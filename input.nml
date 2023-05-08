@@ -1,0 +1,36 @@
+! Namelist based input file
+! =========================
+!
+! Units:
+!  - Pressure: bar
+!  - Temperature: K
+!  - Volume: L
+! =========================
+
+
+&nml_setup
+    nc=5,                ! Number of components
+    model="PR78",        ! SRK PR76 PR78
+    mixrule="ClassicVdW" ! only ClassicVdW
+/
+
+&nml_composition
+    names="PC1" "PC2" "PC3" "PC4" "H2O"
+    spec="critical", ! critical or parameters
+    z=0.15 0.10 0.10 0.15 0.50
+/
+
+&nml_classicvdw
+    kij(1, :)=0	0	0	0	0.7192
+    kij(2, :)=0	0	0	0	0.4598
+    kij(3, :)=0	0	0	0	0.2673
+    kij(4, :)=0	0	0	0	0.2417
+    kij(5, :)=0.7192	0.4598	0.2673	0.2417	0
+    lij(:, :) = 0
+/
+
+&nml_critical
+    tc=305.586 638.889 788.889 838.889 647.3
+    pc=48.82 19.65 10.2 7.72 220.89
+    w=0.098 0.535 0.891 1.085 0.344
+/
