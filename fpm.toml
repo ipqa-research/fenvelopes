@@ -16,3 +16,6 @@ library = false
 
 [dependencies]
 ftools = {git = "https://github.com/fedebenelli/ftools"}
+
+[fortran]
+implicit-external = true  # default: false
