@@ -19,3 +19,4 @@ ftools = {git = "https://github.com/fedebenelli/ftools"}
 
 [fortran]
 implicit-external = true  # default: false
+implicit-typing = true  # default: false
