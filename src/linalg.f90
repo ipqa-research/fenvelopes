@@ -24,6 +24,42 @@ contains
 
       x = b_lapack
    end function solve_system
+
+   function intersect_two_lines(l1_x, l1_y, l2_x, l2_y) result(intersections)
+      real(pr), intent(in) :: l1_x(:), l1_y(:), l2_x(:), l2_y(:)
+      type(point), allocatable :: intersections(:)
+
+      real(pr) :: s, t
+      integer :: i, j
+
+      real(pr) :: x, y, xold=9999, yold=9999
+
+      allocate(intersections(0))
+
+      line1: do i=2, size(l1_x)
+         line2: do j=2, size(l2_x)
+            associate(x1 => l1_x(i-1), x2 => l1_x(i), x3 => l2_x(j-1), x4 => l2_x(j), &
+                      y1 => l1_y(i-1), y2 => l1_y(i), y3 => l2_y(j-1), y4 => l2_y(j))
+               call intersects(x1, x2, x3, x4, y1, y2, y3, y4, s, t)
+
+               if (0 <= s .and. s <= 1 .and. 0 <= t .and. t <= 1) then
+                  x = s * (x2-x1) + x1
+                  y = s * (y2-y1) + y1
+
+                  if (abs(x - xold) > 1 .and. abs(y - yold) > 1) then
+                     print *, "CROSS", x, y
+                     xold = x
+                     yold = y
+                     intersections = [intersections, point(x, y, i, j)]
+                     exit line2
+                  end if
+
+               end if
+            end associate
+         end do line2
+      end do line1
+   end function
+   
    function intersect_one_line(lx, ly) result(intersections)
       real(pr), intent(in) :: lx(:), ly(:)
       type(point), allocatable :: intersections(:)
