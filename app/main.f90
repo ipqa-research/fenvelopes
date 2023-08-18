@@ -25,13 +25,23 @@ program main
    call setup              !
    call pt_envelopes
    call px_envelopes
+contains
+   subroutine setup
+      use io_nml, only: read_system, write_system
+      use system, only: kij
+      use inj_envelopes, only: setup_inj => from_nml
+      integer :: funit_system
+      character(len=254) :: infile
+      call get_command_argument(1, value=infile)
 
-    call k_wilson_bubble(z, t, p, k)
+      call read_system(trim(infile))
+      call setup_inj(trim(infile))
 
-    call envelope2(&
-       1, nc, z, T, P, k, &
-       n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
-       env &
-    )
-    call env%write("output.csv")
+      open (newunit=funit_system, file="systemdata.nml")
+      call write_system(funit_system)
+      close (funit_system)
+
+      allocate (tv(max_points), pv(max_points), dv(max_points))
+      allocate (k(size(z)))
+   end subroutine
 end program main
