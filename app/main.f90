@@ -1,29 +1,30 @@
 program main
-    use envelopes, only: envelope2, max_points, k_wilson_bubble
-    use dtypes, only: envelope
-    use constants, only: pr
-    use io_nml, only: read_system, write_system
-    use system, only: z, nc
-    implicit none
+   use envelopes, only: envelope2, max_points, k_wilson_bubble, &
+                        max_points, p_wilson, k_wilson
+   use dtypes, only: envelope
+   use constants, only: pr
+   use system, only: z, nc
 
-    real(pr), allocatable :: tv(:) ! Temperatures [K]
-    real(pr), allocatable :: pv(:) ! Pressures [bar]
-    real(pr), allocatable :: dv(:) ! Pressures [bar]
-    real(pr) :: tcri(4) ! Critical points temperatures
-    real(pr) :: pcri(4) ! Critical points pressures
-    real(pr) :: dcri(4) ! Critical points densities
-    real(pr) :: t, p ! Temperature and pressure
-    real(pr), allocatable :: k(:) ! K factors
-    integer :: n_points, icri(4), ncri, funit_system
+   implicit none
 
-    type(envelope) :: env
+   real(pr), allocatable :: tv(:) ! Temperatures [K]
+   real(pr), allocatable :: pv(:) ! Pressures [bar]
+   real(pr), allocatable :: dv(:) ! Densities [mol/L]
 
-    allocate(tv(max_points), pv(max_points), dv(max_points), k(max_points))
-    call read_system("input.nml")
+   real(pr) :: tcri(4)            ! Critical points temperatures
+   real(pr) :: pcri(4)            ! Critical points pressures
+   real(pr) :: dcri(4)            ! Critical points densities
 
-    open(newunit=funit_system, file="systemdata.nml")
-    call write_system(funit_system)
-    close(funit_system)
+   real(pr) :: t, p               ! Temperature and pressure
+   real(pr), allocatable :: k(:)  ! K factors
+
+   integer :: n_points, icri(4), ncri, i
+
+   type(envelope) :: bub_env, dew_env
+
+   call setup              !
+   call pt_envelopes
+   call px_envelopes
 
     call k_wilson_bubble(z, t, p, k)
 
