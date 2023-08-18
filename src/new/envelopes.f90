@@ -7,11 +7,17 @@ module envelopes
    use dtypes, only: envelope
    implicit none
 
-   integer :: max_points = 1000
+   integer, parameter :: max_points = 2000
    integer :: env_number = 0
 
-   interface F
-      module procedure :: F2
+   interface
+      function F(X, ns, S)
+         import pr
+         real(pr), intent(in) :: X(:)
+         integer, intent(in) :: ns
+         real(pr), intent(in) :: S
+         real(pr) :: F
+      end function
    end interface
 contains
    ! ===========================================================================
@@ -26,18 +32,31 @@ contains
 
       real(pr), intent(out) :: k(size(z))
 
-      P = 11.0
-      T = 205.0
+      P = 100.0
+      T = 200.0
 
       do while (P > 10)
          T = T - 5._pr
-         P = sum(z*pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
+         P = 1.0_pr/sum(z*pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
       end do
-
-      k = pc*exp(5.373_pr*(1.0_pr + w)*(1.0_pr - tc/t))/p
+      k = k_wilson(t, p)
    end subroutine
-   
+
+   function k_wilson(t, p) result(k)
+      use system, only: pc, tc, w
+      real(pr), intent(in) :: t, p
+      real(pr) :: k(size(pc))
+      k = pc * exp(5.373_pr * (1.0_pr + w) * (1.0_pr - tc/t))/p
+   end function
+
+   function p_wilson(z, t) result(p)
+      use system, only: pc, tc, w
+      real(pr), intent(in) :: t, z(:)
+      real(pr) :: p
+      P = 1.0_pr/sum(z*pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
+   end function
    ! ===========================================================================
+   
    ! ===========================================================================
    ! General routines
    ! ---------------------------------------------------------------------------
@@ -192,6 +211,7 @@ contains
       integer, intent(in)  :: point
       integer, intent(in)  :: iterations
       integer, intent(in)  :: desired_iterations
+      
       real(pr), intent(in) :: first_tol
       real(pr), intent(in) :: tol
       real(pr), intent(in out) :: delX(:)
@@ -217,8 +237,8 @@ contains
    subroutine envelope2(ichoice, n, z, T, P, KFACT, & ! This will probably always exist
                         n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, & ! This shouldnt be here in the future
                         this_envelope) ! This output should encapsulate everything
-      use dtypes, only: envelope, point, critical_point
-      use linalg, only: solve_system
+      use dtypes, only: envelope, critical_point
+      use linalg, only: point, solve_system
       implicit none
 
       ! number of compounds in the system and starting point type
@@ -291,9 +311,7 @@ contains
       integer :: black_i ! Number of steps while trying to escape the CP
       real(pr) :: stepx
 
-      integer :: funit_it
       integer :: funit_env
-      character(len=20) :: fname_it
       character(len=20) :: fname_env
 
       ! =============================================================================
@@ -371,10 +389,6 @@ contains
       dFdS = 0.d0
       dFdS(n + 2) = -1.d0
 
-      write(fname_it, *) ichoice
-      fname_it = trim(adjustl("X_it_2ph" // "_" //adjustl(trim(fname_it))))
-
-      open(newunit=funit_it, file=fname_it)
       do while (run)
          i = i + 1
          if (i > max_points - 50) then
@@ -412,11 +426,7 @@ contains
             y = z*KFACT
             T = exp(X(n + 1))
             P = exp(X(n + 2))
-
-            write(funit_it, *) i, iter, T, P, KFACT
          end do
-         write(funit_it, *) " "
-         write(funit_it, *) " "
 
          ! Point converged (unless it jumped out because of high number of iterations)
          write(funit_env, *) T, P, exp(X(:n))
@@ -447,7 +457,7 @@ contains
             run = .false.
          end if
          
-         print *, incipient_phase, i, T, P, ns, iter
+         ! print *, incipient_phase, i, T, P, ns, iter
          if (i > max_points - 50) exit
 
          if (sum(X(:n) * Xold(:n)) < 0) then  ! critical point detected
@@ -458,7 +468,6 @@ contains
             Tcri(ncri) = Tv(i - 1) + frac*(T - Tv(i - 1))
             Pcri(ncri) = Pv(i - 1) + frac*(P - Pv(i - 1))
             Dcri(ncri) = Dv(i - 1) + frac*(Dv(i) - Dv(i - 1))
-
 
             select case (incipient_phase)
             case("liquid")
@@ -556,7 +565,6 @@ contains
             end do
             end block critical_region
 
-
             T = exp(X(n + 1))
 
             if (.not. passingcri .and. abs(T - Told) > 7) then 
@@ -575,8 +583,8 @@ contains
             if ((dXdS(n + 1)*delS < 0 .and. P < 0.1 .or. T < 120.0) &  ! dew line stops when P<0.1 bar or T<150K
                 .or. (P > 1.0 .and. T < 150.0) &   ! bubble line stops when T<150K
                 .or. (P > 1500) &
-                .or. (abs(dels) < 1.d-8)) then
-               run = .false.
+                .or. (abs(dels) < 1.d-10)) then
+                run = .false.
             end if
          end if
       end do
@@ -594,7 +602,6 @@ contains
 
       ! Define envelope values, omit the last point to avoid not really
       ! converged cases
-      close(funit_it)
       close(funit_env)
       this_envelope%logk = tmp_logk(:n_points - 1, :)
       this_envelope%logphi = tmp_logphi(:n_points - 1, :)
@@ -609,239 +616,29 @@ contains
    end subroutine envelope2
    ! ===========================================================================
 
+
    ! =============================================================================
-   !  Crossing related
-   ! -----------------------------------------------------------------------------
-   subroutine find_crossings(&
-         dew, bub, hpl, &
-         Tcr1, Pcr1, Tcr2, Pcr2, &
-         kfcr1, kscr1, kfcr2, kscr2, &
-         crossings, stat &
-      )
-      !! Find the crossings between the whole set of two-phase lines
-      !!
-      !! Possible cases (found yet):
-      !! - No cross
-      !! - Two crosses
-      !! - Single cross at high T (between HPLL and Dew line)
-      !! - Self cross and a low T cross
-      use dtypes, only: envelope, kfcross, point, find_cross, find_self_cross
-      implicit none
 
-      type(envelope),        intent(in out) :: dew !! Dew envelope (AOP)
-      type(envelope),        intent(in out) :: bub !! Bubble envelope
-      type(envelope),        intent(in out) :: hpl !! HPLL envelope
-      real(pr),                 intent(out) :: Tcr1, Pcr1, Tcr2, Pcr2
-      real(pr),                 intent(out) :: kfcr1(:), kscr1(:), kfcr2(:), kscr2(:)
-      type(point), intent(out)    :: crossings(2)
-      character(len=50), intent(in out) :: stat
+   ! subroutine two_phase_envelope(X0, spec_number, specification, envels)
+   !    real(pr), intent(in) :: X0(:)
+   !    integer, intent(in) :: spec_number
+   !    real(pr), intent(in) :: specification
+   !    type(envelope), allocatable, intent(out) :: envels(:)
 
-      type(point), allocatable :: self_cross(:)
-      type(point), allocatable :: dew_bub_cross(:)
-      type(point), allocatable :: dew_hpl_cross(:)
-      type(point), allocatable :: bub_hpl_cross(:)
+   !    real(pr) :: X(size(X))
+   !    integer :: ns
+   !    real(pr) :: S
+   !    real(pr) :: XS(max_points, size(X0))
 
-      logical :: has_hpll_line
+   !    integer :: i
+   !    ns = spec_number
+   !    S = specification
 
-      logical :: crossed_dew_hpl
-      logical :: crossed_bub_hpl
-      logical :: crossed_dew_dew
-      logical :: crossed_dew_bub
-      logical :: crossed_self
-
-      tcr1 = 0
-      tcr2 = 0
-      pcr1 = 0
-      pcr2 = 0
-
-      has_hpll_line = allocated(hpl%t)
-      stat = "0"
-
-      ! ========================================================================
-      !  Find the crossings
-      ! ------------------------------------------------------------------------
-
-      ! First check if the dew_envelope or the low_t_envelope self_cross
-      call find_self_cross(dew%t, dew%p, self_cross, crossed_self)
-
-      ! Then:
-      ! - Check if HPLL line has been traced
-      ! - [Cross dew bub?]|[Cross bub HPLL andor Cross dew HPLL]
-      if (has_hpll_line) then
-         call find_cross(dew%t, hpl%t, dew%p, hpl%p, dew_hpl_cross, crossed_dew_hpl)
-         call find_cross(bub%t, hpl%t, bub%p, hpl%p, bub_hpl_cross, crossed_bub_hpl)
-         call find_cross(dew%t, bub%t, dew%p, bub%p, dew_bub_cross, crossed_dew_bub)
-      else
-         call find_cross(dew%t, bub%t, dew%p, bub%p, dew_bub_cross, crossed_dew_bub)
-      end if
-
-      if (size(dew_bub_cross) > 10) then
-         ! With this amount of crosses it's more probable that both
-         ! are the same line
-         crossed_dew_bub = .false.
-      end if
-      ! ========================================================================
-
-      if (has_hpll_line) then
-         if (crossed_bub_hpl .and. crossed_dew_bub) then
-            ! HPLL line crossed with bubble, and bubble crossed with dew
-            call get_values(bub_hpl_cross, 1, hpl, bub, tcr1, pcr1, kscr1, kfcr1)
-            call get_values(dew_bub_cross, 1, bub, dew, tcr2, pcr2, kfcr2, kscr2)
-
-            crossings(1) = bub_hpl_cross(1)
-            crossings(2) = dew_bub_cross(1)
-            stat = "2_HPL_BUB_DEW"
-         else if (crossed_dew_hpl) then
-            ! HPLL line crossed with dew line
-            call get_values(dew_hpl_cross, 1, hpl, dew, tcr2, pcr2, kfcr2, kscr2)
-            if (allocated(dew%critical_points)) then
-               if (size(dew%critical_points) > 0) then
-                  if (tcr2 < dew%critical_points(1)%t) then
-                     tcr1 = tcr2
-                     pcr1 = pcr2
-                  end if
-               end if
-            end if
-            crossings(1) = dew_hpl_cross(1)
-            stat = "1_HPL_DEW"
-         end if
-      else
-         if (crossed_dew_bub) then
-            call get_values(dew_bub_cross, 1, bub, dew, tcr2, pcr2, kfcr2, kscr2)
-            call get_values(dew_bub_cross, 2, bub, dew, tcr1, pcr1, kfcr1, kscr1)
-            crossings(1) = dew_bub_cross(2)
-            crossings(2) = dew_bub_cross(1)
-            stat = "2_BUB_DEW"
-         end if
-      end if
-      
-      if (crossed_self) then
-         call get_values(self_cross, 1, dew, dew, tcr2, pcr2, kfcr2, kscr2)
-         crossings(2) = self_cross(1)
-         stat = "SELF_CROSS"
-      end if
-   contains
-       subroutine get_values(&
-             cross, index, envelope1, envelope2, t, p, kf, ks &
-         )
-          use dtypes, only: point
-          type(point), allocatable, intent(in) :: cross(:)
-          type(envelope), intent(in) :: envelope1, envelope2
-          integer, intent(in) :: index
-          real(pr), intent(out) :: t
-          real(pr), intent(out) :: p
-          real(pr), intent(out) :: kf(size(kfcr1))
-          real(pr), intent(out) :: ks(size(kscr1))
-
-          integer :: icross, jcross
-
-          icross = cross(index)%i
-          jcross = cross(index)%j
-
-          t = cross(index)%x
-          p = cross(index)%y
-
-          kf = kfcross(jcross, envelope1%t, envelope1%logk, t)
-          ks = kfcross(icross, envelope2%t, envelope2%logk, t)
-       end subroutine
-   end subroutine find_crossings
-   ! ===========================================================================
-
-   subroutine get_stable(&
-           dew, bub, hpl, crossings, cross_type, &
-           dew_stable, bub_stable, hpl_stable &
-    )
-      use dtypes, only: point
-      use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
-      
-      type(envelope), intent(in) :: dew, bub, hpl
-      type(point), intent(in) :: crossings(2)
-      character(len=50), intent(in) :: cross_type
-      type(envelope), intent(out) :: dew_stable, bub_stable, hpl_stable
-
-      integer :: idx_c1, idx_c2
-      
-      real(pr) :: nan
-      nan = IEEE_VALUE(nan, IEEE_QUIET_NAN)
-
-      dew_stable = dew
-      bub_stable = bub
-      hpl_stable = hpl
-
-      print *, cross_type
-
-      select case(cross_type)
-      case("0")
-         bub_stable%t = nan
-         bub_stable%p = nan
-         bub_stable%logk = nan
-      case("2_BUB_DEW")
-         idx_c2 = crossings(2)%i
-         idx_c1 = crossings(1)%i
-
-         dew_stable%t(idx_c2:idx_c1) = nan
-         dew_stable%p(idx_c2:idx_c1) = nan
-
-         dew_stable%t(idx_c2) = crossings(2)%x
-         dew_stable%p(idx_c2) = crossings(2)%y
-         dew_stable%t(idx_c1) = crossings(1)%x
-         dew_stable%p(idx_c1) = crossings(1)%y
-
-         idx_c1 = crossings(1)%j
-         idx_c2 = crossings(2)%j
-
-         bub_stable%t(:idx_c1) = nan
-         bub_stable%p(:idx_c1) = nan
-         bub_stable%t(idx_c1) = crossings(1)%x
-         bub_stable%p(idx_c1) = crossings(1)%y
-
-         bub_stable%t(idx_c2:) = nan
-         bub_stable%p(idx_c2:) = nan
-         
-         bub_stable%t(idx_c2) = crossings(2)%x
-         bub_stable%p(idx_c2) = crossings(2)%y
-      case ("2_HPL_BUB_DEW")
-         idx_c1 = crossings(1)%j
-
-         hpl_stable%t(idx_c1:) = nan
-         hpl_stable%t(idx_c1) = crossings(1)%x
-         hpl_stable%p(idx_c1:) = nan
-         hpl_stable%p(idx_c1) = crossings(1)%y
-
-         idx_c1 = crossings(1)%i
-         idx_c2 = crossings(2)%j
-
-         bub_stable%t(:idx_c1) = nan
-         bub_stable%t(idx_c1) = crossings(1)%x
-         bub_stable%p(:idx_c1) = nan
-         bub_stable%p(idx_c1) = crossings(1)%y
-
-         bub_stable%t(idx_c2:) = nan
-         bub_stable%t(idx_c2) = crossings(2)%x
-         bub_stable%p(idx_c2:) = nan
-         bub_stable%p(idx_c2) = crossings(2)%y
-
-         idx_c2 = crossings(2)%i
-         dew_stable%t(idx_c2:) = nan
-         dew_stable%t(idx_c2) = crossings(2)%x
-         dew_stable%p(idx_c2:) = nan
-         dew_stable%p(idx_c2) = crossings(2)%y
-      case ("1_HPL_DEW")
-         idx_c1 = crossings(1)%j
-
-         hpl_stable%t(idx_c1:) = nan
-         hpl_stable%t(idx_c1) = crossings(1)%x
-         hpl_stable%p(idx_c1:) = nan
-         hpl_stable%p(idx_c1) = crossings(1)%y
-         
-         idx_c1 = crossings(1)%i
-         dew_stable%t(idx_c1:) = nan
-         dew_stable%t(idx_c1) = crossings(1)%x
-         dew_stable%p(idx_c1:) = nan
-         dew_stable%p(idx_c1) = crossings(1)%y
-
-         bub_stable%t = nan
-         bub_stable%p = nan
-    end select
-   end subroutine
+   !    do i=1,max_points
+   !       call solve_point
+   !       call update_specification
+   !       call detect_critical
+   !       call check_end
+   !    end do
+   ! end subroutine
 end module envelopes
