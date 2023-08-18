@@ -2,6 +2,18 @@ module linalg
    !! Wrapper module around LAPACK's `dgesv`
    use constants, only: pr
    implicit none
+
+   type :: point
+      real(pr) :: x
+      real(pr) :: y
+      integer :: i
+      integer :: j
+   end type point
+
+   interface intersection
+      module procedure :: intersect_two_lines
+      module procedure :: intersect_one_line
+   end interface
 contains
    function solve_system(a, b) result(x)
       real(pr), intent(in out) :: b(:)
