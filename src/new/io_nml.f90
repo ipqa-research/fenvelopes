@@ -60,9 +60,7 @@ module io_nml
    private
 
    public :: setup_input, read_system, write_system
-
 contains
-
    subroutine setup_input(filepath)
       !> Setup input file to be used
       character(len=*), intent(in) :: filepath !! Path to input file
@@ -227,6 +225,7 @@ contains
       call setup_input(filepath)
       call read_model()
       call read_components()
+      close(nunit_input)
    end subroutine
 
    subroutine write_system(file_unit)
