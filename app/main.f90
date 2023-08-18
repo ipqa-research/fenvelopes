@@ -44,4 +44,52 @@ contains
       allocate (tv(max_points), pv(max_points), dv(max_points))
       allocate (k(size(z)))
    end subroutine
+
+   subroutine pt_envelopes
+      !! Calculation of PT envelopes of the main system.
+      
+      integer :: n
+
+      ! =====================================================================
+      !  Bubble envel
+      ! ---------------------------------------------------------------------
+      call k_wilson_bubble(z, t, p, k)
+      call envelope2( &
+         1, nc, z, T, P, k, &
+         n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
+         bub_env &
+         )
+      ! =====================================================================
+
+      ! =====================================================================
+      !  Dew/AOP envelopes
+      ! ---------------------------------------------------------------------
+      t = 315
+      p = p_wilson(z, t)
+      do while (p > 0.1)
+         t = t - 5
+         p = p_wilson(z, t)
+      end do
+      k = 1/k_wilson(t, p)
+
+      call envelope2( &
+         2, nc, z, T, P, k, &
+         n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
+         dew_env &
+         )
+
+      ! Remove the low pressure parts.
+      n = 1
+      do i = 2, size(dew_env%t)
+         n = n + 1
+         if (dew_env%t(i) - dew_env%t(i - 1) < 0) exit
+      end do
+
+      if (n /= size(dew_env%t)) then
+         dew_env%t = dew_env%t(i:)
+         dew_env%p = dew_env%p(i:)
+         dew_env%logk = dew_env%logk(i:, :)
+      end if
+      ! =====================================================================
+   end subroutine
 end program main
