@@ -24,6 +24,21 @@ contains
 
       x = b_lapack
    end function solve_system
+   subroutine intersects(x1, x2, x3, x4, y1, y2, y3, y4, s, t)
+      real(pr), intent(in) :: x1, x2, x3, x4, y1, y2, y3, y4
+      real(pr), intent(out) :: s, t
+
+      real(pr) :: A(2,2), b(2), tmp
+
+      A(1, :) = [x2-x1, x3-x4]
+      A(2, :) = [y2-y1, y3-y4]
+      b = [x3-x1, y3-y1]
+
+      b = solve_system(a, b)
+      s = b(1)
+      t = b(2)
+   end subroutine
+
    elemental function interpol(x1, x2, y1, y2, x_obj) result(y)
       real(pr), intent(in) :: x1
       real(pr), intent(in) :: x2
