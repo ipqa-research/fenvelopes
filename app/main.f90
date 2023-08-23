@@ -1,34 +1,28 @@
 program main
-   use envelopes, only: envelope2, max_points, k_wilson_bubble, &
-                        max_points, p_wilson, k_wilson
    use dtypes, only: envelope
    use constants, only: pr
-   use system, only: z, nc
+   ! use system, only: z, nc
+   use legacy_ar_models, only: z, nc
 
    implicit none
-
-   real(pr), allocatable :: tv(:) ! Temperatures [K]
-   real(pr), allocatable :: pv(:) ! Pressures [bar]
-   real(pr), allocatable :: dv(:) ! Densities [mol/L]
-
-   real(pr) :: tcri(4)            ! Critical points temperatures
-   real(pr) :: pcri(4)            ! Critical points pressures
-   real(pr) :: dcri(4)            ! Critical points densities
-
-   real(pr) :: t, p               ! Temperature and pressure
-   real(pr), allocatable :: k(:)  ! K factors
-
-   integer :: n_points, icri(4), ncri, i
-
+   real(pr) :: et, st
+   
    type(envelope) :: bub_env, dew_env
 
-   call setup              !
+   call setup
+
+   call cpu_time(st)
    call pt_envelopes
+   call cpu_time(et)
+   print *, "PT: ", (et-st) * 1000 , "ms"
+
+   call cpu_time(st)
    call px_envelopes
+   call cpu_time(et)
+   print *, "PX: ", (et-st) * 1000 , "ms"
 contains
    subroutine setup
       use io_nml, only: read_system, write_system
-      use system, only: kij
       use inj_envelopes, only: setup_inj => from_nml
       integer :: funit_system
       character(len=254) :: infile
@@ -40,15 +34,29 @@ contains
       open (newunit=funit_system, file="systemdata.nml")
       call write_system(funit_system)
       close (funit_system)
-
-      allocate (tv(max_points), pv(max_points), dv(max_points))
-      allocate (k(size(z)))
    end subroutine
 
    subroutine pt_envelopes
+      use legacy_ar_models, only: z
+      use envelopes, only: envelope2, max_points, k_wilson_bubble, &
+                        max_points, p_wilson, k_wilson
       !! Calculation of PT envelopes of the main system.
-      
+      real(pr), allocatable :: tv(:) ! Temperatures [K]
+      real(pr), allocatable :: pv(:) ! Pressures [bar]
+      real(pr), allocatable :: dv(:) ! Densities [mol/L]
+
+      real(pr) :: tcri(4)            ! Critical points temperatures
+      real(pr) :: pcri(4)            ! Critical points pressures
+      real(pr) :: dcri(4)            ! Critical points densities
+
+      real(pr) :: t, p               ! Temperature and pressure
+      real(pr), allocatable :: k(:)  ! K factors
+      integer :: n_points, icri(4), ncri, i
+
       integer :: n
+
+      allocate (tv(max_points), pv(max_points), dv(max_points))
+      allocate (k(size(z)))
 
       ! =====================================================================
       !  Bubble envel
@@ -97,7 +105,7 @@ contains
       !! Calculation of Px envelopes at selected temperature.
       use inj_envelopes, only: F_injection, full_newton, z_injection, &
                                T_inj => T, injection_envelope, z_0, injection_case, &
-                               injelope, funit_output
+                               injelope
       use envelopes, only: envelope, k_wilson, p_wilson
       use linalg, only: interpol
 
@@ -106,6 +114,8 @@ contains
       integer :: ns, i, iters, idx, ti
       integer, allocatable :: i_inj(:)
       real(pr), allocatable :: ts_envel(:), ts(:)
+      real(pr) :: t, p
+      real(pr), allocatable :: k(:)
       real(pr) :: t_tol = 2
 
       type(injelope) :: bub_envels, dew_envels
@@ -117,7 +127,6 @@ contains
       alpha = 0.0
       z_injection = z_injection/sum(z_injection)
       ns = nc + 2
-      open (newunit=funit_output, file="px.dat")
       ! ======================================================================
 
       ! ======================================================================
@@ -182,8 +191,8 @@ contains
                     t_inj))
 
             X(1:nc) = log(K)
-            X(nc + 1) = log(P)
-            X(nc + 2) = alpha
+            X(nc+1) = log(P)
+            X(nc+2) = alpha
 
             call injection_envelope(X, ns, 0.01_pr, dew_envels)
          end do
@@ -199,14 +208,11 @@ contains
          inter = intersection( &
                  dew_envels%alpha, dew_envels%p, &
                  bub_envels%alpha, bub_envels%p &
-                 )
-
+               )
          do i = 1, size(inter)
             print *, inter(i)
          end do
       end block check_crossings
       ! ======================================================================
-      close (funit_output)
-      print *, "END"
    end subroutine
 end program main

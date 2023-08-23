@@ -5,5 +5,6 @@ module constants
    integer, parameter :: pr = real64
    real(pr), parameter :: R = 0.08314472
    character(len=254) :: database_path = "database/"
+   character(len=254) :: ouput_path = "output/"
    character(len=1) :: path_sep = "/"
 end module constants

@@ -6,6 +6,8 @@ module inj_envelopes
 
    implicit none
 
+   integer :: env_number = 0
+
    type, extends(envelope) :: injelope
       real(pr), allocatable :: alpha(:) !! Ammount of injected fluid
       real(pr), allocatable :: z_inj(:) !! Injected fluid composition
@@ -18,12 +20,12 @@ module inj_envelopes
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
    real(pr) :: del_S = 0.1 !! Specificiation variation
-   character(len=:), allocatable :: injection_case !! Kind of injection displace|dilute
-   integer :: funit_output !! Output file unit
+   character(len=10) :: injection_case !! Kind of injection displace|dilute
 contains
 
    subroutine from_nml(filepath)
-       use system, only: nc
+       ! use system, only: nc
+       use legacy_ar_models, only: nc
        character(len=*), intent(in) :: filepath
        integer :: funit
 
@@ -34,9 +36,6 @@ contains
        open(newunit=funit, file=filepath)
            read(funit, nml=nml_px)
        close(funit)
-
-       print *, z_0
-       print *, z_injection
    end subroutine
 
    subroutine F_injection(X, ns, S, F, dF)
@@ -55,6 +54,7 @@ contains
       !! - Addition:  \( z = \frac{\alpha z_i + (1-\alpha) z_0}{\sum_{i=1}^N \alpha z_i + (1-\alpha) z_0} \)
       !!
       use iso_fortran_env, only: error_unit
+      use legacy_ar_models, only: TERMO
       real(pr), intent(in)  :: X(:) !! Vector of variables
       integer, intent(in)   :: ns !! Number of specification
       real(pr), intent(in)  :: S !! Specification value
@@ -244,6 +244,7 @@ contains
 !    end subroutine
 
    subroutine injection_envelope(X0, spec_number, del_S0, envels)
+       use constants, only: ouput_path
        !! Subroutine to calculate Px phase envelopes via continuation method
        real(pr), intent(in) :: X0(:) !! Vector of variables
        integer,  intent(in) :: spec_number !! Number of specification
@@ -260,6 +261,9 @@ contains
        real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
 
        integer :: point, iters, n
+       integer :: i
+       integer :: funit_output
+       character(len=254) :: fname_env
 
        allocate(cps(0))
        X = X0
@@ -268,8 +272,20 @@ contains
        S = X(ns)
        del_S = del_S0
 
+       ! ======================================================================
+       !  Output file
+       ! ----------------------------------------------------------------------
+       env_number = env_number + 1
+       
+       write(fname_env, *) env_number
+       fname_env = "env-2ph-PX" // "_" // trim(adjustl(fname_env))
+       fname_env = trim(adjustl(ouput_path)) // trim(fname_env) // ".dat"
+       
+       open(funit_output, file=fname_env)
        write(funit_output, * ) "#", T
        write(funit_output, *) "X0", iters, ns, X(n+2), exp(X(n+1)),  X(:n)
+       ! ======================================================================
+
        enveloop: do point=1, max_points
           call full_newton(f_injection, iters, X, ns, S, F, dF)
 
@@ -345,6 +361,8 @@ contains
                 pc = Xnew(n+1)
 
                 cps = [cps, critical_point(t, pc, alpha_c)]
+                write(funit_output, *) ""
+                write(funit_output, *) ""
              end if
           end block detect_critical
 
@@ -356,15 +374,22 @@ contains
 
        point = point - 1
 
+       write(funit_output, *) "#critical"
+       if (size(cps) > 0 ) then
+          do i=1,size(cps)
+             write(funit_output, *) cps(i)%t, cps(i)%p
+          end do
+       else
+          write(funit_output, *) "NaN NaN"
+       endif
+       
+       close(funit_output)
        envels%z = z_0
        envels%z_inj = z_injection
        envels%logk = XS(:point, :n)
        envels%alpha = XS(:point, n+2)
        envels%p = exp(XS(:point, n+1))
        envels%critical_points = cps
-
-       write(funit_output, *) ""
-       write(funit_output, *) ""
    end subroutine
 
    subroutine full_newton(fun, iters, X, ns, S, F, dF)
@@ -426,7 +451,8 @@ contains
       alpha = X(n+2)
 
       break_conditions = [&
-          p < 10 .or. p > 1000 &
+          p < 10 .or. p > 1000, &
+          abs(del_S) < 1e-8     &
       ]
    end function
 end module

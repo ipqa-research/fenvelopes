@@ -3,8 +3,9 @@ module envelopes
    !! phase envelopes 
    use constants, only: pr
    use linalg, only: solve_system
-   use system, only: nc
+   ! use system, only: nc
    use dtypes, only: envelope
+   use legacy_ar_models, only: nc, termo
    implicit none
 
    integer, parameter :: max_points = 2000
@@ -25,7 +26,8 @@ contains
    ! ---------------------------------------------------------------------------
    subroutine k_wilson_bubble(z, t, p, k)
       !! Find the Wilson Kfactors at ~10 bar to initialize a bubble point
-      use system, only: pc, tc, w
+      ! use system, only: pc, tc, w
+      use legacy_ar_models, only: pc, tc, w
       real(pr), intent(in) :: z(:)
       real(pr), intent(in out) :: p
       real(pr), intent(in out) :: t
@@ -37,20 +39,22 @@ contains
 
       do while (P > 10)
          T = T - 5._pr
-         P = 1.0_pr/sum(z*pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
+         P = 1.0_pr/sum(z * pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
       end do
       k = k_wilson(t, p)
    end subroutine
 
    function k_wilson(t, p) result(k)
-      use system, only: pc, tc, w
+      ! use system, only: pc, tc, w
+      use legacy_ar_models, only: pc, tc, w
       real(pr), intent(in) :: t, p
       real(pr) :: k(size(pc))
       k = pc * exp(5.373_pr * (1.0_pr + w) * (1.0_pr - tc/t))/p
    end function
 
    function p_wilson(z, t) result(p)
-      use system, only: pc, tc, w
+      ! use system, only: pc, tc, w
+      use legacy_ar_models, only: pc, tc, w
       real(pr), intent(in) :: t, z(:)
       real(pr) :: p
       P = 1.0_pr/sum(z*pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
@@ -117,7 +121,8 @@ contains
    ! Specification function derivatives
    ! ---------------------------------------------------------------------------
    subroutine dFdS(dF_dS)
-      use system, only: nc
+      ! use system, only: nc
+      use legacy_ar_models, only: nc
       real(pr), intent(out) :: dF_dS(nc + 2)
 
       dF_dS = 0
@@ -239,6 +244,7 @@ contains
                         this_envelope) ! This output should encapsulate everything
       use dtypes, only: envelope, critical_point
       use linalg, only: point, solve_system
+      use constants, only: ouput_path
       implicit none
 
       ! number of compounds in the system and starting point type
@@ -275,7 +281,7 @@ contains
 
       ! Intermediate variables during calculation process
       real(pr), dimension(n) :: y
-      integer, dimension(n + 2) :: ipiv
+      integer,  dimension(n + 2) :: ipiv
       real(pr), dimension(n + 2) :: X, Xold, Xold2, delX, bd, F, dFdS, dXdS
       real(pr), dimension(n + 2, n + 2) :: JAC, AJ
       real(pr) :: Vy, Vx
@@ -286,7 +292,7 @@ contains
       type(envelope), intent(out) :: this_envelope
       real(pr) :: tmp_logk(max_points, n)
       real(pr) :: tmp_logphi(max_points, n)
-      
+
       ! Extrapolation of variables to detect critical points
       real(pr) :: extra_slope(n + 2)
       real(pr) :: lnK_extrapolated(n)
@@ -311,18 +317,18 @@ contains
       integer :: black_i ! Number of steps while trying to escape the CP
       real(pr) :: stepx
 
-      integer :: funit_env
-      character(len=20) :: fname_env
+      integer :: funit_output
+      character(len=254) :: fname_env
 
       ! =============================================================================
       !  OUTPUT file
       ! -----------------------------------------------------------------------------
       env_number = env_number + 1
       write(fname_env, *) env_number
-      print *, fname_env
-      fname_env = "ENV2_OUT" // "_" // trim(adjustl(fname_env))
-      print *, fname_env
-      open(newunit=funit_env, file=fname_env)
+      fname_env = "env-2ph-PT" // "_" // trim(adjustl(fname_env))
+      fname_env = trim(adjustl(ouput_path)) // trim(fname_env) // ".dat"
+      
+      open(newunit=funit_output, file=fname_env)
       ! =============================================================================
 
       ! Initialize with zero Tv and Pv
@@ -343,8 +349,6 @@ contains
       i = 0
       ncri = 0
       JAC(n + 1, :) = 0.d0
-      ! lda = n + 2
-      ! ldb = n + 2
       X(:n) = log(KFACT)
       X(n + 1) = log(T)
       X(n + 2) = log(P)
@@ -361,21 +365,21 @@ contains
       case (3)
          incipient_phase = "2ndliquid"
       end select
-      write(funit_env, *) incipient_phase
+      write(funit_output, *) "#", incipient_phase
 
-      if (ichoice <= 2) then  
+      if (ichoice <= 2) then
          ! low T bub (1) or dew (2)
          ! x will be vapor phase during the first part, 
          ! and liquid after a critical point is crossed
          if (ichoice == 1) iy = -1
-         if (ichoice == 2) ix = -1  
+         if (ichoice == 2) ix = -1
          ns = n + 1
          S = log(T)
          delS = 0.005
 
          ! Wilson estimate for vapor (or liquid) composition
-         y = KFACT*z 
-      else    
+         y = KFACT*z
+      else
          ! (ichoice==3) high P L-L sat
          ! PmaxDewC = maxval(PdewC(1:ilastDewC))
          ns = n + 2
@@ -415,7 +419,7 @@ contains
             if (.not. passingcri .and. i /= 1 &
                 .and. iter > 10 &
                 .and. maxval(abs(delX)) > 0.001) then 
-               ! Too many iterations-->Reduce step to new point
+               ! Too many iterations --> Reduce step to new point
 
                delS = delS*2.0/4.0
                S = S - delS
@@ -429,7 +433,7 @@ contains
          end do
 
          ! Point converged (unless it jumped out because of high number of iterations)
-         write(funit_env, *) T, P, exp(X(:n))
+         write(funit_output, *) "SOL", iter, ns, T, P, exp(X(:n))
          if (iter > max_iter) run = .false.
          if (P > maxP) maxP = P
 
@@ -451,7 +455,7 @@ contains
 
          ! rho_y = 1/Vy     incipient phase density
 
-         if (incipient_phase == "2ndliquid" .and. P < 1.0) then
+         if (incipient_phase == "2ndliquid" .and. P < 0.1) then
             ! isolated LL line detected. 
             ! Stop and start a new one from low T false bubble point
             run = .false.
@@ -476,9 +480,9 @@ contains
                incipient_phase = "liquid"
             end select
 
-            write(funit_env, *) " "
-            write(funit_env, *) " "
-            write(funit_env, *) incipient_phase
+            write(funit_output, *) " "
+            write(funit_output, *) " "
+            write(funit_output, *) "#", incipient_phase
          end if
 
          if (run) then
@@ -592,17 +596,17 @@ contains
 
       n_points = i
 
-      write(funit_env, *) " "
-      write(funit_env, *) " "
-      ! write(funit_env, *) "critical"
-      if (ncri == 0) write(funit_env, *) "NaN NaN"
+      write(funit_output, *) " "
+      write(funit_output, *) " "
+      write(funit_output, *) "#critical"
+      if (ncri == 0) write(funit_output, *) "NaN NaN"
       do i=1, ncri
-         write(funit_env, *) Tcri(i), Pcri(i)
+         write(funit_output, *) Tcri(i), Pcri(i)
       end do
 
       ! Define envelope values, omit the last point to avoid not really
       ! converged cases
-      close(funit_env)
+      close(funit_output)
       this_envelope%logk = tmp_logk(:n_points - 1, :)
       this_envelope%logphi = tmp_logphi(:n_points - 1, :)
       this_envelope%t = Tv(:n_points - 1)
@@ -615,30 +619,4 @@ contains
       this_envelope%critical_points = critical_points
    end subroutine envelope2
    ! ===========================================================================
-
-
-   ! =============================================================================
-
-   ! subroutine two_phase_envelope(X0, spec_number, specification, envels)
-   !    real(pr), intent(in) :: X0(:)
-   !    integer, intent(in) :: spec_number
-   !    real(pr), intent(in) :: specification
-   !    type(envelope), allocatable, intent(out) :: envels(:)
-
-   !    real(pr) :: X(size(X))
-   !    integer :: ns
-   !    real(pr) :: S
-   !    real(pr) :: XS(max_points, size(X0))
-
-   !    integer :: i
-   !    ns = spec_number
-   !    S = specification
-
-   !    do i=1,max_points
-   !       call solve_point
-   !       call update_specification
-   !       call detect_critical
-   !       call check_end
-   !    end do
-   ! end subroutine
 end module envelopes

@@ -15,8 +15,9 @@ auto-examples = true
 library = false
 
 [dependencies]
-ftools = {git = "https://github.com/fedebenelli/ftools"}
+ftools = { git = "https://github.com/fedebenelli/ftools" }
+yaeos  = { git = "https://github.com/fedebenelli/yaeos"  }
 
 [fortran]
-implicit-external = true  # default: false
-implicit-typing = true  # default: false
+implicit-external = false # default: false
+implicit-typing   = false # default: false

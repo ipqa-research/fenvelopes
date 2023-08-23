@@ -25,6 +25,19 @@ contains
 
       integer :: n, nrhs, lda, ipiv(size(b)), ldb, info
 
+      interface
+         subroutine dgesv(n, nrhs, a, lda, ipiv, b, ldb, info)
+            integer :: n
+            integer :: nrhs
+            real(8) :: a(n,n)
+            integer :: lda
+            integer :: ipiv(n)
+            real(8) :: b(n)
+            integer :: ldb
+            integer :: info
+         end subroutine
+      end interface
+
       n = size(a, dim=1)
       nrhs = 1
       lda = n

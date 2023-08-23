@@ -43,8 +43,8 @@ module io_nml
    !!  /
    !!
    use constants, only: pr
-   use system, only: nc, thermo_model, mixing_rule, tdep, &
-                   & names, z, &
+   use legacy_ar_models, only: nc, thermo_model, mixing_rule, tdep, &
+                   & z, &
                    & tc, pc, w, &
                    & ac, b, k, &
                    & kij, lij, bij, &
@@ -56,6 +56,7 @@ module io_nml
    character(len=50) :: model, mixrule
    character(len=254) :: path_to_file
    character(len=50) :: spec
+   character(len=50), allocatable :: names(:)
 
    private
 
@@ -100,6 +101,8 @@ contains
 
       ! Allocate in memory all the parameters
       call setup(nc, thermo_model, tdep, mixing_rule)
+      allocate(names(nc))
+      allocate(z(nc))
    end subroutine
 
    subroutine read_components()
