@@ -587,35 +587,38 @@ contains
             real(pr), intent(out) :: dF(size(X), size(X))
          end subroutine
       end interface
-       integer,  intent(out)    :: iters !! Number of iterations needed
-       real(pr), intent(in out) :: X(:)  !! Variables vector
-       integer,  intent(in)     :: ns    !! Number of specification
-       real(pr), intent(in)     :: S     !! Specification value
-       real(pr), intent(out)    :: F(size(X)) !! Function values at solved point
-       real(pr), intent(out)    :: df(size(X), size(X)) !! Jacobian values
+      integer,  intent(out)    :: iters !! Number of iterations needed
+      real(pr), intent(in out) :: X(:)  !! Variables vector
+      integer,  intent(in)     :: ns    !! Number of specification
+      real(pr), intent(in)     :: S     !! Specification value
+      real(pr), intent(out)    :: F(size(X)) !! Function values at solved point
+      real(pr), intent(out)    :: df(size(X), size(X)) !! Jacobian values
 
-       real(pr) :: b(size(X)), A(size(X), size(X))
+      real(pr) :: b(size(X)), A(size(X), size(X))
 
-       real(pr) :: dX(size(X)), tol=1e-5
+      real(pr) :: dX(size(X)), tol=1e-5
 
-       dX = 20
+      integer :: n, info
+      integer :: i
 
-       newton: do iters=1, max_iters*10
-           if (maxval(abs(dx)) < tol) exit newton
-           call fun(X, ns, S, b, A)
+      n = size(X)
+      dX = 20
 
-           b = -b
-           dX = solve_system(A, b)
+      newton: do iters=1, max_iters*10
+          if (maxval(abs(dx)) < tol) exit newton
+          call fun(X, ns, S, b, a)
+          b = -b
+          dX = solve_system(A, b)
 
-           do while (maxval(abs(dX)) > 1)
-              dX = dX/10
-           end do
+          do while (maxval(abs(dx)) > 0.5*maxval(abs(x)))
+             dX = dX/2
+          end do
 
-           X = X + dX
-       end do newton
+          X = X + dX
+      end do newton
 
-       F = b
-       dF = A
+      F = -b
+      dF = A
    end subroutine
 
    function break_conditions(X, ns, S)
