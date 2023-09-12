@@ -248,7 +248,64 @@ contains
          do i = 1, size(inter)
             print *, inter(i)
          end do
-      end block check_crossings
       ! ======================================================================
+      three_phase: block
+         use inj_envelopes, only: del_S
+         integer :: i, j
+         real(pr) ::  lnKx(nc), lnKy(nc), alpha, beta, X(2*nc+3)
+         real(pr) :: phase_x(nc), phase_y(nc), z(nc)
+         type(injelope) :: bub_3
+         i = inter(1)%i
+         j = inter(1)%j
+
+         alpha = inter(1)%x
+         p     = inter(1)%y
+
+         lnKx = interpol(&
+            dew_envels%alpha(i),   dew_envels%alpha(i+1),   &
+            dew_envels%logk(i, :), dew_envels%logk(i+1, :), &
+            alpha &
+         )
+
+         lnKy = interpol(&
+            bub_envels%alpha(j),   bub_envels%alpha(j+1),   &
+            bub_envels%logk(j, :), bub_envels%logk(j+1, :), &
+            alpha &
+         )
+
+         z = alpha * z_injection + (1-alpha) * z_0
+
+         ! Bubble line composition
+         phase_y = exp(lnKy) * z
+         ! Dew line composition
+         phase_x = exp(lnKx) * z
+
+         ! ====================================================================
+         !  Line with incipient phase gas
+         ! --------------------------------------------------------------------
+         lnKx = log(phase_x/phase_y)
+         lnKy = log(z/phase_y)
+         beta = 1
+         del_S = -0.1_pr
+         X = [lnKx, lnKy, log(p), alpha, beta]
+         ns = 2*nc+3
+         call injection_envelope_three_phase(X, ns, del_S, bub_3)
+
+         print *, bub_3%critical_points
+         ! ====================================================================
+
+         ! ====================================================================
+         !  Line with incipient phase liquid
+         ! --------------------------------------------------------------------
+         lnKx = log(phase_y/phase_x)
+         lnKy = log(z/phase_x)
+         beta = 1
+         del_S = -0.1
+         X = [lnKx, lnKy, log(p), alpha, beta]
+         ns = 2*nc+3
+         call injection_envelope_three_phase(X, ns, del_S, bub_3)
+         ! ====================================================================
+      end block three_phase
+      end block check_crossings
    end subroutine
 end program main
