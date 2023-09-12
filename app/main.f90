@@ -118,6 +118,23 @@ contains
          dew_env%logk = dew_env%logk(i:, :)
       end if
       ! =====================================================================
+      
+      ! ======================================================================
+      !  Look for crossings
+      ! ----------------------------------------------------------------------
+      check_crossings: block
+         use linalg, only: point, intersection
+         type(point), allocatable :: inter(:)
+         inter = intersection( &
+                 dew_env%t, dew_env%p, &
+                 bub_env%t, bub_env%p &
+               )
+         print *, "Intersections: ", size(inter)
+         do i = 1, size(inter)
+            print *, inter(i)
+         end do
+      end block check_crossings
+      ! ======================================================================
    end subroutine
 
    subroutine px_envelopes
