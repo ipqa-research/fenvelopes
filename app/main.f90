@@ -1,21 +1,41 @@
 program main
    use dtypes, only: envelope
+   use constants, only: pr, ouput_path
    use legacy_ar_models, only: nc
+   use flap, only: command_line_interface
 
    implicit none
    real(pr) :: et, st
+
+   type(command_line_interface) :: cli
+   integer :: cli_error
+   character(len=99) :: cli_string
    
    type(envelope) :: bub_env, dew_env
 
-   call setup
+   call cli%init(progname="envelopes", description="Phase Envelopes")
+   call cli%add(&
+            switch="--infile", &
+            switch_ab="-i", &
+            help="Input file", &
+            error=cli_error, &
+            required=.true.)
+   call cli%parse(error=cli_error)
+
+   if (cli_error /= 0) stop
+
+   call system("mkdir -p " // trim(ouput_path))
+   call system("rm " // trim(ouput_path) // "*")
+   
+   call setup ! Setup module variables 
 
    call cpu_time(st)
-   call pt_envelopes
+   call pt_envelopes ! Calculate PT envelopes at the system's composition
    call cpu_time(et)
    print *, "PT: ", (et-st) * 1000 , "ms"
 
    call cpu_time(st)
-   call px_envelopes
+   call px_envelopes ! Calculate Px envelopes
    call cpu_time(et)
    print *, "PX: ", (et-st) * 1000 , "ms"
 contains
@@ -23,8 +43,9 @@ contains
       use io_nml, only: read_system, write_system
       use inj_envelopes, only: setup_inj => from_nml
       integer :: funit_system
-      character(len=254) :: infile
-      call get_command_argument(1, value=infile)
+      character(len=500) :: infile
+
+      call cli%get(val=infile, switch="--infile", error=cli_error)
 
       call read_system(trim(infile))
       call setup_inj(trim(infile))
