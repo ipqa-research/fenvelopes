@@ -1,5 +1,5 @@
 module linalg
-   !! Wrapper module around LAPACK's `dgesv`
+   !! Wrapper module around LAPACK's `dgesv` and lines intersections detector
    use constants, only: pr
    implicit none
 
@@ -99,23 +99,17 @@ contains
          line2: do j=i+15, size(lx)
             associate(x1 => lx(i-1), x2 => lx(i), x3 => lx(j), x4 => lx(j-1), &
                       y1 => ly(i-1), y2 => ly(i), y3 => ly(j), y4 => ly(j-1))
+            
             call intersects(x1, x2, x3, x4, y1, y2, y3, y4, s, t)
             if (0 <= s .and. s <= 1 .and. 0 <= t .and. t <= 1) then
-            
                x = s*(x2 - x1) + x1
                y = s*(y2 - y1) + y1
-
-            if (abs(x - xold) > 1 .and. abs(y - yold) > 1) then
-               print *, "CROSS"
-               print *, i, j, x, y
-               write(*, fmt) "x1, y1 = ", x1, y1
-               write(*, fmt) "x2, y2 = ", x2, y2
-               write(*, fmt) "x3, y3 = ", x3, y3
-               write(*, fmt) "x4, y4 = ", x4, y4
-               xold = x
-               yold = y
-               intersections = [intersections, point(x, y, i, j)]
-            end if
+               if (abs(x - xold) > 1 .and. abs(y - yold) > 1) then
+                  xold = x
+                  yold = y
+                  ! Use earliest point for the "other" line
+                  intersections = [intersections, point(x, y, i, j-1)]
+               end if
             end if
             end associate
          end do line2
