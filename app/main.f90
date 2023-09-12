@@ -1,8 +1,6 @@
 program main
    use dtypes, only: envelope
-   use constants, only: pr
-   ! use system, only: z, nc
-   use legacy_ar_models, only: z, nc
+   use legacy_ar_models, only: nc
 
    implicit none
    real(pr) :: et, st
