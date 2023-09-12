@@ -622,10 +622,10 @@ contains
    end subroutine
 
    function break_conditions(X, ns, S)
-      !! Set of conditions to break the tracing.
-      real(pr) :: X(:)
-      integer :: ns
-      real(pr) :: S
+      !! Set of conditions to break the tracing of a two phase line.
+      real(pr) :: X(:) !! Vector of variables
+      integer :: ns !! Number of specification
+      real(pr) :: S !! Specification value
 
       integer :: n
       real(pr) :: p, alpha
@@ -636,8 +636,27 @@ contains
       alpha = X(n+2)
 
       break_conditions = [&
-          p < 10 .or. p > 1000, &
-          abs(del_S) < 1e-8     &
+           p < 10 .or. p > 2000,  &
+           abs(del_S) < 1e-18     &
+      ]
+   end function
+
+   function break_conditions_three_phases(X, ns, S)
+      !! Set of conditions to break the tracing.
+      real(pr) :: X(:) !! Variables vector
+      integer :: ns !! Number of specification
+      real(pr) :: S !! Value of specification
+
+      integer :: n
+      real(pr) :: p, alpha
+      logical, allocatable :: break_conditions_three_phases(:)
+
+      n = (size(X) - 3)/2
+      p = exp(X(2*n+1))
+      alpha = X(2*n+2)
+
+      break_conditions_three_phases = [&
+           p < 10 .or. p > 3000 &
       ]
    end function
 end module
