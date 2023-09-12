@@ -71,11 +71,10 @@ contains
                   x = s * (x2-x1) + x1
                   y = s * (y2-y1) + y1
 
-                  if (abs(x - xold) > 1 .and. abs(y - yold) > 1) then
-                     print *, "CROSS", x, y
+                  if (abs((x - xold)) > 1e-5_pr .and. abs((y - yold)) > 1e-5_pr) then
                      xold = x
                      yold = y
-                     intersections = [intersections, point(x, y, i, j)]
+                    intersections = [intersections, point(x, y, i, j)]
                      exit line2
                   end if
 
