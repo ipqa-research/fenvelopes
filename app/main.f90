@@ -240,11 +240,13 @@ contains
       ! ----------------------------------------------------------------------
       check_crossings: block
          use linalg, only: point, intersection
-         type(point), allocatable :: inter(:)
+         type(point), allocatable :: inter(:), self_inter(:)
          inter = intersection( &
                  dew_envels%alpha, dew_envels%p, &
-                 bub_envels%alpha, bub_envels%p &
-               )
+                 bub_envels%alpha, bub_envels%p )
+         self_inter = intersection(dew_envels%alpha, dew_envels%p)
+         print *, "Px Intersections:      ", size(inter)
+         print *, "Px Self-Intersections: ", size(self_inter)
          do i = 1, size(inter)
             print *, inter(i)
          end do
