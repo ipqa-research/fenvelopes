@@ -281,10 +281,9 @@ contains
 
       ! Intermediate variables during calculation process
       real(pr), dimension(n) :: y
-      integer,  dimension(n + 2) :: ipiv
       real(pr), dimension(n + 2) :: X, Xold, Xold2, delX, bd, F, dFdS, dXdS
       real(pr), dimension(n + 2, n + 2) :: JAC, AJ
-      real(pr) :: Vy, Vx
+      real(pr) :: Vx
       logical :: run, passingcri, minT, minmaxT
 
       character(len=:), allocatable :: incipient_phase
@@ -320,16 +319,16 @@ contains
       integer :: funit_output
       character(len=254) :: fname_env
 
-      ! =============================================================================
+      ! ========================================================================
       !  OUTPUT file
-      ! -----------------------------------------------------------------------------
+      ! ------------------------------------------------------------------------
       env_number = env_number + 1
       write(fname_env, *) env_number
       fname_env = "env-2ph-PT" // "_" // trim(adjustl(fname_env))
       fname_env = trim(adjustl(ouput_path)) // trim(fname_env) // ".dat"
       
       open(newunit=funit_output, file=fname_env)
-      ! =============================================================================
+      ! ========================================================================
 
       ! Initialize with zero Tv and Pv
       allocate(this_envelope%vars(max_points-50, n+2))
@@ -447,13 +446,8 @@ contains
 
          Tv(i) = T
          Pv(i) = P
-         Dv(i) = 1/Vx ! saturated phase density
          this_envelope%vars(i, :) = X
-
          tmp_logk(i, :n) = X(:n)
-         ! tmp_logphi(i, :n) = philogx(:n)
-
-         ! rho_y = 1/Vy     incipient phase density
 
          if (incipient_phase == "2ndliquid" .and. P < 0.1) then
             ! isolated LL line detected. 
@@ -461,11 +455,9 @@ contains
             run = .false.
          end if
          
-         ! print *, incipient_phase, i, T, P, ns, iter
          if (i > max_points - 50) exit
 
          if (sum(X(:n) * Xold(:n)) < 0) then  ! critical point detected
-            print *, "Found critical!"
             ncri = ncri + 1
             icri(ncri) = i - 1
             frac = -Xold(ns)/(X(ns) - Xold(ns))
