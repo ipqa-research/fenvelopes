@@ -1,5 +1,6 @@
 program main
    use dtypes, only: envelope
+   use inj_envelopes, only: injelope
    use constants, only: pr, ouput_path
    use legacy_ar_models, only: nc
    use flap, only: command_line_interface
@@ -11,7 +12,8 @@ program main
    integer :: cli_error
    character(len=99) :: cli_string
 
-   type(envelope) :: bub_env, dew_env
+   type(envelope) :: pt_bub, pt_dew
+   type(injelope) :: px_bub, px_dew
 
    call cli%init(progname="envelopes", description="Phase Envelopes")
    call cli%add( &
@@ -84,7 +86,7 @@ contains
       call envelope2( &
          1, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
-         bub_env &
+         pt_bub &
          )
       ! ========================================================================
 
@@ -103,20 +105,20 @@ contains
       call envelope2( &
          2, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
-         dew_env &
+         pt_dew &
          )
 
       ! Remove the low pressure parts.
       n = 1
-      do i = 2, size(dew_env%t)
+      do i = 2, size(pt_dew%t)
          n = n + 1
-         if (dew_env%t(i) - dew_env%t(i - 1) < 0) exit
+         if (pt_dew%t(i) - pt_dew%t(i - 1) < 0) exit
       end do
 
-      if (n /= size(dew_env%t)) then
-         dew_env%t = dew_env%t(i:)
-         dew_env%p = dew_env%p(i:)
-         dew_env%logk = dew_env%logk(i:, :)
+      if (n /= size(pt_dew%t)) then
+         pt_dew%t = pt_dew%t(i:)
+         pt_dew%p = pt_dew%p(i:)
+         pt_dew%logk = pt_dew%logk(i:, :)
       end if
       ! ========================================================================
 
@@ -127,8 +129,8 @@ contains
          use linalg, only: point, intersection
          type(point), allocatable :: inter(:)
          inter = intersection( &
-                 dew_env%t, dew_env%p, &
-                 bub_env%t, bub_env%p &
+                 pt_dew%t, pt_dew%p, &
+                 pt_bub%t, pt_bub%p &
                  )
          print *, "Intersections: ", size(inter)
          do i = 1, size(inter)
@@ -153,7 +155,6 @@ contains
       real(pr) :: p
       real(pr), allocatable :: k(:)
       real(pr) :: t_tol = 2
-      type(injelope) :: bub_envels, dew_envels
 
       ! ========================================================================
       !  Setup system
@@ -171,25 +172,25 @@ contains
       bubble: block
          real(pr) :: pold
          pold = 0
-         ts_envel = pack(bub_env%t, mask=abs(bub_env%t - t_inj) < t_tol)
+         ts_envel = pack(pt_bub%t, mask=abs(pt_bub%t - t_inj) < t_tol)
          do i = 1, size(ts_envel)
-            idx = findloc(bub_env%t, value=ts_envel(i), dim=1)
+            idx = findloc(pt_bub%t, value=ts_envel(i), dim=1)
             p = interpol( &
-                bub_env%t(idx), bub_env%t(idx + 1), &
-                bub_env%p(idx), bub_env%p(idx + 1), &
+                pt_bub%t(idx), pt_bub%t(idx + 1), &
+                pt_bub%p(idx), pt_bub%p(idx + 1), &
                 t_inj)
 
             if (abs(p - pold) < 5) cycle
             pold = p
 
             k = exp(interpol( &
-                    bub_env%t(idx), bub_env%t(idx + 1), &
-                    bub_env%logk(idx, :), bub_env%logk(idx + 1, :), &
+                    pt_bub%t(idx), pt_bub%t(idx + 1), &
+                    pt_bub%logk(idx, :), pt_bub%logk(idx + 1, :), &
                     t_inj))
 
             X = [log(K), log(P), alpha]
 
-            call injection_envelope(X, ns, del_S0, bub_envels)
+            call injection_envelope(X, ns, del_S0, px_bub)
          end do
       end block bubble
       ! ========================================================================
@@ -201,25 +202,25 @@ contains
       dew: block
          real(pr) :: pold
          pold = 0
-         ts_envel = pack(dew_env%t, mask=abs(dew_env%t - t_inj) < t_tol)
+         ts_envel = pack(pt_dew%t, mask=abs(pt_dew%t - t_inj) < t_tol)
          do i = 1, size(ts_envel)
-            idx = findloc(dew_env%t, value=ts_envel(i), dim=1)
+            idx = findloc(pt_dew%t, value=ts_envel(i), dim=1)
             alpha = 0
             p = interpol( &
-                dew_env%t(idx), dew_env%t(idx + 1), &
-                dew_env%p(idx), dew_env%p(idx + 1), &
+                pt_dew%t(idx), pt_dew%t(idx + 1), &
+                pt_dew%p(idx), pt_dew%p(idx + 1), &
                 t_inj)
 
             if (abs(p - pold) < 5) cycle
             pold = p
             k = exp(interpol( &
-                    dew_env%t(idx), dew_env%t(idx + 1), &
-                    dew_env%logk(idx, :), dew_env%logk(idx + 1, :), &
+                    pt_dew%t(idx), pt_dew%t(idx + 1), &
+                    pt_dew%logk(idx, :), pt_dew%logk(idx + 1, :), &
                     t_inj))
 
             X = [log(K), log(P), alpha]
 
-            call injection_envelope(X, ns, del_s0, dew_envels)
+            call injection_envelope(X, ns, del_s0, px_dew)
          end do
       end block dew
       ! ========================================================================
@@ -231,9 +232,9 @@ contains
          use linalg, only: point, intersection
          type(point), allocatable :: inter(:), self_inter(:)
          inter = intersection( &
-                 dew_envels%alpha, dew_envels%p, &
-                 bub_envels%alpha, bub_envels%p)
-         self_inter = intersection(dew_envels%alpha, dew_envels%p)
+                 px_dew%alpha, px_dew%p, &
+                 px_bub%alpha, px_bub%p)
+         self_inter = intersection(px_dew%alpha, px_dew%p)
 
          print *, "Px Intersections:      ", size(inter)
          print *, "Px Self-Intersections: ", size(self_inter)
@@ -244,9 +245,12 @@ contains
          ! =====================================================================
          three_phase: block
             integer :: i, j
-            real(pr) ::  lnKx(nc), lnKy(nc), alpha, beta, X(2*nc + 3)
+            ! Variables
+            real(pr) :: alpha, beta
+            real(pr), allocatable ::  lnKx(:), lnKy(:), X(:)
+            
             real(pr) :: phase_x(nc), phase_y(nc), z(nc)
-            type(injelope) :: bub_3
+            type(injelope) :: px_bub_3, px_dew_3
 
             ! =================================================================
             !  Set variables based on intersections
@@ -260,14 +264,14 @@ contains
                p = inter(1)%y
 
                lnKx = interpol( &
-                      dew_envels%alpha(i), dew_envels%alpha(i + 1), &
-                      dew_envels%logk(i, :), dew_envels%logk(i + 1, :), &
+                      px_dew%alpha(i), px_dew%alpha(i + 1), &
+                      px_dew%logk(i, :), px_dew%logk(i + 1, :), &
                       alpha &
                       )
 
                lnKy = interpol( &
-                      bub_envels%alpha(j), bub_envels%alpha(j + 1), &
-                      bub_envels%logk(j, :), bub_envels%logk(j + 1, :), &
+                      px_bub%alpha(j), px_bub%alpha(j + 1), &
+                      px_bub%logk(j, :), px_bub%logk(j + 1, :), &
                       alpha &
                       )
             end if
@@ -290,7 +294,7 @@ contains
             lnKx = log(phase_x/phase_y)
             lnKy = log(z/phase_y)
             X = [lnKx, lnKy, log(p), alpha, beta]
-            call injection_envelope_three_phase(X, ns, del_S0, bub_3)
+            call injection_envelope_three_phase(X, ns, del_S0, px_bub_3)
             ! ==================================================================
 
             ! ==================================================================
@@ -299,7 +303,7 @@ contains
             lnKx = log(phase_y/phase_x)
             lnKy = log(z/phase_x)
             X = [lnKx, lnKy, log(p), alpha, beta]
-            call injection_envelope_three_phase(X, ns, del_S0, bub_3)
+            call injection_envelope_three_phase(X, ns, del_S0, px_dew_3)
             ! ==================================================================
          end block three_phase
       end block check_crossings
