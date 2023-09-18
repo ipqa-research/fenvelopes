@@ -1,8 +1,8 @@
-name = "envelopes"
+name = "fenvelopes"
 version = "0.1.0"
 license = "license"
 author = "Federico E. Benelli"
-maintainer = "fedebenelli@outlook.com"
+maintainer = "federico.benelli@mi.unc.edu.ar"
 copyright = "Copyright 2023, Federico E. Benelli"
 
 [build]
