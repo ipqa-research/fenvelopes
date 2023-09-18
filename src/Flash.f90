@@ -1,28 +1,17 @@
 module phase_equilibria
+   use constants, only: pr
+   use legacy_ar_models, only: zTVTERMO, termo, n => nc, omg => w, tc, pc
    implicit none
 
 contains
-   subroutine flash(spec, FIRST, n, z, t, p, v, x, y, rho_x, rho_y, beta, iter)
-      use constants
-      use system, only: & 
-                        nmodel => thermo_model, ncomb => mixing_rule, ntdep => tdep, &
-                        ac, b, delta1 => del1, rk_or_m => k, &
-                        tc, pc, dceos => dc, omg => w, &
-                        kij_or_k0 => kij, lij, bij
-      implicit real(pr)(A - H, O - Z)
-      integer, parameter :: nco=64
-      
-      common /keepK/ saveK, LOG_K2, Pold, Pold2, Told, Told2
-      
+   subroutine flash(spec, FIRST, z, t, p, v, x, y, rho_x, rho_y, beta, iter)
       ! Flash specification, eos id and  number of compounds in the system
-      character*4, intent(in) :: spec
+      character(len=*), intent(in) :: spec !! Flash specification [PT | VT]
       logical, intent(in out) ::  FIRST
       logical :: stopflash
-      double precision Kinf
 
       ! composition of the system
-      integer, intent(in) :: n
-      real*8, intent(in) :: z(n)
+      real*8, intent(in) :: z(:)
 
       ! Temperature and Pressure for the flash
       real*8, intent(in) :: t            ! Temperature for the flash (K)
@@ -30,8 +19,8 @@ contains
       real*8 :: v          ! (L/mol) Molar vol for the flash (TV) or resulting from (TP)
 
       ! Results from flash calculation
-      real*8, dimension(n), intent(out) :: x  ! composition of liquid (molar fractions)
-      real*8, dimension(n), intent(out) :: y  ! composition of vapour (molar fractions)
+      real*8, dimension(size(z)), intent(out) :: x  ! composition of liquid (molar fractions)
+      real*8, dimension(size(z)), intent(out) :: y  ! composition of vapour (molar fractions)
       real*8, intent(out) :: rho_x            ! density of liquid (moles/L)
       real*8, intent(out) :: rho_y            ! density of vapour (moles/L)
       real*8, intent(out) :: beta             ! total fraction of vapour (molar base)
@@ -45,14 +34,21 @@ contains
       real*8 :: g, dg, bmin, bmax, Vy, Vx
 
       ! real*8, dimension(nco, nco) :: Kij_or_K0, Tstar
-      real*8, dimension(nco) :: saveK, LOG_K2
+      ! real*8, dimension(nco) :: saveK, LOG_K2
+      real(8) :: aux, bx, savek(n), log_k2(n)
+      integer :: MTYP
 
-      do i = 1, n
-         do j = i, n
-            bij(i, j) = (1 - lij(i, j))*(b(i) + b(j))/2
-            bij(j, i) = bij(i, j)
-         end do
-      end do
+      real(8) :: dh, dpv, DPVl, dpvv, dVydVl, h, pl, pold, pold2, pv, step, stepv
+      real(8) :: told, told2, bij(n, n)
+
+      integer :: i, j, iterv, nco
+
+      ! do i = 1, n
+      !    do j = i, n
+      !       bij(i, j) = (1 - lij(i, j))*(b(i) + b(j))/2
+      !       bij(j, i) = bij(i, j)
+      !    end do
+      ! end do
       !
       !-----------------------------------------------------------
       ! This algorithm assumes that the specified T and P correspond to
@@ -135,7 +131,9 @@ contains
          ! new for TV Flash
          if (spec == 'TV' .or. spec == 'isoV') then     ! find Vy,Vx (vV and vL) from V balance and P equality equations
             dVydVl = -(1 - beta)/beta
-            call Bcalc(n, x, T, Bx)
+            ! call Bcalc(n, x, T, Bx)
+            ! TODO: Add this intiial volume
+
             if (Vx < Bx) Vx = 1.625*Bx  ! First evaluation will be with Vx = 1.5*Bx
             ! Pl = -1.0
             call zTVTERMO(n, 0, T, x, Vx, Pl, DPVl, PHILOGy, DLPHIP, DLPHIT, FUGN)  ! 26/06/15
@@ -146,6 +144,7 @@ contains
             Vy = (v - (1 - beta)*Vx)/beta
             h = 1.0
             iterv = 0
+
             stopflash = .false.
             do while (abs(h) > 1.d-4)  ! Newton for solving P equality, with Vx as independent variable
                iterv = iterv + 1
@@ -169,6 +168,7 @@ contains
                Vy = (v - (1 - beta)*Vx)/beta
             end do
             if (stopflash .eqv. .true.) exit
+
             call zTVTERMO(n, 1, T, x, Vx, Pl, DPVl, PHILOGx, DLPHIP, DLPHIT, FUGN)
             call zTVTERMO(n, 1, T, y, Vy, Pv, DPVv, PHILOGy, DLPHIP, DLPHIT, FUGN)
          else  
