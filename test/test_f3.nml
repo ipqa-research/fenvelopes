@@ -1,12 +1,3 @@
-! Namelist based input file
-! =========================
-!
-! Units:
-!  - Pressure: bar
-!  - Temperature: K
-!  - Volume: L
-! =========================
-
 &nml_setup
     nc=8,                ! Number of components
     model="PR78",        ! SRK PR76 PR78 RKPR
@@ -49,5 +40,5 @@
     T=500.0
     z_0=0.0246 0.3694 0.0752 0.0193 0.0157 0.0162 0.47145 0.00815
     z_injection=1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-    injection_case="displace" ![dilute|displace]
+    injection_case="displace" ! [dilute|displace]
 /
