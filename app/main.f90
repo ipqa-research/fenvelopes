@@ -279,7 +279,7 @@ contains
             phase_y = exp(lnKy)*z
             ! Dew line composition
             phase_x = exp(lnKx)*z
-            
+
             del_S0 = -0.1_pr
             beta = 1
             ns = 2*nc + 3
