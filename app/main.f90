@@ -4,6 +4,10 @@ program main
    use constants, only: pr, ouput_path
    use legacy_ar_models, only: nc
    use flap, only: command_line_interface
+   use stdlib_ansi, only: blue => fg_color_blue, red => fg_color_red, &
+                          operator(//), operator(+), &
+                          style_reset
+
 
    implicit none
    real(pr) :: et, st
@@ -34,12 +38,12 @@ program main
    call cpu_time(st)
    call pt_envelopes ! Calculate PT envelopes at the system's composition
    call cpu_time(et)
-   print *, "PT: ", (et - st)*1000, "ms"
+   print *, "PT: ", (et - st)*1000, "cpu ms"
 
    call cpu_time(st)
    call px_envelopes ! Calculate Px envelopes
    call cpu_time(et)
-   print *, "PX: ", (et - st)*1000, "ms"
+   print *, "PX: ", (et - st)*1000, "cpu ms"
 contains
    subroutine setup
       use io_nml, only: read_system, write_system
@@ -182,33 +186,69 @@ contains
       end block check_crossings
       ! ========================================================================
       
+      ! ========================================================================
+      !  Three phase regions
+      ! ------------------------------------------------------------------------
+      three_phase: block
+         use legacy_ar_models, only: TERMO
+         integer :: i, j
+         ! Variables
+         real(pr) :: alpha, beta
+         real(pr), allocatable ::  lnKx(:), lnKy(:), X(:)
+         
+         real(pr) :: phase_x(nc), phase_y(nc), z(nc)
+         real(pr) :: lnfug_x(nc), dlnphi_dp(nc), dlnphi_dt(nc), dlnphi_dn(nc,nc), v
+         real(pr) :: lnfug_y(nc)
+         type(injelope) :: px_bub_3, px_dew_3
 
-            ! =================================================================
-            !  Set variables based on intersections
-            ! -----------------------------------------------------------------
-            if (size(inter) == 0) then
-            else
-               i = inter(1)%i
-               j = inter(1)%j
+         ! =====================================================================
+         !  Set variables based on intersections
+         ! ---------------------------------------------------------------------
+         if (size(inter) == 0) then
+            phase_x = 0
+            phase_x(nc) = 1
+            p = px_bub%p(1)
+            phase_y = exp(px_bub%logk(1, :)) * z_0
 
-               alpha = inter(1)%x
-               p = inter(1)%y
+            call TERMO(&
+               nc, 1, 1, t_inj, p, phase_y, &
+               v, lnfug_y, dlnphi_dp, dlnphi_dt, dlnphi_dn)
+            
+            call TERMO(&
+               nc, 1, 1, t_inj, p, phase_x, &
+               v, lnfug_x, dlnphi_dp, dlnphi_dt, dlnphi_dn)
 
-               lnKx = interpol( &
-                      px_dew%alpha(i), px_dew%alpha(i + 1), &
-                      px_dew%logk(i, :), px_dew%logk(i + 1, :), &
-                      alpha &
-                      )
+            ! lnKx = log(phase_x/phase_y)
+            lnKx = lnfug_x - lnfug_y
+            lnKy = log(    z_0/phase_y)
 
-               lnKy = interpol( &
-                      px_bub%alpha(j), px_bub%alpha(j + 1), &
-                      px_bub%logk(j, :), px_bub%logk(j + 1, :), &
-                      alpha &
-                      )
-            end if
-            ! =================================================================
+            alpha = 0.0_pr
+            beta = 1.0_pr - z_0(nc)
+            del_S0 = -0.1_pr
 
-            z = alpha*z_injection + (1 - alpha)*z_0
+            ns = 2*nc+3
+            X = [lnKx, lnKy, log(p), alpha, beta]
+            call injection_envelope_three_phase(X, ns, del_S0, px_bub_3)
+         else
+            i = inter(1)%i
+            j = inter(1)%j
+
+            alpha = inter(1)%x
+            p = inter(1)%y
+
+            lnKx = interpol( &
+                     px_dew%alpha(i), px_dew%alpha(i + 1), &
+                     px_dew%logk(i, :), px_dew%logk(i + 1, :), &
+                     alpha &
+                     )
+
+            lnKy = interpol( &
+                     px_bub%alpha(j), px_bub%alpha(j + 1), &
+                     px_bub%logk(j, :), px_bub%logk(j + 1, :), &
+                     alpha &
+                     )
+
+            call get_z(alpha, z, dzda)
 
             ! Bubble line composition
             phase_y = exp(lnKy)*z
@@ -222,6 +262,7 @@ contains
             ! ==================================================================
             !  Line with incipient phase gas
             ! ------------------------------------------------------------------
+            print *, "Three Phase: Gas"
             lnKx = log(phase_x/phase_y)
             lnKy = log(z/phase_y)
             X = [lnKx, lnKy, log(p), alpha, beta]
@@ -231,13 +272,15 @@ contains
             ! ==================================================================
             !  Line with incipient phase liquid
             ! ------------------------------------------------------------------
+            print *, "Three Phase: Liquid"
             lnKx = log(phase_y/phase_x)
             lnKy = log(z/phase_x)
             X = [lnKx, lnKy, log(p), alpha, beta]
             call injection_envelope_three_phase(X, ns, del_S0, px_dew_3)
             ! ==================================================================
-         end block three_phase
-      end block check_crossings
+         end if
+      end block three_phase
+      ! ========================================================================
    end subroutine
 
    function check_intersections(this, other) result(intersections)
