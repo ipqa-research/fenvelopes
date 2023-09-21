@@ -3,6 +3,7 @@ module inj_envelopes
    use constants, only: pr, R
    use dtypes, only: envelope, critical_point
    use linalg, only: solve_system, interpol
+   use progress_bar_module, only: progress_bar
 
    implicit none
 
@@ -12,18 +13,19 @@ module inj_envelopes
       real(pr), allocatable :: z_mix(:, :) !! Composition at each step
    end type
 
-   ! ==========================================================================
+   ! ===========================================================================
    !  Parameters
-   ! --------------------------------------------------------------------------
+   ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 500 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 100 !! Maximum number of iterations for a newton step
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
    real(pr) :: del_S = 0.1 !! Specificiation variation
    character(len=10) :: injection_case !! Kind of injection displace|dilute
-   ! ==========================================================================
+   character(len=255) :: FE_LOG
+   ! ===========================================================================
 contains
    subroutine from_nml(filepath)
       use legacy_ar_models, only: nc
@@ -35,8 +37,10 @@ contains
       allocate (z_0(nc), z_injection(nc))
 
       open (newunit=funit, file=filepath)
-      read (funit, nml=nml_px)
+         read (funit, nml=nml_px)
       close (funit)
+
+      z_injection = z_injection/sum(z_injection)
    end subroutine
 
    subroutine F_injection(X, ns, S, F, dF)
@@ -89,7 +93,7 @@ contains
 
       call get_z(alpha, z, dzda)
 
-      if (any(z < 0)) z = 0
+      ! if (any(z < 0)) z = 0
 
       y = K*z
 
@@ -190,7 +194,7 @@ contains
       beta = Xvars(2*n + 3)
 
       call get_z(alpha, z, dzda)
-      if (any(z < 0)) z = 0
+      ! if (any(z < 0)) z = 0
 
       w = z/(beta*Ky + (1 - beta)*Kx)
       x = w*Kx
@@ -317,9 +321,11 @@ contains
       ! ======================================================================
 
       enveloop: do point = 1, max_points
+         call progress_bar(point, max_points, advance=.false.)
          call full_newton(f_injection, iters, X, ns, S, F, dF)
 
          if (iters >= max_iters) then
+            print *, "Breaking: Above max iterations"
             exit enveloop
          end if
 
@@ -345,7 +351,7 @@ contains
 
             del_S = sign(1.0_pr, del_S)*minval([ &
                                                max(sqrt(abs(X(ns)))/10, 0.1), &
-                                               abs(del_S)*3/iters &
+                                               abs(del_S)*2/iters &
                                                ] &
                                                )
 
@@ -360,7 +366,7 @@ contains
             dP = exp(Xnew(n + 1)) - exp(X(n + 1))
             dalpha = Xnew(n + 2) - X(n + 2)
 
-            do while (abs(dP) > 50 .or. abs(dalpha) > 0.03)
+            do while (abs(dP) > 10 .or. abs(dalpha) > 0.03)
                dXdS = dXdS/10.0_pr
 
                Xnew = X + dXdS*del_S
@@ -403,12 +409,16 @@ contains
          X = X + dXdS*del_S
          S = X(ns)
 
-         if (any(break_conditions(X, ns, S))) exit enveloop
+         if (any(break_conditions(X, ns, S))) then
+            print *, "Breaking: ", break_conditions(X, ns, S)
+            exit enveloop
+         end if
          write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
             X(:n)
       end do enveloop
 
       point = point - 1
+      call progress_bar(point, max_points, .true.)
 
       write (funit_output, *) ""
       write (funit_output, *) ""
@@ -432,6 +442,7 @@ contains
 
    subroutine injection_envelope_three_phase(X0, spec_number, del_S0, envels)
       use constants, only: ouput_path
+      use io, only: str
       !! Subroutine to calculate Px phase envelopes via continuation method.
       !! Three phases version.
       real(pr), intent(in) :: X0(:) !! Vector of variables
@@ -471,13 +482,17 @@ contains
 
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
+      write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), &
          X(2*n + 3), X(:2*n)
       ! ======================================================================
 
       enveloop: do point = 1, max_points
+         call progress_bar(point, max_points, advance=.false.)
          call full_newton(F_injection_three_phases, iters, X, ns, S, F, dF)
          if (iters >= max_iters) then
+            print *, "Breaking: Above max iterations"
             exit enveloop
          end if
 
@@ -496,7 +511,7 @@ contains
             dXdS = solve_system(dF, dFdS)
 
             if (maxval(abs(X(:2*n))) < 1) then
-               ! T and P not allowed to be chosen close to a critical point
+               ! alpha, P and beta not allowed near a CP
                ns_new = maxloc(abs(dXdS(:2*n)), dim=1)
             else
                ns_new = maxloc(abs(dXdS), dim=1)
@@ -507,25 +522,25 @@ contains
                dXdS = dXdS/dXdS(ns_new)
                ns = ns_new
             end if
-
-            del_S = sign(1.0_pr, del_S)*minval([ &
-                                               max(sqrt(abs(X(ns))), 0.1), &
-                                               abs(del_S)*3/iters &
-                                               ] &
-                                               )
-
-            if (injection_case == "dilution") del_S = 50*del_S
          end block update_spec
 
          fix_step: block
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dalpha
 
-            Xnew = X + dXdS*del_S
-            dP = exp(Xnew(2*n + 1)) - exp(X(n + 1))
-            dalpha = Xnew(2*n + 2) - X(n + 2)
+            del_S = sign(1.7_pr, del_S)*minval([ &
+                                               max(abs(X(ns)/10), 0.1_pr), &
+                                               abs(del_S)*3/iters &
+                                               ] &
+                                               )
 
-            do while (abs(dP) > 50 .or. abs(dalpha) > 0.03)
+            if (injection_case == "dilution") del_S = 50*del_S
+
+            Xnew = X + dXdS*del_S
+            dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+            dalpha = Xnew(2*n + 2) - X(2*n + 2)
+
+            do while (abs(dP) > 10 .or. abs(dalpha) > 0.1)
                dXdS = dXdS/10.0_pr
 
                Xnew = X + dXdS*del_S
@@ -539,12 +554,14 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 15.0_pr
+            fact = 2.0_pr
 
-            Xnew = X + fact*dXdS*del_S
-            do i = 0, 1
+            loop: do i = 0, 1
+               Xnew = X + fact*dXdS*del_S
+
                K = X(i*n + 1:(i + 1)*n)
                Knew = Xnew(i*n + 1:(i + 1)*n)
+
                max_changing = minloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
@@ -552,24 +569,30 @@ contains
                          -k(max_changing)*(Xnew(ns) - X(ns)) &
                          /(Knew(max_changing) - K(max_changing)) &
                          )
-                  del_S = sign(15.0_pr, dS_c) ! dS_c * 15_pr
 
                   Xnew = X + dXdS*dS_c
                   alpha_c = Xnew(2*n + 2)
                   pc = exp(Xnew(2*n + 1))
-
                   cps = [cps, critical_point(t, pc, alpha_c)]
+
+                  del_S = dS_c + del_S ! * fact
+                  ! del_S = del_S * fact
+
                   write (funit_output, *) ""
                   write (funit_output, *) ""
+                  exit loop
                end if
-            end do
+            end do loop
          end block detect_critical
 
-         if (x(2*n + 3) > 1) exit enveloop
+         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) exit enveloop
 
          X = X + dXdS*del_S
          S = X(ns)
-         if (any(break_conditions_three_phases(X, ns, S))) exit enveloop
+         if (any(break_conditions_three_phases(X, ns, S))) then
+            print *, "Breaking: ", break_conditions_three_phases(X, ns, S)
+            exit enveloop
+         end if
       end do enveloop
 
       point = point - 1
@@ -586,6 +609,7 @@ contains
       end if
 
       close (funit_output)
+      call progress_bar(point, max_points, .true.)
       envels%z = z_0
       envels%z_inj = z_injection
       envels%logk = XS(:point, :n)
@@ -598,6 +622,7 @@ contains
       !! Subroutine to solve a point in the envelope.
       !!
       !! Procedure that solves a point with the Newton-Raphson method.
+      use constants, only: ouput_path
       interface
          subroutine fun(X, ns, S, F, dF)
             !! Function to solve
@@ -620,11 +645,18 @@ contains
 
       real(pr) :: b(size(X)), A(size(X), size(X))
       real(pr) :: dX(size(X)), tol = 1e-5
+      integer :: funit_log_newton
 
       integer :: n
 
       n = size(X)
       dX = 20
+
+      call get_environment_variable(name="FE_LOG", value=FE_LOG)
+
+      if (trim(FE_LOG) == "1") then
+         open(newunit=funit_log_newton, file=trim(ouput_path) // "newton_log.dat")
+      end if
 
       newton: do iters = 1, max_iters*10
          if (maxval(abs(dx)) < tol) exit newton
@@ -637,7 +669,9 @@ contains
          end do
 
          X = X + dX
+         if (trim(FE_LOG) == "1") write(funit_log_newton, *) X
       end do newton
+      if (trim(FE_LOG) == "1")  close(funit_log_newton)
 
       F = -b
       dF = A
@@ -658,8 +692,8 @@ contains
       alpha = X(n + 2)
 
       break_conditions = [ &
-                         p < 10 .or. p > 2000, &
-                         abs(del_S) < 1e-18 &
+                         p < 0.1 .or. p > 5000, &
+                         abs(del_S) < 1e-3 &
                          ]
    end function
 
@@ -678,7 +712,7 @@ contains
       alpha = X(2*n + 2)
 
       break_conditions_three_phases = [ &
-                                      p < 10 .or. p > 3000 &
+                                      p < 1 .or. p > 5000 &
                                       ]
    end function
 
