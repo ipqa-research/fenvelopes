@@ -144,97 +144,34 @@ contains
       !! Calculation of Px envelopes at selected temperature.
       use inj_envelopes, only: full_newton, z_injection, &
                                T_inj => T, injection_envelope, z_0, &
-                               injelope, injection_envelope_three_phase
+                               injelope, injection_envelope_three_phase, get_z
       use envelopes, only: envelope, k_wilson, p_wilson
-      use linalg, only: interpol
+      use linalg, only: interpol, point
+      
+      type(point), allocatable :: inter(:), self_inter(:)
 
-      real(pr), allocatable :: X(:)
-      real(pr) :: alpha, del_S0
-      integer :: ns, i, idx
-      real(pr), allocatable :: ts_envel(:)
+      real(pr) :: del_S0
+      integer :: ns, i
       real(pr) :: p
-      real(pr), allocatable :: k(:)
       real(pr) :: t_tol = 2
+      real(pr) :: dzda(nc)
 
       ! ========================================================================
-      !  Setup system
+      !  Two phase envelopes
       ! ------------------------------------------------------------------------
-      alpha = 0.0_pr
-      z_injection = z_injection/sum(z_injection)
-      ns = nc + 2
-      del_S0 = 0.1_pr
-      ! ========================================================================
-
-      ! ========================================================================
-      !  Bubble envelope
-      ! ------------------------------------------------------------------------
-      print *, "Running Bubble"
-      bubble: block
-         real(pr) :: pold
-         pold = 0
-         ts_envel = pack(pt_bub%t, mask=abs(pt_bub%t - t_inj) < t_tol)
-         do i = 1, size(ts_envel)
-            idx = findloc(pt_bub%t, value=ts_envel(i), dim=1)
-            p = interpol( &
-                pt_bub%t(idx), pt_bub%t(idx + 1), &
-                pt_bub%p(idx), pt_bub%p(idx + 1), &
-                t_inj)
-
-            if (abs(p - pold) < 5) cycle
-            pold = p
-
-            k = exp(interpol( &
-                    pt_bub%t(idx), pt_bub%t(idx + 1), &
-                    pt_bub%logk(idx, :), pt_bub%logk(idx + 1, :), &
-                    t_inj))
-
-            X = [log(K), log(P), alpha]
-
-            call injection_envelope(X, ns, del_S0, px_bub)
-         end do
-      end block bubble
-      ! ========================================================================
-
-      ! ========================================================================
-      !  Dew envelope
-      ! ------------------------------------------------------------------------
-      print *, "Running Dew"
-      dew: block
-         real(pr) :: pold
-         pold = 0
-         ts_envel = pack(pt_dew%t, mask=abs(pt_dew%t - t_inj) < t_tol)
-         do i = 1, size(ts_envel)
-            idx = findloc(pt_dew%t, value=ts_envel(i), dim=1)
-            alpha = 0
-            p = interpol( &
-                pt_dew%t(idx), pt_dew%t(idx + 1), &
-                pt_dew%p(idx), pt_dew%p(idx + 1), &
-                t_inj)
-
-            if (abs(p - pold) < 5) cycle
-            pold = p
-            k = exp(interpol( &
-                    pt_dew%t(idx), pt_dew%t(idx + 1), &
-                    pt_dew%logk(idx, :), pt_dew%logk(idx + 1, :), &
-                    t_inj))
-
-            X = [log(K), log(P), alpha]
-
-            call injection_envelope(X, ns, del_s0, px_dew)
-         end do
-      end block dew
+      print *, red // "Running Bubble" // style_reset
+      px_bub = px_two_phase(t_inj, pt_bub, t_tol)
+      
+      print *, blue // "Running Dew" // style_reset
+      px_dew = px_two_phase(t_inj, pt_dew, t_tol)
       ! ========================================================================
 
       ! ========================================================================
       !  Look for crossings
       ! ------------------------------------------------------------------------
       check_crossings: block
-         use linalg, only: point, intersection
-         type(point), allocatable :: inter(:), self_inter(:)
-         inter = intersection( &
-                 px_dew%alpha, px_dew%p, &
-                 px_bub%alpha, px_bub%p)
-         self_inter = intersection(px_dew%alpha, px_dew%p)
+         inter = check_intersections(px_dew, px_bub)
+         self_inter = check_self_intersections(px_dew)
 
          print *, "Px Intersections:      ", size(inter)
          print *, "Px Self-Intersections: ", size(self_inter)
@@ -242,15 +179,9 @@ contains
          do i = 1, size(inter)
             print *, inter(i)
          end do
-         ! =====================================================================
-         three_phase: block
-            integer :: i, j
-            ! Variables
-            real(pr) :: alpha, beta
-            real(pr), allocatable ::  lnKx(:), lnKy(:), X(:)
-            
-            real(pr) :: phase_x(nc), phase_y(nc), z(nc)
-            type(injelope) :: px_bub_3, px_dew_3
+      end block check_crossings
+      ! ========================================================================
+      
 
             ! =================================================================
             !  Set variables based on intersections
@@ -308,6 +239,27 @@ contains
          end block three_phase
       end block check_crossings
    end subroutine
+
+   function check_intersections(this, other) result(intersections)
+      !! Find intersections between two injelopes.
+      use linalg, only: point, intersection
+      type(injelope), intent(in) :: this !! One of the injelopes
+      type(injelope), intent(in) :: other !! The other injelope
+      type(point), allocatable :: intersections(:) !! Found intersections
+      intersections = intersection( &
+                 this%alpha, this%p, &
+                 other%alpha, other%p  &
+      )
+   end function
+
+   function check_self_intersections(self) result(self_intersections)
+      !! Find self-intersections on a given injelope.
+      use linalg, only: point, intersection
+      type(injelope), intent(in) :: self !! Envelope to check self-intersections
+      type(point), allocatable :: self_intersections(:) !! Found intersections
+      self_intersections = intersection(self%alpha, self%p)
+   end function
+
    function px_two_phase(t_inj, pt_env_2, t_tol)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
