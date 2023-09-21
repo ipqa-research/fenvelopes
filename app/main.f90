@@ -308,4 +308,55 @@ contains
          end block three_phase
       end block check_crossings
    end subroutine
+   function px_two_phase(t_inj, pt_env_2, t_tol)
+      !! Calculate two phase Px envelopes at a given injection temperature.
+      !!
+      !! Given an injection temperature `t_inj` and a base PT envelope 
+      !! `pt_env_2`, finds all the points on the PT envelope near `t_inj`, based
+      !! on an absolute tolerance `t_tol`. These points are used as 
+      !! initialization for calculation of Px envelopes.
+      
+      use linalg, only: interpol
+      use inj_envelopes, only: injection_envelope
+      
+      real(pr), intent(in) :: t_inj !! Injection temperature [K]
+      type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
+      real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
+      type(injelope) :: px_two_phase !! Output Px envelope
+      
+      real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
+      real(pr), allocatable :: k(:) !! K values
+      real(pr), allocatable :: X(:) !! Vector of variables
+      real(pr) :: alpha !! Amount of injection
+      real(pr) :: p !! Pressure of ocurrence
+      real(pr) :: pold !! Old pressure, used to assure no repeats
+
+      integer :: i, idx, ns
+      real(pr) :: del_S0
+
+      del_S0 = 0.01_pr
+      pold = 0
+
+      ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
+      do i = 1, size(ts_envel)
+         idx = findloc(pt_env_2%t, value=ts_envel(i), dim=1)
+         p = interpol( &
+               pt_env_2%t(idx), pt_env_2%t(idx + 1), &
+               pt_env_2%p(idx), pt_env_2%p(idx + 1), &
+               t_inj)
+
+         if (abs(p - pold) < 5) cycle
+         pold = p
+
+         k = exp(interpol( &
+                  pt_env_2%t(idx), pt_env_2%t(idx + 1), &
+                  pt_env_2%logk(idx, :), pt_env_2%logk(idx + 1, :), &
+                  t_inj))
+
+         X = [log(K), log(P), alpha]
+         ns = size(X)
+
+         call injection_envelope(X, ns, del_S0, px_two_phase)
+      end do
+   end function
 end program main
