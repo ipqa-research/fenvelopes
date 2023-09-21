@@ -23,10 +23,10 @@ set style line dew_3ph lc rgb "blue" dashtype 2
 set style line bub_3ph lc rgb "black"  dashtype 2
 
 
-plot "./output/env-2ph-PX_1.dat" u 4:5 w l ls bub_2ph t "Bubble Line", \
-     "./output/env-2ph-PX_2.dat" u 4:5 w l ls dew_2ph t "Dew Line", \
-     "./output/env-3ph-PX_3.dat" u 4:5 w l ls bub_3ph t "3ph-vapor", \
-     "./output/env-3ph-PX_4.dat" u 4:5 w l ls dew_3ph t "3ph-liquid", \
-     "./output/env-3ph-PX_3.dat" index "critical" u 1:2 w p t "" pt 7 lc rgb "black", \
-     "./output/env-3ph-PX_4.dat" index "critical" u 1:2 w p t "" pt 7 lc rgb "black"
+plot "./fenvelopes_output/env-2ph-PX_1.dat" u 4:5 w lp ls bub_2ph ps 0.5 t "Bubble Line", \
+     "./fenvelopes_output/env-2ph-PX_2.dat" u 4:5 w lp ls dew_2ph ps 0.5 t "Dew Line", \
+     "./fenvelopes_output/env-3ph-PX_3.dat" u 4:5 w lp ls bub_3ph ps 0.5 t "3ph-vapor", \
+     "./fenvelopes_output/env-3ph-PX_4.dat" u 4:5 w lp ls dew_3ph ps 0.5 t "3ph-liquid", \
+     "./fenvelopes_output/env-3ph-PX_3.dat" index "critical" u 1:2 w p t "" pt 7 lc rgb "black", \
+     "./fenvelopes_output/env-3ph-PX_4.dat" index "critical" u 1:2 w p t "" pt 7 lc rgb "black"
 pause mouse close
