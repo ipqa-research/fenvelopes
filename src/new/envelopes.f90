@@ -3,7 +3,6 @@ module envelopes
    !! phase envelopes 
    use constants, only: pr
    use linalg, only: solve_system
-   ! use system, only: nc
    use dtypes, only: envelope
    use legacy_ar_models, only: nc, termo
    implicit none
