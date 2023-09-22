@@ -16,8 +16,8 @@ module linalg
    end interface
 contains
    function solve_system(a, b) result(x)
-      real(pr), intent(in out) :: b(:)
-      real(pr), intent(in out) :: a(size(b), size(b))
+      real(pr), intent(in) :: b(:)
+      real(pr), intent(in) :: a(size(b), size(b))
 
       real(pr) :: x(size(b))
 
@@ -75,7 +75,7 @@ contains
                   y = s*(y2 - y1) + y1
 
                   if ( &
-                     abs((x - xold)) > 1e-5_pr .and. abs((y - yold)) > 1e-5_pr &
+                     abs((x - xold)) > 1e-2 .and. abs((y - yold)) > 1e-2_pr &
                      ) then
                      xold = x
                      yold = y
