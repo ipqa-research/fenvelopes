@@ -1,4 +1,5 @@
 program main
+   use envelopes, only: PTEnvel3
    use dtypes, only: envelope
    use inj_envelopes, only: injelope
    use constants, only: pr, ouput_path
@@ -6,8 +7,7 @@ program main
    use flap, only: command_line_interface
    use stdlib_ansi, only: blue => fg_color_blue, red => fg_color_red, &
                           operator(//), operator(+), &
-                          style_reset
-
+                          style_reset, style_blink_fast, style_bold
 
    implicit none
    real(pr) :: et, st
@@ -18,6 +18,7 @@ program main
 
    type(envelope) :: pt_bub, pt_dew
    type(injelope) :: px_bub, px_dew
+   type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:)
 
    call cli%init(progname="envelopes", description="Phase Envelopes")
    call cli%add( &
@@ -137,9 +138,67 @@ contains
                  pt_bub%t, pt_bub%p &
                  )
          print *, "Intersections: ", size(inter)
-         do i = 1, size(inter)
-            print *, inter(i)
+         call exit
+
+         three_phase: block
+         use linalg, only: interpol
+         use envelopes, only: pt_envelope_three_phase, PTEnvel3
+         real(pr), allocatable :: lnKx(:), lnKy(:)
+         real(pr), allocatable :: X(:)
+         real(pr) :: t, p, beta, del_S0
+         real(pr), allocatable :: phase_y(:), phase_x(:)
+         integer :: i, j, i_inter=1
+         integer :: ns
+
+         allocate(pt_bub_3(size(inter)), pt_dew_3(size(inter)))
+         do i_inter=1,size(inter)
+            i = inter(i_inter)%i
+            j = inter(i_inter)%j
+
+            t = inter(i_inter)%x
+            p = inter(i_inter)%y
+
+            lnKx = interpol( pt_dew%t(i), pt_dew%t(i + 1), &
+                           pt_dew%logk(i, :), pt_dew%logk(i + 1, :), &
+                           t &
+                           )
+
+            lnKy = interpol( &
+                     pt_bub%t(j), pt_bub%t(j + 1), &
+                     pt_bub%logk(j, :), pt_bub%logk(j + 1, :), &
+                     t &
+                     )
+
+            ! Bubble line composition
+            phase_y = exp(lnKy)*z
+            ! Dew line composition
+            phase_x = exp(lnKx)*z
+
+            del_S0 = -0.01_pr
+            beta = 1
+
+            ns = 2*nc + 3
+
+            ! ==================================================================
+            !  Line with incipient phase gas
+            ! ------------------------------------------------------------------
+            print *, "Three Phase: Gas"
+            lnKx = log(phase_x/phase_y)
+            lnKy = log(z/phase_y)
+            X = [lnKx, lnKy, log(p), log(t), beta]
+            call pt_envelope_three_phase(X, ns, del_S0, pt_bub_3(i_inter))
+            ! ==================================================================
+            ! ==================================================================
+            !  Line with incipient phase liquid
+            ! ------------------------------------------------------------------
+            print *, "Three Phase: Liquid"
+            lnKx = log(phase_y/phase_x)
+            lnKy = log(z/phase_x)
+            X = [lnKx, lnKy, log(p), log(t), beta]
+            call pt_envelope_three_phase(X, ns, del_S0, pt_dew_3(i_inter))
+            ! ==================================================================
          end do
+         end block three_phase
       end block check_crossings
       ! ========================================================================
    end subroutine
@@ -163,6 +222,12 @@ contains
       ! ========================================================================
       !  Two phase envelopes
       ! ------------------------------------------------------------------------
+      ! print *, red // "Running Bubble" // style_reset
+      ! px_bub = px_two_phase(t_inj, pt_bub, t_tol, del_S0=-0.1_pr)
+      
+      ! print *, blue // "Running Dew" // style_reset
+      ! px_dew = px_two_phase(t_inj, pt_dew, t_tol, del_S0=-0.1_pr)
+
       print *, red // "Running Bubble" // style_reset
       px_bub = px_two_phase(t_inj, pt_bub, t_tol)
       
@@ -176,13 +241,8 @@ contains
       check_crossings: block
          inter = check_intersections(px_dew, px_bub)
          self_inter = check_self_intersections(px_dew)
-
-         print *, "Px Intersections:      ", size(inter)
-         print *, "Px Self-Intersections: ", size(self_inter)
-
-         do i = 1, size(inter)
-            print *, inter(i)
-         end do
+         print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
+         print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
       end block check_crossings
       ! ========================================================================
       
@@ -191,7 +251,7 @@ contains
       ! ------------------------------------------------------------------------
       three_phase: block
          use legacy_ar_models, only: TERMO
-         integer :: i, j
+         integer :: i, j, i_inter
          ! Variables
          real(pr) :: alpha, beta
          real(pr), allocatable ::  lnKx(:), lnKy(:), X(:)
@@ -205,36 +265,16 @@ contains
          !  Set variables based on intersections
          ! ---------------------------------------------------------------------
          if (size(inter) == 0) then
-            phase_x = 0
-            phase_x(nc) = 1
-            p = px_bub%p(1)
-            phase_y = exp(px_bub%logk(1, :)) * z_0
-
-            call TERMO(&
-               nc, 1, 1, t_inj, p, phase_y, &
-               v, lnfug_y, dlnphi_dp, dlnphi_dt, dlnphi_dn)
-            
-            call TERMO(&
-               nc, 1, 1, t_inj, p, phase_x, &
-               v, lnfug_x, dlnphi_dp, dlnphi_dt, dlnphi_dn)
-
-            ! lnKx = log(phase_x/phase_y)
-            lnKx = lnfug_x - lnfug_y
-            lnKy = log(    z_0/phase_y)
-
-            alpha = 0.0_pr
-            beta = 1.0_pr - z_0(nc)
-            del_S0 = -0.1_pr
-
-            ns = 2*nc+3
-            X = [lnKx, lnKy, log(p), alpha, beta]
-            call injection_envelope_three_phase(X, ns, del_S0, px_bub_3)
+            px_bub_3 = px_three_phase(t_inj, pt_bub_3, t_tol)
+            px_dew_3 = px_three_phase(t_inj, pt_dew_3, t_tol)
          else
-            i = inter(1)%i
-            j = inter(1)%j
+            do i_inter=1,size(inter)
+               print *, "Intersection: ", inter(i_inter)
+            i = inter(i_inter)%i
+            j = inter(i_inter)%j
 
-            alpha = inter(1)%x
-            p = inter(1)%y
+            alpha = inter(i_inter)%x
+            p = inter(i_inter)%y
 
             lnKx = interpol( &
                      px_dew%alpha(i), px_dew%alpha(i + 1), &
@@ -255,8 +295,14 @@ contains
             ! Dew line composition
             phase_x = exp(lnKx)*z
 
-            del_S0 = -0.1_pr
-            beta = 1
+            if (i_inter == 1) then
+               del_S0 = -0.01_pr
+               beta = 1
+            else
+               del_S0 = 0.01_pr
+               beta = 0
+            end if
+
             ns = 2*nc + 3
 
             ! ==================================================================
@@ -277,6 +323,7 @@ contains
             lnKy = log(z/phase_x)
             X = [lnKx, lnKy, log(p), alpha, beta]
             call injection_envelope_three_phase(X, ns, del_S0, px_dew_3)
+            end do
             ! ==================================================================
          end if
       end block three_phase
@@ -303,7 +350,7 @@ contains
       self_intersections = intersection(self%alpha, self%p)
    end function
 
-   function px_two_phase(t_inj, pt_env_2, t_tol)
+   function px_two_phase(t_inj, pt_env_2, t_tol, del_S0)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -313,10 +360,13 @@ contains
       
       use linalg, only: interpol
       use inj_envelopes, only: injection_envelope
+      use stdlib_optval, only: optval
+      use envelopes, only: AbsEnvel
       
       real(pr), intent(in) :: t_inj !! Injection temperature [K]
       type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
+      real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
       type(injelope) :: px_two_phase !! Output Px envelope
       
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
@@ -327,9 +377,9 @@ contains
       real(pr) :: pold !! Old pressure, used to assure no repeats
 
       integer :: i, idx, ns
-      real(pr) :: del_S0
+      real(pr) :: del_S
 
-      del_S0 = 0.01_pr
+      del_S = optval(del_S0, 0.1_pr)
       pold = 0
 
       ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
@@ -348,10 +398,80 @@ contains
                   pt_env_2%logk(idx, :), pt_env_2%logk(idx + 1, :), &
                   t_inj))
 
+         alpha = 0
          X = [log(K), log(P), alpha]
          ns = size(X)
 
-         call injection_envelope(X, ns, del_S0, px_two_phase)
+         call injection_envelope(X, ns, del_S, px_two_phase)
+      end do
+   end function
+
+   function px_three_phase(t_inj, pt_env_3, t_tol, del_S0)
+      !! Calculate three phase Px envelopes at a given injection temperature.
+      !!
+      !! Given an injection temperature `t_inj` and a base PT envelope 
+      !! `pt_env_2`, finds all the points on the PT envelope near `t_inj`, based
+      !! on an absolute tolerance `t_tol`. These points are used as 
+      !! initialization for calculation of Px envelopes.
+      
+      use linalg, only: interpol
+      use inj_envelopes, only: injection_envelope_three_phase
+      use stdlib_optval, only: optval
+      use envelopes, only: AbsEnvel
+      
+      real(pr), intent(in) :: t_inj !! Injection temperature [K]
+      type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelope
+      real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
+      real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
+      type(injelope) :: px_three_phase !! Output Px envelope
+      
+      real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
+      real(pr), allocatable :: kx(:), ky(:) !! K values
+      real(pr), allocatable :: X(:) !! Vector of variables
+      real(pr) :: alpha !! Amount of injection
+      real(pr) :: beta  !! Main phases molar fraction
+      real(pr) :: p !! Pressure of ocurrence
+      real(pr) :: pold !! Old pressure, used to assure no repeats
+
+      integer :: i, idx, ns, i_envel
+      real(pr) :: del_S
+
+      del_S = optval(del_S0, 0.05_pr)
+      pold = 0
+
+      do i_envel = 1,size(pt_env_3)
+      associate(pt => pt_env_3(i_envel))
+      ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
+      do i = 1, size(ts_envel)
+         idx = findloc(pt%t, value=ts_envel(i), dim=1)
+         p = interpol( &
+               pt%t(idx), pt%t(idx + 1), &
+               pt%p(idx), pt%p(idx + 1), &
+               t_inj)
+
+         if (abs(p - pold) < 5) cycle
+         pold = p
+
+         kx = exp(interpol( &
+                  pt%t(idx), pt%t(idx + 1), &
+                  pt%lnkx(idx, :), pt%lnkx(idx + 1, :), &
+                  t_inj))
+         ky = exp(interpol( &
+                  pt%t(idx), pt%t(idx + 1), &
+                  pt%lnky(idx, :), pt%lnky(idx + 1, :), &
+                  t_inj))
+         beta = interpol( &
+                  pt%t(idx), pt%t(idx + 1), &
+                  pt%beta(idx), pt%beta(idx + 1), &
+                  t_inj)
+         
+         alpha = 0
+         X = [log(Kx), log(Ky), log(P), alpha, beta]
+         ns = size(X) - 1
+
+         call injection_envelope_three_phase(X, ns, del_S, px_three_phase)
+      end do
+      end associate
       end do
    end function
 end program main
