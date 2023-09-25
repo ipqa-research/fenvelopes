@@ -183,7 +183,7 @@ contains
 
          XS(point, :) = X
 
-         call update_spec_two_phases(X, ns, del_S, dF, dXdS)
+         call update_spec(X, ns, del_S, dF, dXdS)
          call fix_step_two_phases(X, ns, S, iters, del_S, dXdS)
 
          detect_critical: block
@@ -242,6 +242,8 @@ contains
       end if
 
       close (funit_output)
+
+      point = point - 1
       envels%z = z_0
       envels%z_inj = z_injection
       envels%logk = XS(:point, :n)
@@ -545,30 +547,7 @@ contains
             exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
          XS(point, :) = X
 
-         update_spec: block
-            real(pr) :: dFdS(size(X0))
-            integer  :: ns_new
-
-            dFdS = 0
-            ! Actually it's -dFdS
-            dFdS(2*n + 3) = 1
-
-            dXdS = solve_system(dF, dFdS)
-
-            if (maxval(abs(X(:2*n))) < 1) then
-               ! alpha, P and beta not allowed near a CP
-               ns_new = maxloc(abs(dXdS(:2*n)), dim=1)
-            else
-               ns_new = maxloc(abs(dXdS), dim=1)
-            end if
-
-            if (ns_new /= ns) then
-               ! translation of delS to the  new specification variable
-               del_S = dXdS(ns_new)*del_S  
-               dXdS = dXdS/dXdS(ns_new)
-               ns = ns_new
-            end if
-         end block update_spec
+         call update_spec(X, ns, del_S, dF, dXdS)
 
          fix_step: block
             real(pr) :: Xnew(size(X0))
@@ -600,7 +579,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 3.0_pr
+            fact = 4.0_pr
 
             loop: do i = 0, 1
                Xnew = X + fact*dXdS*del_S
@@ -608,7 +587,7 @@ contains
                K = X(i*n + 1:(i + 1)*n)
                Knew = Xnew(i*n + 1:(i + 1)*n)
 
-               max_changing = minloc(abs(Knew - K), dim=1)
+               max_changing = ns ! maxloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
                   dS_c = ( &
@@ -621,8 +600,9 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(t, pc, alpha_c)]
 
-                  del_S = dS_c + del_S ! * fact
+                  ! del_S = dS_c + del_S ! * fact
                   ! del_S = del_S * fact
+                  del_S = dS_c + sign(0.7_pr, dS_c)
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
