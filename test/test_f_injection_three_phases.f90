@@ -43,9 +43,11 @@ program main
     do ns=1, nvars
         print *, ns
         do i=1, nvars
-            print "(I3, x, 3(E10.3, 2x))", i, jac(i,ns), numjac(i,ns), (numjac(i, ns) - jac(i, ns)) * 100
+            print "(I3, x, 3(E10.3, 2x))", i, jac(i,ns), numjac(i,ns), (numjac(i, ns) - jac(i, ns))
         end do
     end do
+
+    if (any(abs(numjac - jac) > 1e-2)) call exit(1)
 
 contains
     function fun(x)
