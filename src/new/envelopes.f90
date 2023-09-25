@@ -3,11 +3,24 @@ module envelopes
    !! phase envelopes 
    use constants, only: pr
    use linalg, only: solve_system
-   use dtypes, only: envelope
+   use dtypes, only: AbsEnvel, envelope, critical_point
    use legacy_ar_models, only: nc, termo
+   use inj_envelopes, only: full_newton
+   use progress_bar_module, only: progress_bar
    implicit none
 
+   type, extends(AbsEnvel) :: PTEnvel3
+      integer :: n
+      real(pr), allocatable :: lnKx(:, :)
+      real(pr), allocatable :: lnKy(:, :)
+      real(pr), allocatable :: T(:)
+      real(pr), allocatable :: P(:)
+      real(pr), allocatable :: beta(:)
+      type(critical_point), allocatable :: critical_points(:)
+   end type
+
    integer, parameter :: max_points = 2000
+   integer, parameter :: max_iters = 100
    integer :: env_number = 0
 
    interface
@@ -610,5 +623,344 @@ contains
       critical_points%p = pcri(:ncri)
       this_envelope%critical_points = critical_points
    end subroutine envelope2
+   ! ===========================================================================
+
+   ! ===========================================================================
+   ! Three-phase envelopes
+   ! ---------------------------------------------------------------------------
+   subroutine pt_F_three_phases(Xvars, ns, S, F, dF)
+      !! Function to solve at each point of a three phase envelope.
+      !!
+      !! The vector of variables X corresponds to:
+      !! \( X = [lnKx_i, lnKy_i lnP, lnT, \beta] \)
+      !!
+      !! While the equations are:
+      !!
+      !! \( F = [
+      !!        lnKx_i - ln \phi_i(x, P, T) + ln \phi_i(w, P, T),
+      !!        lnKy_i - ln \phi_i(y, P, T) + ln \phi_i(w, P, T),
+      !!        \sum_{i=1}^N (w_i) - 1,
+      !!        \sum_{i=1}^N (x_i - y_i),
+      !!        X_{ns} - S
+      !! ] \)
+      use legacy_ar_models, only: TERMO, z
+      use iso_fortran_env, only: error_unit
+      real(pr), intent(in)  :: Xvars(:) !! Vector of variables
+      integer, intent(in)  :: ns   !! Number of specification
+      real(pr), intent(in)  :: S    !! Specification value
+      real(pr), intent(out) :: F(size(Xvars)) !! Vector of functions valuated
+      real(pr), intent(out) :: df(size(Xvars), size(Xvars)) !! Jacobian matrix
+
+      ! Xvars variables
+      ! real(pr) :: z((Size(Xvars)-3)/2)
+      real(pr) :: Kx((Size(Xvars)-3)/2)
+      real(pr) :: Ky((Size(Xvars)-3)/2)
+      real(pr) :: P
+      real(pr) :: T
+      real(pr) :: beta
+
+      ! Main phase 1 variables
+      real(pr) :: Vx
+      real(pr), dimension((Size(Xvars)-3)/2) :: x, lnfug_x, dlnphi_dt_x, dlnphi_dp_x
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_x
+
+      ! Main phase 2 variables
+      real(pr) :: Vy
+      real(pr), dimension((Size(Xvars)-3)/2) :: y, lnfug_y, dlnphi_dt_y, dlnphi_dp_y
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_y
+
+      ! Incipient phase variables
+      real(pr) :: Vw
+      real(pr), dimension((Size(Xvars)-3)/2) :: w, lnfug_w, dlnphi_dt_w, dlnphi_dp_w
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_w
+
+      ! Derivative of w wrt beta
+      real(pr) :: dwdb((Size(Xvars)-3)/2)
+
+      real(pr) :: dwdKx((Size(Xvars)-3)/2), dxdKx((Size(Xvars)-3)/2), dydKx((Size(Xvars)-3)/2)
+      real(pr) :: dwdKy((Size(Xvars)-3)/2), dxdKy((Size(Xvars)-3)/2), dydKy((Size(Xvars)-3)/2)
+
+      integer :: i, j, n
+
+      n = (Size(Xvars)-3)/2
+
+      Kx = exp(Xvars(1:n))
+      Ky = exp(Xvars(n + 1:2*n))
+      P = exp(Xvars(2*n + 1))
+      T = exp(Xvars(2*n + 2))
+      beta = Xvars(2*n + 3)
+
+      w = z/(beta*Ky + (1 - beta)*Kx)
+      x = w*Kx
+      y = w*Ky
+
+      call TERMO( &
+         n, 0, 4, T, P, x, Vx, lnfug_x, dlnphi_dp_x, dlnphi_dt_x, dlnphi_dn_x &
+         )
+      call TERMO( &
+         n, 0, 4, T, P, y, Vy, lnfug_y, dlnphi_dp_y, dlnphi_dt_y, dlnphi_dn_y &
+         )
+      call TERMO( &
+         n, 0, 4, T, P, w, Vw, lnfug_w, dlnphi_dp_w, dlnphi_dt_w, dlnphi_dn_w &
+         )
+
+      F = 0
+
+      F(1:n) = Xvars(1:n) + lnfug_x - lnfug_w
+      F(n + 1:2*n) = Xvars(n + 1:2*n) + lnfug_y - lnfug_w
+
+      F(2*n + 1) = sum(w) - 1
+      F(2*n + 2) = sum(x - y)
+      F(2*n + 3) = Xvars(ns) - S
+
+      df = 0
+      dwdb = z*(Kx - Ky)/((1 - beta)*Kx + beta*Ky)**2
+
+      dwdKx = -z*(1 - beta)/(Ky*beta + (1 - beta)*Kx)**2
+      dxdKx = Kx*dwdKx + w
+      dydKx = Ky*dwdKx
+
+      dwdKy = -z*(beta)/(Ky*beta + (1 - beta)*Kx)**2
+      dxdKy = Kx*dwdKy
+      dydKy = Ky*dwdKy + w
+
+      do i = 1, n
+         do j = 1, n
+            df(i, j) = Kx(j)*(dlnphi_dn_x(i, j)*dxdKx(j) &
+                              - dlnphi_dn_w(i, j)*dwdKx(j))
+            df(i + n, j) = Kx(j)*(dlnphi_dn_y(i, j)*dydKx(j) &
+                                  - dlnphi_dn_w(i, j)*dwdKx(j))
+
+            df(i, j + n) = Ky(j)*(dlnphi_dn_x(i, j)*dxdKy(j) &
+                                  - dlnphi_dn_w(i, j)*dwdKy(j))
+            df(i + n, j + n) = Ky(j)*(dlnphi_dn_y(i, j)*dydKy(j) &
+                                      - dlnphi_dn_w(i, j)*dwdKy(j))
+         end do
+
+         ! dlnK_i/dlnK_i
+         df(i, i) = df(i, i) + 1
+         df(i + n, i + n) = df(i + n, i + n) + 1
+
+         df(i, 2*n + 3) = sum(Kx*dlnphi_dn_x(i, :)*dwdb - dlnphi_dn_w(i, :)*dwdb)
+         df(i + n, 2*n + 3) = sum(Ky*dlnphi_dn_y(i, :)*dwdb - dlnphi_dn_w(i, :)*dwdb)
+
+         df(2*n + 1, i) = Kx(i)*dwdKx(i)
+         df(2*n + 1, i + n) = Ky(i)*dwdKy(i)
+
+         df(2*n + 2, i) = Kx(i)*dxdKx(i) - Kx(i)*dydKx(i)
+         df(2*n + 2, i + n) = Ky(i)*dxdKy(i) - Ky(i)*dydKy(i)
+      end do
+
+      ! Derivatives wrt P
+      df(:n, 2*n + 1) = P*(dlnphi_dp_x - dlnphi_dp_w)
+      df(n + 1:2*n, 2*n + 1) = P*(dlnphi_dp_y - dlnphi_dp_w)
+
+      ! Derivatives wrt T
+      df(:n, 2*n + 2) = T*(dlnphi_dt_x - dlnphi_dt_w)
+      df(n + 1:2*n, 2*n + 2) = T*(dlnphi_dt_y - dlnphi_dt_w)
+
+      ! Derivatives wrt beta
+      df(2*n + 1, 2*n + 3) = sum(dwdb)
+      df(2*n + 2, 2*n + 3) = sum(Kx*dwdb - Ky*dwdb)
+
+      ! Derivatives wrt Xs
+      df(2*n + 3, :) = 0
+      df(2*n + 3, ns) = 1
+   end subroutine
+
+   subroutine pt_envelope_three_phase(X0, spec_number, del_S0, envel)
+      use constants, only: ouput_path
+      use io, only: str
+      !! Subroutine to calculate Px phase envelopes via continuation method.
+      !! Three phases version.
+      real(pr), intent(in) :: X0(:) !! Vector of variables
+      integer, intent(in) :: spec_number !! Number of specification
+      real(pr), intent(in) :: del_S0 !! \(\Delta S_0\)
+      type(PTEnvel3), intent(out) :: envel !! Calculated envelopes
+
+      type(critical_point), allocatable :: cps(:)
+
+      real(pr) :: X(size(X0))
+      integer :: ns
+      real(pr) :: S
+      real(pr) :: del_S
+      real(pr) :: XS(max_points, size(X0))
+
+      real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
+
+      integer :: point, iters, n
+      integer :: i
+      integer :: funit_output
+      character(len=254) :: fname_env
+
+      allocate (cps(0))
+      X = X0
+      n = (size(X0) - 3)/2
+      ns = spec_number
+      S = X(ns)
+      del_S = del_S0
+
+      ! ======================================================================
+      !  Output file
+      ! ----------------------------------------------------------------------
+      env_number = env_number + 1
+
+      write (fname_env, *) env_number
+      fname_env = "env-3ph-PT"//"_"//trim(adjustl(fname_env))
+      fname_env = trim(adjustl(ouput_path))//trim(fname_env)//".dat"
+
+      open (newunit=funit_output, file=fname_env)
+      write (funit_output, *) "#"
+      write (funit_output, *) "STAT", " iters", " ns", " T", " P", &
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
+      write (funit_output, *) "X0", iters, ns, exp(X(2*n + 2)), exp(X(2*n + 1)), &
+         X(2*n + 3), X(:2*n)
+      ! ======================================================================
+
+      enveloop: do point = 1, max_points
+         call progress_bar(point, max_points, advance=.false.)
+         call full_newton(pt_F_three_phases, iters, X, ns, S, F, dF)
+         if (iters >= max_iters) then
+            print *, "Breaking: Above max iterations"
+            exit enveloop
+         end if
+
+         write (funit_output, *) "SOL", iters, ns, exp(X(2*n + 2)), &
+            exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
+         XS(point, :) = X
+
+         update_spec: block
+            real(pr) :: dFdS(size(X0))
+            integer  :: ns_new
+
+            dFdS = 0
+            ! Actually it's -dFdS
+            dFdS(2*n + 3) = 1
+
+            dXdS = solve_system(dF, dFdS)
+
+            if (maxval(abs(X(:2*n))) < 1) then
+               ! T, P and beta not allowed near a CP
+               ns_new = maxloc(abs(dXdS(:2*n)), dim=1)
+            else
+               ns_new = maxloc(abs(dXdS), dim=1)
+            end if
+
+            if (ns_new /= ns) then
+               ! translation of delS to the  new specification variable
+               del_S = dXdS(ns_new)*del_S  
+               dXdS = dXdS/dXdS(ns_new)
+               ns = ns_new
+            end if
+         end block update_spec
+
+         fix_step: block
+            real(pr) :: Xnew(size(X0))
+            real(pr) :: dP, dT
+
+            del_S = sign(1.3_pr, del_S)*minval([ &
+                                               max(abs(X(ns)/5), 0.1_pr), &
+                                               abs(del_S)*3/iters &
+                                               ] &
+                                               )
+
+            Xnew = X + dXdS*del_S
+            dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+            dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
+
+            do while (abs(dP) > 2 .or. abs(dT) > 5)
+               dXdS = dXdS/2.0_pr
+
+               Xnew = X + dXdS*del_S
+               dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+               dT = Xnew(2*n + 2) - X(2*n + 2)
+            end do
+         end block fix_step
+
+         detect_critical: block
+            real(pr) :: K((size(X0) - 3)/2), Knew((size(X0) - 3)/2), &
+                        Xnew(size(X0)), fact
+            real(pr) :: pc, tc, dS_c, dXdS_in(size(X0))
+            integer :: max_changing, i
+            fact = 3.0_pr
+
+            loop: do i = 0, 1
+               Xnew = X + fact*dXdS*del_S
+
+               K = X(i*n + 1:(i + 1)*n)
+               Knew = Xnew(i*n + 1:(i + 1)*n)
+
+               max_changing = minloc(abs(Knew - K), dim=1)
+
+               if (all(K*Knew < 0)) then
+                  dS_c = ( &
+                         -k(max_changing)*(Xnew(ns) - X(ns)) &
+                         /(Knew(max_changing) - K(max_changing)) &
+                         )
+
+                  Xnew = X + dXdS*dS_c
+                  Tc = exp(Xnew(2*n + 2))
+                  pc = exp(Xnew(2*n + 1))
+                  cps = [cps, critical_point(tc, pc, 0.0_pr)]
+
+                  del_S = dS_c + sign(0.04_pr, dS_c) ! dS_c + 2*del_S ! * fact
+                  ! del_S = del_S * fact
+
+                  write (funit_output, *) ""
+                  write (funit_output, *) ""
+                  exit loop
+               end if
+            end do loop
+         end block detect_critical
+
+         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) exit enveloop
+
+         X = X + dXdS*del_S
+         S = X(ns)
+         if (any(break_conditions_three_phases(X, ns, S))) then
+            print *, "Breaking: ", break_conditions_three_phases(X, ns, S)
+            exit enveloop
+         end if
+      end do enveloop
+
+      write (funit_output, *) ""
+      write (funit_output, *) ""
+      write (funit_output, *) "#critical"
+      if (size(cps) > 0) then
+         do i = 1, size(cps)
+            write (funit_output, *) cps(i)%t, cps(i)%p
+         end do
+      else
+         write (funit_output, *) "NaN NaN"
+      end if
+
+      close (funit_output)
+      call progress_bar(point, max_points, .true.)
+      envel%lnKx = XS(:point, :n)
+      envel%lnKy = XS(:point, n+1:2*n)
+      envel%P = exp(XS(:point, 2*n + 1))
+      envel%T = exp(XS(:point, 2*n + 2))
+      envel%beta = XS(:point, 2*n + 3)
+      envel%critical_points = cps
+   end subroutine
+   
+   function break_conditions_three_phases(X, ns, S)
+      !! Set of conditions to break the tracing.
+      real(pr) :: X(:) !! Variables vector
+      integer :: ns !! Number of specification
+      real(pr) :: S !! Value of specification
+
+      integer :: n
+      real(pr) :: p, t
+      logical, allocatable :: break_conditions_three_phases(:)
+
+      n = (size(X) - 3)/2
+      p = exp(X(2*n + 1))
+      t = X(2*n + 2)
+
+      break_conditions_three_phases = [ .false.&
+                                      ! p < 1 .or. p > 5000 &
+                                      ]
+   end function
    ! ===========================================================================
 end module envelopes
