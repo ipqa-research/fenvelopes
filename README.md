@@ -8,7 +8,9 @@ equilibria diagrams using Equations of State.
 Right now `fenvelopes` calculates three kinds of phase-envelopes.
 
 - [x] Two-phase PT envelopes
-- [ ] Three-phase PT envelopes
+- [o] Three-phase PT envelopes
+    - [x] PT envelopes based on double saturation points.
+    - [ ] Isolated PT envelopes
 - [x] Two-phase Px envelopes
 - [ ] Three-phase Px envelopes
     - [x] Px envelopes based on double saturation points.

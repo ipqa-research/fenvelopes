@@ -5,10 +5,14 @@ module dtypes
    implicit none
 
    private
+   public :: AbsEnvel
    public :: envelope
    public :: env3
    public :: print_header
    public :: critical_point
+
+   type, abstract :: AbsEnvel
+   end type
    
    type :: critical_point
       real(pr) :: t

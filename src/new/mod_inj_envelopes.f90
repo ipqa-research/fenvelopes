@@ -3,6 +3,7 @@ module inj_envelopes
    use constants, only: pr, R
    use dtypes, only: envelope, critical_point
    use linalg, only: solve_system, interpol
+   use progress_bar_module, only: progress_bar
 
    implicit none
 
@@ -12,18 +13,27 @@ module inj_envelopes
       real(pr), allocatable :: z_mix(:, :) !! Composition at each step
    end type
 
-   ! ==========================================================================
+   ! ===========================================================================
    !  Parameters
-   ! --------------------------------------------------------------------------
+   ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 500 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 50 !! Maximum number of iterations for a newton step
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
-   real(pr) :: del_S = 0.1 !! Specificiation variation
    character(len=10) :: injection_case !! Kind of injection displace|dilute
-   ! ==========================================================================
+   character(len=255) :: FE_LOG
+   
+   ! Two-phase settings
+   real(pr) :: del_S_multiplier = 1.5_pr
+   real(pr) :: max_dp=75.0_pr
+   real(pr) :: max_dalpha=0.05_pr
+   
+   ! Three phase parameters
+   real(pr) :: del_S_multiplier_three_phase = 1.7_pr
+   real(pr) :: critical_fact = 3.0_pr
+   ! ===========================================================================
 contains
    subroutine from_nml(filepath)
       use legacy_ar_models, only: nc
@@ -35,10 +45,15 @@ contains
       allocate (z_0(nc), z_injection(nc))
 
       open (newunit=funit, file=filepath)
-      read (funit, nml=nml_px)
+         read (funit, nml=nml_px)
       close (funit)
+
+      z_injection = z_injection/sum(z_injection)
    end subroutine
 
+   ! ===========================================================================
+   ! Two-phases
+   ! ---------------------------------------------------------------------------
    subroutine F_injection(X, ns, S, F, dF)
       !! Function to solve at each point of the phase envelope.
       !!
@@ -89,7 +104,7 @@ contains
 
       call get_z(alpha, z, dzda)
 
-      if (any(z < 0)) z = 0
+      ! if (any(z < 0)) z = 0
 
       y = K*z
 
@@ -122,6 +137,218 @@ contains
       df(n + 2, ns) = 1
    end subroutine
 
+   subroutine injection_envelope(X0, spec_number, del_S0, envels)
+      use constants, only: ouput_path
+      use io, only: str
+      !! Subroutine to calculate Px phase envelopes via continuation method
+      real(pr), intent(in) :: X0(:) !! Vector of variables
+      integer, intent(in) :: spec_number !! Number of specification
+      real(pr), intent(in) :: del_S0 !! \(\Delta S_0\)
+      type(injelope), intent(out) :: envels !! Calculated envelopes
+
+      type(critical_point), allocatable :: cps(:)
+
+      real(pr) :: X(size(X0))
+      integer :: ns
+      real(pr) :: S
+      real(pr) :: XS(max_points, size(X0))
+      real(pr) :: del_S
+
+      real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
+
+      integer :: point, iters, n
+      integer :: i
+      integer :: funit_output
+      character(len=254) :: fname_env
+
+      allocate (cps(0))
+      X = X0
+      n = size(X0) - 2
+      ns = spec_number
+      S = X(ns)
+      del_S = del_S0
+
+      ! ======================================================================
+      !  Output file
+      ! ----------------------------------------------------------------------
+      env_number = env_number + 1
+
+      write (fname_env, *) env_number
+      fname_env = "env-2ph-PX"//"_"//trim(adjustl(fname_env))
+      fname_env = trim(adjustl(ouput_path))//trim(fname_env)//".dat"
+
+      open (newunit=funit_output, file=fname_env)
+      write (funit_output, *) "#", T
+      write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
+         (" lnK"//str(i), i=1,n)
+      write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n)
+      ! ======================================================================
+
+      enveloop: do point = 1, max_points
+         call progress_bar(point, max_points, advance=.false.)
+         call full_newton(f_injection, iters, X, ns, S, F, dF)
+
+         if (iters >= max_iters) then
+            print *, "Breaking: Above max iterations"
+            exit enveloop
+         end if
+
+         XS(point, :) = X
+
+         call update_spec(X, ns, del_S, dF, dXdS)
+         call fix_step_two_phases(X, ns, S, iters, del_S, dXdS)
+
+         detect_critical: block
+            real(pr) :: K(size(X0) - 2), Knew(size(X0) - 2), &
+                        Xnew(size(X0)), fact
+            real(pr) :: pc, alpha_c, dS_c
+            integer :: max_changing
+            fact = 2.5
+
+            Xnew = X + fact*dXdS*del_S
+
+            K = X(:n)
+            Knew = Xnew(:n)
+
+            if (all(K*Knew < 0)) then
+               max_changing = maxloc(abs(K - Knew), dim=1)
+
+               dS_c = ( &
+                      -k(max_changing)*(Xnew(ns) - X(ns)) &
+                      /(Knew(max_changing) - K(max_changing)) &
+                      )
+               del_S = dS_c*1.1
+
+               Xnew = X + dXdS*dS_c
+               alpha_c = Xnew(n + 2)
+               pc = Xnew(n + 1)
+
+               cps = [cps, critical_point(t, pc, alpha_c)]
+               write (funit_output, *) ""
+               write (funit_output, *) ""
+            end if
+         end block detect_critical
+
+         X = X + dXdS*del_S
+         S = X(ns)
+
+         if (any(break_conditions(X, ns, S, del_S))) then
+            print *, "Breaking: ", break_conditions(X, ns, S, del_S)
+            exit enveloop
+         end if
+         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
+            X(:n)
+      end do enveloop
+
+      write (funit_output, *) ""
+      write (funit_output, *) ""
+      write (funit_output, *) "#critical"
+      if (size(cps) > 0) then
+         do i = 1, size(cps)
+            write (funit_output, *) cps(i)%t, cps(i)%p
+         end do
+      else
+         write (funit_output, *) "NaN NaN"
+      end if
+
+      close (funit_output)
+
+      point = point - 1
+      envels%z = z_0
+      envels%z_inj = z_injection
+      envels%logk = XS(:point, :n)
+      envels%alpha = XS(:point, n + 2)
+      envels%p = exp(XS(:point, n + 1))
+      envels%critical_points = cps
+   end subroutine
+
+   subroutine update_spec(X, ns, del_S, dF, dXdS)
+      real(pr), intent(in) :: X(:)
+      integer, intent(in out) :: ns
+      real(pr), intent(in out) :: del_S
+      real(pr), intent(in) :: dF(size(X), size(X))
+      real(pr), intent(in out) :: dXdS(size(X))
+
+      real(pr) :: dFdS(size(X))
+      integer  :: ns_new
+
+      dFdS = 0
+      dFdS(size(dFdS)) = 1
+
+      dXdS = solve_system(dF, dFdS)
+
+      ns_new = maxloc(abs(dXdS), dim=1)
+
+      if (ns_new /= ns) then
+         ! translation of delS and dXdS to the  new specification variable
+         del_S = dXdS(ns_new)*del_S
+         dXdS = dXdS/dXdS(ns_new)
+         ns = ns_new
+      end if
+
+   end subroutine
+
+   subroutine fix_step_two_phases(X, ns, S, solve_its, del_S, dXdS)
+      real(pr), intent(in) :: X(:)
+      integer, intent(in) :: ns
+      real(pr), intent(in) :: S
+      integer, intent(in) :: solve_its
+      real(pr), intent(in out) :: del_S
+      real(pr), intent(in out) :: dXdS(size(X))
+
+
+      real(pr) :: Xnew(size(X-1))
+      real(pr) :: dP, dalpha
+      integer :: n
+      
+      n = size(X) - 2
+      
+      del_S = sign(del_S_multiplier, del_S)*minval([ &
+                                         max(sqrt(abs(X(ns)))/10, 0.1), &
+                                         abs(del_S)*3/solve_its &
+                                         ] &
+                                 )
+
+      if (injection_case == "dilution") del_S = 50*del_S
+
+      Xnew = X + dXdS*del_S
+      dP = exp(Xnew(n + 1)) - exp(X(n + 1))
+      dalpha = Xnew(n + 2) - X(n + 2)
+
+      do while (abs(dP) > max_dP .or. abs(dalpha) > max_dalpha)
+         dXdS = dXdS/2.0_pr
+
+         Xnew = X + dXdS*del_S
+         dP = exp(Xnew(n + 1)) - exp(X(n + 1))
+         dalpha = Xnew(n + 2) - X(n + 2)
+      end do
+   end subroutine
+   
+   function break_conditions(X, ns, S, del_S)
+      !! Set of conditions to break the tracing of a two phase line.
+      real(pr) :: X(:) !! Vector of variables
+      integer :: ns !! Number of specification
+      real(pr) :: S !! Specification value
+      real(pr) :: del_S !! \(\Delta S\)
+
+      integer :: n
+      real(pr) :: p, alpha
+      logical, allocatable :: break_conditions(:)
+
+      n = size(X) - 2
+      p = exp(X(n + 1))
+      alpha = X(n + 2)
+
+      break_conditions = [ .false. &
+                         ! p < 1e-15 .or. p > 5000, &
+                         ! abs(del_S) < 1e-3 &
+                         ]
+   end function
+   ! ===========================================================================
+
+   ! ===========================================================================
+   ! Three-phases
+   ! ---------------------------------------------------------------------------
    subroutine F_injection_three_phases(Xvars, ns, S, F, dF)
       !! Function to solve at each point of a three phase envelope.
       !!
@@ -145,43 +372,41 @@ contains
       real(pr), intent(out) :: F(size(Xvars)) !! Vector of functions valuated
       real(pr), intent(out) :: df(size(Xvars), size(Xvars)) !! Jacobian matrix
 
-#define N (size(Xvars) - 3 )/2
       ! Xvars variables
-      real(pr) :: z(N)
-      real(pr) :: Kx(N)
-      real(pr) :: Ky(N)
+      real(pr) :: z((Size(Xvars)-3)/2)
+      real(pr) :: Kx((Size(Xvars)-3)/2)
+      real(pr) :: Ky((Size(Xvars)-3)/2)
       real(pr) :: P
       real(pr) :: beta
       real(pr) :: alpha
 
       ! Main phase 1 variables
       real(pr) :: Vx
-      real(pr), dimension(N) :: x, lnfug_x, dlnphi_dt_x, dlnphi_dp_x
-      real(pr), dimension(N, N) :: dlnphi_dn_x
+      real(pr), dimension((Size(Xvars)-3)/2) :: x, lnfug_x, dlnphi_dt_x, dlnphi_dp_x
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_x
 
       ! Main phase 2 variables
       real(pr) :: Vy
-      real(pr), dimension(N) :: y, lnfug_y, dlnphi_dt_y, dlnphi_dp_y
-      real(pr), dimension(N, N) :: dlnphi_dn_y
+      real(pr), dimension((Size(Xvars)-3)/2) :: y, lnfug_y, dlnphi_dt_y, dlnphi_dp_y
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_y
 
       ! Incipient phase variables
       real(pr) :: Vw
-      real(pr), dimension(N) :: w, lnfug_w, dlnphi_dt_w, dlnphi_dp_w
-      real(pr), dimension(N, N) :: dlnphi_dn_w
+      real(pr), dimension((Size(Xvars)-3)/2) :: w, lnfug_w, dlnphi_dt_w, dlnphi_dp_w
+      real(pr), dimension((Size(Xvars)-3)/2, (Size(Xvars)-3)/2) :: dlnphi_dn_w
 
       ! Derivative of z wrt alpha
-      real(pr) :: dzda(N), dwda(N)
+      real(pr) :: dzda((Size(Xvars)-3)/2), dwda((Size(Xvars)-3)/2)
 
       ! Derivative of w wrt beta
-      real(pr) :: dwdb(N)
+      real(pr) :: dwdb((Size(Xvars)-3)/2)
 
-      real(pr) :: dwdKx(N), dxdKx(N), dydKx(N)
-      real(pr) :: dwdKy(N), dxdKy(N), dydKy(N)
+      real(pr) :: dwdKx((Size(Xvars)-3)/2), dxdKx((Size(Xvars)-3)/2), dydKx((Size(Xvars)-3)/2)
+      real(pr) :: dwdKy((Size(Xvars)-3)/2), dxdKy((Size(Xvars)-3)/2), dydKy((Size(Xvars)-3)/2)
 
       integer :: i, j, n
 
-      n = N
-#undef N
+      n = (Size(Xvars)-3)/2
 
       Kx = exp(Xvars(1:n))
       Ky = exp(Xvars(n + 1:2*n))
@@ -190,7 +415,7 @@ contains
       beta = Xvars(2*n + 3)
 
       call get_z(alpha, z, dzda)
-      if (any(z < 0)) z = 0
+      ! if (any(z < 0)) z = 0
 
       w = z/(beta*Ky + (1 - beta)*Kx)
       x = w*Kx
@@ -273,165 +498,9 @@ contains
       df(2*n + 3, ns) = 1
    end subroutine
 
-   subroutine injection_envelope(X0, spec_number, del_S0, envels)
-      use constants, only: ouput_path
-      !! Subroutine to calculate Px phase envelopes via continuation method
-      real(pr), intent(in) :: X0(:) !! Vector of variables
-      integer, intent(in) :: spec_number !! Number of specification
-      real(pr), intent(in) :: del_S0 !! \(\Delta S_0\)
-      type(injelope), intent(out) :: envels !! Calculated envelopes
-
-      type(critical_point), allocatable :: cps(:)
-
-      real(pr) :: X(size(X0))
-      integer :: ns
-      real(pr) :: S
-      real(pr) :: XS(max_points, size(X0))
-
-      real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
-
-      integer :: point, iters, n
-      integer :: i
-      integer :: funit_output
-      character(len=254) :: fname_env
-
-      allocate (cps(0))
-      X = X0
-      n = size(X0) - 2
-      ns = spec_number
-      S = X(ns)
-      del_S = del_S0
-
-      ! ======================================================================
-      !  Output file
-      ! ----------------------------------------------------------------------
-      env_number = env_number + 1
-
-      write (fname_env, *) env_number
-      fname_env = "env-2ph-PX"//"_"//trim(adjustl(fname_env))
-      fname_env = trim(adjustl(ouput_path))//trim(fname_env)//".dat"
-
-      open (funit_output, file=fname_env)
-      write (funit_output, *) "#", T
-      write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n)
-      ! ======================================================================
-
-      enveloop: do point = 1, max_points
-         call full_newton(f_injection, iters, X, ns, S, F, dF)
-
-         if (iters >= max_iters) then
-            exit enveloop
-         end if
-
-         XS(point, :) = X
-
-         update_spec: block
-            real(pr) :: dFdS(size(X0))
-            integer  :: ns_new
-
-            dFdS = 0
-            dFdS(n + 2) = 1
-
-            dXdS = solve_system(dF, dFdS)
-
-            ns_new = maxloc(abs(dXdS), dim=1)
-
-            if (ns_new /= ns) then
-               ! translation of delS and dXdS to the  new specification variable
-               del_S = dXdS(ns_new)*del_S
-               dXdS = dXdS/dXdS(ns_new)
-               ns = ns_new
-            end if
-
-            del_S = sign(1.0_pr, del_S)*minval([ &
-                                               max(sqrt(abs(X(ns)))/10, 0.1), &
-                                               abs(del_S)*3/iters &
-                                               ] &
-                                               )
-
-            if (injection_case == "dilution") del_S = 50*del_S
-         end block update_spec
-
-         fix_step: block
-            real(pr) :: Xnew(size(X0))
-            real(pr) :: dP, dalpha
-
-            Xnew = X + dXdS*del_S
-            dP = exp(Xnew(n + 1)) - exp(X(n + 1))
-            dalpha = Xnew(n + 2) - X(n + 2)
-
-            do while (abs(dP) > 50 .or. abs(dalpha) > 0.03)
-               dXdS = dXdS/10.0_pr
-
-               Xnew = X + dXdS*del_S
-               dP = exp(Xnew(n + 1)) - exp(X(n + 1))
-               dalpha = Xnew(n + 2) - X(n + 2)
-            end do
-         end block fix_step
-
-         detect_critical: block
-            real(pr) :: K(size(X0) - 2), Knew(size(X0) - 2), &
-                        Xnew(size(X0)), fact
-            real(pr) :: pc, alpha_c, dS_c
-            integer :: max_changing
-            fact = 2.5
-
-            Xnew = X + fact*dXdS*del_S
-
-            K = X(:n)
-            Knew = Xnew(:n)
-
-            if (all(K*Knew < 0)) then
-               max_changing = maxloc(abs(K - Knew), dim=1)
-
-               dS_c = ( &
-                      -k(max_changing)*(Xnew(ns) - X(ns)) &
-                      /(Knew(max_changing) - K(max_changing)) &
-                      )
-               del_S = dS_c*1.1
-
-               Xnew = X + dXdS*dS_c
-               alpha_c = Xnew(n + 2)
-               pc = Xnew(n + 1)
-
-               cps = [cps, critical_point(t, pc, alpha_c)]
-               write (funit_output, *) ""
-               write (funit_output, *) ""
-            end if
-         end block detect_critical
-
-         X = X + dXdS*del_S
-         S = X(ns)
-
-         if (any(break_conditions(X, ns, S))) exit enveloop
-         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
-            X(:n)
-      end do enveloop
-
-      point = point - 1
-
-      write (funit_output, *) ""
-      write (funit_output, *) ""
-      write (funit_output, *) "#critical"
-      if (size(cps) > 0) then
-         do i = 1, size(cps)
-            write (funit_output, *) cps(i)%t, cps(i)%p
-         end do
-      else
-         write (funit_output, *) "NaN NaN"
-      end if
-
-      close (funit_output)
-      envels%z = z_0
-      envels%z_inj = z_injection
-      envels%logk = XS(:point, :n)
-      envels%alpha = XS(:point, n + 2)
-      envels%p = exp(XS(:point, n + 1))
-      envels%critical_points = cps
-   end subroutine
-
    subroutine injection_envelope_three_phase(X0, spec_number, del_S0, envels)
       use constants, only: ouput_path
+      use io, only: str
       !! Subroutine to calculate Px phase envelopes via continuation method.
       !! Three phases version.
       real(pr), intent(in) :: X0(:) !! Vector of variables
@@ -445,6 +514,7 @@ contains
       integer :: ns
       real(pr) :: S
       real(pr) :: XS(max_points, size(X0))
+      real(pr) :: del_S
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
 
@@ -471,13 +541,17 @@ contains
 
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
+      write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), &
          X(2*n + 3), X(:2*n)
       ! ======================================================================
 
       enveloop: do point = 1, max_points
+         call progress_bar(point, max_points, advance=.false.)
          call full_newton(F_injection_three_phases, iters, X, ns, S, F, dF)
          if (iters >= max_iters) then
+            print *, "Breaking: Above max iterations"
             exit enveloop
          end if
 
@@ -485,48 +559,26 @@ contains
             exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
          XS(point, :) = X
 
-         update_spec: block
-            real(pr) :: dFdS(size(X0))
-            integer  :: ns_new
-
-            dFdS = 0
-            ! Actually it's -dFdS
-            dFdS(2*n + 3) = 1
-
-            dXdS = solve_system(dF, dFdS)
-
-            if (maxval(abs(X(:2*n))) < 1) then
-               ! T and P not allowed to be chosen close to a critical point
-               ns_new = maxloc(abs(dXdS(:2*n)), dim=1)
-            else
-               ns_new = maxloc(abs(dXdS), dim=1)
-            end if
-
-            if (ns_new /= ns) then
-               del_S = dXdS(ns_new)*del_S  ! translation of delS to the  new specification variable
-               dXdS = dXdS/dXdS(ns_new)
-               ns = ns_new
-            end if
-
-            del_S = sign(1.0_pr, del_S)*minval([ &
-                                               max(sqrt(abs(X(ns))), 0.1), &
-                                               abs(del_S)*3/iters &
-                                               ] &
-                                               )
-
-            if (injection_case == "dilution") del_S = 50*del_S
-         end block update_spec
+         call update_spec(X, ns, del_S, dF, dXdS)
 
          fix_step: block
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dalpha
 
-            Xnew = X + dXdS*del_S
-            dP = exp(Xnew(2*n + 1)) - exp(X(n + 1))
-            dalpha = Xnew(2*n + 2) - X(n + 2)
+            del_S = sign(del_S_multiplier_three_phase, del_S)*minval([ &
+                                               max(abs(X(ns)/10), 0.1_pr), &
+                                               abs(del_S)*3/iters &
+                                               ] &
+                                               )
 
-            do while (abs(dP) > 50 .or. abs(dalpha) > 0.03)
-               dXdS = dXdS/10.0_pr
+            if (injection_case == "dilution") del_S = 50*del_S
+
+            Xnew = X + dXdS*del_S
+            dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+            dalpha = Xnew(2*n + 2) - X(2*n + 2)
+
+            do while (abs(dP) > max_dp .or. abs(dalpha) > max_dalpha)
+               dXdS = dXdS/2.0_pr
 
                Xnew = X + dXdS*del_S
                dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
@@ -539,40 +591,54 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 15.0_pr
+            fact = critical_fact
 
-            Xnew = X + fact*dXdS*del_S
-            do i = 0, 1
+            loop: do i = 0, 1
+               Xnew = X + fact*dXdS*del_S
+
                K = X(i*n + 1:(i + 1)*n)
                Knew = Xnew(i*n + 1:(i + 1)*n)
-               max_changing = minloc(abs(Knew - K), dim=1)
+
+               max_changing = maxloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
                   dS_c = ( &
                          -k(max_changing)*(Xnew(ns) - X(ns)) &
                          /(Knew(max_changing) - K(max_changing)) &
                          )
-                  del_S = sign(15.0_pr, dS_c) ! dS_c * 15_pr
 
                   Xnew = X + dXdS*dS_c
                   alpha_c = Xnew(2*n + 2)
                   pc = exp(Xnew(2*n + 1))
-
                   cps = [cps, critical_point(t, pc, alpha_c)]
+
+                  ! del_S = dS_c + del_S ! * fact
+                  ! del_S = del_S * fact
+                  del_S = dS_c + sign(0.7_pr, dS_c)
+
                   write (funit_output, *) ""
                   write (funit_output, *) ""
+                  exit loop
                end if
-            end do
+            end do loop
          end block detect_critical
 
-         if (x(2*n + 3) > 1) exit enveloop
+         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) then
+            call progress_bar(point, max_points, .true.)
+            print *, "Breaking: positive 𝜷"
+            exit enveloop
+         end if
 
          X = X + dXdS*del_S
          S = X(ns)
-         if (any(break_conditions_three_phases(X, ns, S))) exit enveloop
+         if (any(break_conditions_three_phases(X, ns, S, del_S))) then
+            call progress_bar(point, max_points, .true.)
+            print *, "Breaking: ", break_conditions_three_phases(X, ns, S, del_S)
+            exit enveloop
+         end if
       end do enveloop
 
-      point = point - 1
+      ! point = point - 1
 
       write (funit_output, *) ""
       write (funit_output, *) ""
@@ -593,11 +659,34 @@ contains
       envels%p = exp(XS(:point, n + 1))
       envels%critical_points = cps
    end subroutine
+   
+   function break_conditions_three_phases(X, ns, S, del_S)
+      !! Set of conditions to break the tracing.
+      real(pr) :: X(:) !! Variables vector
+      integer :: ns !! Number of specification
+      real(pr) :: S !! Value of specification
+      real(pr) :: del_S
 
+      integer :: n
+      real(pr) :: p, alpha
+      logical, allocatable :: break_conditions_three_phases(:)
+
+      n = (size(X) - 3)/2
+      p = exp(X(2*n + 1))
+      alpha = X(2*n + 2)
+
+      break_conditions_three_phases = [ &
+                                       p < 1 .or. p > 5000, &
+                                       abs(del_S) < 1e-5 &
+                                      ]
+   end function
+   ! ===========================================================================
+   
    subroutine full_newton(fun, iters, X, ns, S, F, dF)
       !! Subroutine to solve a point in the envelope.
       !!
       !! Procedure that solves a point with the Newton-Raphson method.
+      use constants, only: ouput_path
       interface
          subroutine fun(X, ns, S, F, dF)
             !! Function to solve
@@ -620,11 +709,18 @@ contains
 
       real(pr) :: b(size(X)), A(size(X), size(X))
       real(pr) :: dX(size(X)), tol = 1e-5
+      integer :: funit_log_newton
 
       integer :: n
 
       n = size(X)
       dX = 20
+
+      call get_environment_variable(name="FE_LOG", value=FE_LOG)
+
+      if (trim(FE_LOG) == "1") then
+         open(newunit=funit_log_newton, file=trim(ouput_path) // "newton_log.dat")
+      end if
 
       newton: do iters = 1, max_iters*10
          if (maxval(abs(dx)) < tol) exit newton
@@ -637,50 +733,13 @@ contains
          end do
 
          X = X + dX
+         if (trim(FE_LOG) == "1") write(funit_log_newton, *) X
       end do newton
+      if (trim(FE_LOG) == "1")  close(funit_log_newton)
 
       F = -b
       dF = A
    end subroutine
-
-   function break_conditions(X, ns, S)
-      !! Set of conditions to break the tracing of a two phase line.
-      real(pr) :: X(:) !! Vector of variables
-      integer :: ns !! Number of specification
-      real(pr) :: S !! Specification value
-
-      integer :: n
-      real(pr) :: p, alpha
-      logical, allocatable :: break_conditions(:)
-
-      n = size(X) - 2
-      p = exp(X(n + 1))
-      alpha = X(n + 2)
-
-      break_conditions = [ &
-                         p < 10 .or. p > 2000, &
-                         abs(del_S) < 1e-18 &
-                         ]
-   end function
-
-   function break_conditions_three_phases(X, ns, S)
-      !! Set of conditions to break the tracing.
-      real(pr) :: X(:) !! Variables vector
-      integer :: ns !! Number of specification
-      real(pr) :: S !! Value of specification
-
-      integer :: n
-      real(pr) :: p, alpha
-      logical, allocatable :: break_conditions_three_phases(:)
-
-      n = (size(X) - 3)/2
-      p = exp(X(2*n + 1))
-      alpha = X(2*n + 2)
-
-      break_conditions_three_phases = [ &
-                                      p < 10 .or. p > 3000 &
-                                      ]
-   end function
 
    subroutine get_z(alpha, z, dzda)
       !! Calculate the fluid composition based on an amount of addition
