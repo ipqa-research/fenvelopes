@@ -7,7 +7,7 @@ program main
    use flap, only: command_line_interface
    use stdlib_ansi, only: blue => fg_color_blue, red => fg_color_red, &
                           operator(//), operator(+), &
-                          style_reset, style_blink_fast, style_bold
+                          style_reset, style_blink_fast, style_bold, style_underline
 
    implicit none
    real(pr) :: et, st
@@ -16,42 +16,56 @@ program main
    integer :: cli_error
    character(len=99) :: cli_string
 
-   type(envelope) :: pt_bub, pt_dew
-   type(injelope) :: px_bub, px_dew
-   type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:)
+   type(envelope) :: pt_bub, pt_dew, pt_hpl !! Shared 2ph-PT envelopes
+   type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:) !! Shared 3ph-PT envelopes
+   type(injelope) :: px_bub, px_dew, px_hpl !! Shared 2ph-Px envelopes
 
-   call cli%init(progname="envelopes", description="Phase Envelopes")
-   call cli%add( &
-      switch="--infile", &
-      switch_ab="-i", &
-      help="Input file", &
-      error=cli_error, &
-      required=.true.)
-   call cli%parse(error=cli_error)
+   ! Setup everything
+   call setup
 
-   if (cli_error /= 0) stop
-
-   call system("mkdir -p "//trim(ouput_path))
-   call system("rm "//trim(ouput_path)//"*")
-
-   call setup ! Setup module variables
-
+   ! PT Envelopes
    call cpu_time(st)
-   call pt_envelopes ! Calculate PT envelopes at the system's composition
+   call pt_envelopes
    call cpu_time(et)
    print *, "PT: ", (et - st)*1000, "cpu ms"
 
+   ! PX Envelopes
    call cpu_time(st)
-   call px_envelopes ! Calculate Px envelopes
+   call px_envelopes
    call cpu_time(et)
    print *, "PX: ", (et - st)*1000, "cpu ms"
 contains
+
+   subroutine setup_cli
+      !! Setup CLI subroutine
+      !!
+      !! Setup the Command-Line-Interface processor
+      call cli%init(progname="envelopes", description="Phase Envelopes")
+      call cli%add( &
+         switch="--infile", &
+         switch_ab="-i", &
+         help="Input file", &
+         error=cli_error, &
+         required=.true.)
+      call cli%parse(error=cli_error)
+
+      if (cli_error /= 0) stop
+   end subroutine
+
    subroutine setup
+      !! Setup system
+      !!
+      !! Make output folder (if necessary) and/or clean everyhing in an
+      !! existing one. Then read input files to setup needed parameters.
       use io_nml, only: read_system, write_system
       use inj_envelopes, only: setup_inj => from_nml
       integer :: funit_system
       character(len=500) :: infile
 
+      call system("mkdir -p "//trim(ouput_path))
+      call system("rm "//trim(ouput_path)//"*")
+
+      call setup_cli
       call cli%get(val=infile, switch="--infile", error=cli_error)
 
       call read_system(trim(infile))
@@ -65,7 +79,8 @@ contains
    subroutine pt_envelopes
       use legacy_ar_models, only: z
       use envelopes, only: envelope2, max_points, k_wilson_bubble, &
-                           max_points, p_wilson, k_wilson
+                           max_points, p_wilson, k_wilson, find_hpl, get_case
+      use linalg, only: point
       !! Calculation of PT envelopes of the main system.
       real(pr), allocatable :: tv(:) ! Temperatures [K]
       real(pr), allocatable :: pv(:) ! Pressures [bar]
@@ -79,10 +94,15 @@ contains
       real(pr), allocatable :: k(:)  ! K factors
       integer :: n_points, icri(4), ncri, i
 
+      type(point), allocatable :: intersections(:), self_intersections(:)
+      character(len=:), allocatable :: pt_case
+
       integer :: n
 
       allocate (tv(max_points), pv(max_points), dv(max_points))
       allocate (k(size(z)))
+
+      print *, style_underline // "PT Regions" // style_reset
 
       ! ========================================================================
       !  Bubble envel
@@ -128,79 +148,48 @@ contains
       ! ========================================================================
 
       ! ========================================================================
+      !  HPLL Envelope
+      ! ------------------------------------------------------------------------
+      t = 700.0_pr
+      t = pt_bub%t(maxloc(pt_bub%p, dim=1))
+      p = maxval(pt_bub%p)*2.5_pr
+
+      call find_hpl(t, p, k)
+      k = 1/k
+      call envelope2( &
+         3, nc, z, T, P, k, &
+         n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
+         pt_hpl &
+         )
+      ! ========================================================================
+
+      ! ========================================================================
       !  Look for crossings
       ! ------------------------------------------------------------------------
-      check_crossings: block
-         use linalg, only: point, intersection
-         type(point), allocatable :: inter(:)
-         inter = intersection( &
-                 pt_dew%t, pt_dew%p, &
-                 pt_bub%t, pt_bub%p &
-                 )
-         print *, "Intersections: ", size(inter)
-         call exit
-
-         three_phase: block
-         use linalg, only: interpol
-         use envelopes, only: pt_envelope_three_phase, PTEnvel3
-         real(pr), allocatable :: lnKx(:), lnKy(:)
-         real(pr), allocatable :: X(:)
-         real(pr) :: t, p, beta, del_S0
-         real(pr), allocatable :: phase_y(:), phase_x(:)
-         integer :: i, j, i_inter=1
-         integer :: ns
-
-         allocate(pt_bub_3(size(inter)), pt_dew_3(size(inter)))
-         do i_inter=1,size(inter)
-            i = inter(i_inter)%i
-            j = inter(i_inter)%j
-
-            t = inter(i_inter)%x
-            p = inter(i_inter)%y
-
-            lnKx = interpol( pt_dew%t(i), pt_dew%t(i + 1), &
-                           pt_dew%logk(i, :), pt_dew%logk(i + 1, :), &
-                           t &
-                           )
-
-            lnKy = interpol( &
-                     pt_bub%t(j), pt_bub%t(j + 1), &
-                     pt_bub%logk(j, :), pt_bub%logk(j + 1, :), &
-                     t &
-                     )
-
-            ! Bubble line composition
-            phase_y = exp(lnKy)*z
-            ! Dew line composition
-            phase_x = exp(lnKx)*z
-
-            del_S0 = -0.01_pr
-            beta = 1
-
-            ns = 2*nc + 3
-
-            ! ==================================================================
-            !  Line with incipient phase gas
-            ! ------------------------------------------------------------------
-            print *, "Three Phase: Gas"
-            lnKx = log(phase_x/phase_y)
-            lnKy = log(z/phase_y)
-            X = [lnKx, lnKy, log(p), log(t), beta]
-            call pt_envelope_three_phase(X, ns, del_S0, pt_bub_3(i_inter))
-            ! ==================================================================
-            ! ==================================================================
-            !  Line with incipient phase liquid
-            ! ------------------------------------------------------------------
-            print *, "Three Phase: Liquid"
-            lnKx = log(phase_y/phase_x)
-            lnKy = log(z/phase_x)
-            X = [lnKx, lnKy, log(p), log(t), beta]
-            call pt_envelope_three_phase(X, ns, del_S0, pt_dew_3(i_inter))
-            ! ==================================================================
-         end do
-         end block three_phase
-      end block check_crossings
+      call get_case(&
+         pt_dew, pt_bub, pt_hpl, &
+         intersections, self_intersections, pt_case &
+      )
+      ! print *, style_bold // pt_case // style_reset
       ! ========================================================================
+
+      three_phase: block
+         use envelopes, only: pt_three_phase_from_intersection
+
+         allocate(pt_bub_3(size(intersections)), pt_dew_3(size(intersections)))
+         select case(pt_case)
+         case("2_DEW_BUB")
+            call pt_three_phase_from_intersection(&
+                  pt_dew, pt_bub, intersections, &
+                  pt_bub_3, pt_dew_3 &
+            )
+         case("1_HPL_DEW")
+            call pt_three_phase_from_intersection(&
+                  pt_hpl, pt_dew, intersections, &
+                  pt_bub_3, pt_dew_3 &
+            )
+         end select
+      end block three_phase
    end subroutine
 
    subroutine px_envelopes
@@ -218,113 +207,56 @@ contains
       real(pr) :: p
       real(pr) :: t_tol = 2
       real(pr) :: dzda(nc)
+      
+      print *, style_underline // "----------" // style_reset
+      print *, style_underline // "Px Regions" // style_reset
+      print *, style_underline // "----------" // style_reset
 
       ! ========================================================================
       !  Two phase envelopes
       ! ------------------------------------------------------------------------
-      ! print *, red // "Running Bubble" // style_reset
-      ! px_bub = px_two_phase(t_inj, pt_bub, t_tol, del_S0=-0.1_pr)
-      
-      ! print *, blue // "Running Dew" // style_reset
-      ! px_dew = px_two_phase(t_inj, pt_dew, t_tol, del_S0=-0.1_pr)
-
       print *, red // "Running Bubble" // style_reset
       px_bub = px_two_phase(t_inj, pt_bub, t_tol)
       
       print *, blue // "Running Dew" // style_reset
       px_dew = px_two_phase(t_inj, pt_dew, t_tol)
+
       ! ========================================================================
 
       ! ========================================================================
       !  Look for crossings
       ! ------------------------------------------------------------------------
-      check_crossings: block
-         inter = check_intersections(px_dew, px_bub)
-         self_inter = check_self_intersections(px_dew)
-         print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
-         print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
-      end block check_crossings
+      inter = check_intersections(px_dew, px_bub)
+      self_inter = check_self_intersections(px_dew)
+      print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
+      print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
       ! ========================================================================
       
       ! ========================================================================
       !  Three phase regions
       ! ------------------------------------------------------------------------
       three_phase: block
-         use legacy_ar_models, only: TERMO
-         integer :: i, j, i_inter
-         ! Variables
-         real(pr) :: alpha, beta
-         real(pr), allocatable ::  lnKx(:), lnKy(:), X(:)
-         
-         real(pr) :: phase_x(nc), phase_y(nc), z(nc)
-         real(pr) :: lnfug_x(nc), dlnphi_dp(nc), dlnphi_dt(nc), dlnphi_dn(nc,nc), v
-         real(pr) :: lnfug_y(nc)
-         type(injelope) :: px_bub_3, px_dew_3
+         integer :: i
+         type(injelope) :: px_bub_3, px_dew_3, px_branch_3(2)
 
-         ! =====================================================================
-         !  Set variables based on intersections
-         ! ---------------------------------------------------------------------
          if (size(inter) == 0) then
             px_bub_3 = px_three_phase(t_inj, pt_bub_3, t_tol)
             px_dew_3 = px_three_phase(t_inj, pt_dew_3, t_tol)
          else
-            do i_inter=1,size(inter)
-               print *, "Intersection: ", inter(i_inter)
-            i = inter(i_inter)%i
-            j = inter(i_inter)%j
-
-            alpha = inter(i_inter)%x
-            p = inter(i_inter)%y
-
-            lnKx = interpol( &
-                     px_dew%alpha(i), px_dew%alpha(i + 1), &
-                     px_dew%logk(i, :), px_dew%logk(i + 1, :), &
-                     alpha &
-                     )
-
-            lnKy = interpol( &
-                     px_bub%alpha(j), px_bub%alpha(j + 1), &
-                     px_bub%logk(j, :), px_bub%logk(j + 1, :), &
-                     alpha &
-                     )
-
-            call get_z(alpha, z, dzda)
-
-            ! Bubble line composition
-            phase_y = exp(lnKy)*z
-            ! Dew line composition
-            phase_x = exp(lnKx)*z
-
-            if (i_inter == 1) then
-               del_S0 = -0.01_pr
-               beta = 1
-            else
-               del_S0 = 0.01_pr
-               beta = 0
-            end if
-
-            ns = 2*nc + 3
-
-            ! ==================================================================
-            !  Line with incipient phase gas
-            ! ------------------------------------------------------------------
-            print *, "Three Phase: Gas"
-            lnKx = log(phase_x/phase_y)
-            lnKy = log(z/phase_y)
-            X = [lnKx, lnKy, log(p), alpha, beta]
-            call injection_envelope_three_phase(X, ns, del_S0, px_bub_3)
-            ! ==================================================================
-
-            ! ==================================================================
-            !  Line with incipient phase liquid
-            ! ------------------------------------------------------------------
-            print *, "Three Phase: Liquid"
-            lnKx = log(phase_y/phase_x)
-            lnKy = log(z/phase_x)
-            X = [lnKx, lnKy, log(p), alpha, beta]
-            call injection_envelope_three_phase(X, ns, del_S0, px_dew_3)
+            do i=1,size(inter)
+               print *, "Intersection: ", inter(i)
+               px_branch_3 = px_three_phase_from_inter(inter(i), px_dew, px_bub)
             end do
-            ! ==================================================================
+         end if
+
+         if (size(self_inter) > 0) then
+            do i=1,size(self_inter)
+               !TODO: Add a check if one of the previous lines already
+               !      in this DSP
+               px_branch_3 = px_three_phase_from_inter(&
+                  self_inter(i), px_dew, px_dew &
+               )
+            end do
          end if
       end block three_phase
       ! ========================================================================
@@ -435,7 +367,7 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 5) cycle
+         if (abs(p - pold) < 30) cycle
          pold = p
 
          k = exp(interpol( &
