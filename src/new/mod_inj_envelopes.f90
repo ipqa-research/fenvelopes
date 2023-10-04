@@ -17,14 +17,22 @@ module inj_envelopes
    !  Parameters
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 100 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 50 !! Maximum number of iterations for a newton step
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
-   real(pr) :: del_S = 0.1 !! Specificiation variation
    character(len=10) :: injection_case !! Kind of injection displace|dilute
    character(len=255) :: FE_LOG
+   
+   ! Two-phase settings
+   real(pr) :: del_S_multiplier = 1.5_pr
+   real(pr) :: max_dp=75.0_pr
+   real(pr) :: max_dalpha=0.05_pr
+   
+   ! Three phase parameters
+   real(pr) :: del_S_multiplier_three_phase = 1.7_pr
+   real(pr) :: critical_fact = 3.0_pr
    ! ===========================================================================
 contains
    subroutine from_nml(filepath)
@@ -131,6 +139,7 @@ contains
 
    subroutine injection_envelope(X0, spec_number, del_S0, envels)
       use constants, only: ouput_path
+      use io, only: str
       !! Subroutine to calculate Px phase envelopes via continuation method
       real(pr), intent(in) :: X0(:) !! Vector of variables
       integer, intent(in) :: spec_number !! Number of specification
@@ -143,6 +152,7 @@ contains
       integer :: ns
       real(pr) :: S
       real(pr) :: XS(max_points, size(X0))
+      real(pr) :: del_S
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
 
@@ -169,6 +179,8 @@ contains
 
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
+      write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
+         (" lnK"//str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n)
       ! ======================================================================
 
@@ -220,15 +232,13 @@ contains
          X = X + dXdS*del_S
          S = X(ns)
 
-         if (any(break_conditions(X, ns, S))) then
-            print *, "Breaking: ", break_conditions(X, ns, S)
+         if (any(break_conditions(X, ns, S, del_S))) then
+            print *, "Breaking: ", break_conditions(X, ns, S, del_S)
             exit enveloop
          end if
          write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
             X(:n)
       end do enveloop
-
-      call progress_bar(point, max_points, .true.)
 
       write (funit_output, *) ""
       write (funit_output, *) ""
@@ -293,7 +303,7 @@ contains
       
       n = size(X) - 2
       
-      del_S = sign(1.0_pr, del_S)*minval([ &
+      del_S = sign(del_S_multiplier, del_S)*minval([ &
                                          max(sqrt(abs(X(ns)))/10, 0.1), &
                                          abs(del_S)*3/solve_its &
                                          ] &
@@ -305,8 +315,8 @@ contains
       dP = exp(Xnew(n + 1)) - exp(X(n + 1))
       dalpha = Xnew(n + 2) - X(n + 2)
 
-      do while (abs(dP) > 50 .or. abs(dalpha) > 0.1)
-         dXdS = dXdS/9.0_pr
+      do while (abs(dP) > max_dP .or. abs(dalpha) > max_dalpha)
+         dXdS = dXdS/2.0_pr
 
          Xnew = X + dXdS*del_S
          dP = exp(Xnew(n + 1)) - exp(X(n + 1))
@@ -314,11 +324,12 @@ contains
       end do
    end subroutine
    
-   function break_conditions(X, ns, S)
+   function break_conditions(X, ns, S, del_S)
       !! Set of conditions to break the tracing of a two phase line.
       real(pr) :: X(:) !! Vector of variables
       integer :: ns !! Number of specification
       real(pr) :: S !! Specification value
+      real(pr) :: del_S !! \(\Delta S\)
 
       integer :: n
       real(pr) :: p, alpha
@@ -328,9 +339,9 @@ contains
       p = exp(X(n + 1))
       alpha = X(n + 2)
 
-      break_conditions = [ &
-                         p < 1e-15 .or. p > 5000, &
-                         abs(del_S) < 1e-3 &
+      break_conditions = [ .false. &
+                         ! p < 1e-15 .or. p > 5000, &
+                         ! abs(del_S) < 1e-3 &
                          ]
    end function
    ! ===========================================================================
@@ -503,6 +514,7 @@ contains
       integer :: ns
       real(pr) :: S
       real(pr) :: XS(max_points, size(X0))
+      real(pr) :: del_S
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
 
@@ -553,7 +565,7 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dalpha
 
-            del_S = sign(1.7_pr, del_S)*minval([ &
+            del_S = sign(del_S_multiplier_three_phase, del_S)*minval([ &
                                                max(abs(X(ns)/10), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
@@ -565,7 +577,7 @@ contains
             dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
             dalpha = Xnew(2*n + 2) - X(2*n + 2)
 
-            do while (abs(dP) > 10 .or. abs(dalpha) > 0.01)
+            do while (abs(dP) > max_dp .or. abs(dalpha) > max_dalpha)
                dXdS = dXdS/2.0_pr
 
                Xnew = X + dXdS*del_S
@@ -579,7 +591,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 4.0_pr
+            fact = critical_fact
 
             loop: do i = 0, 1
                Xnew = X + fact*dXdS*del_S
@@ -587,7 +599,7 @@ contains
                K = X(i*n + 1:(i + 1)*n)
                Knew = Xnew(i*n + 1:(i + 1)*n)
 
-               max_changing = ns ! maxloc(abs(Knew - K), dim=1)
+               max_changing = maxloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
                   dS_c = ( &
@@ -611,12 +623,17 @@ contains
             end do loop
          end block detect_critical
 
-         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) exit enveloop
+         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) then
+            call progress_bar(point, max_points, .true.)
+            print *, "Breaking: positive 𝜷"
+            exit enveloop
+         end if
 
          X = X + dXdS*del_S
          S = X(ns)
-         if (any(break_conditions_three_phases(X, ns, S))) then
-            print *, "Breaking: ", break_conditions_three_phases(X, ns, S)
+         if (any(break_conditions_three_phases(X, ns, S, del_S))) then
+            call progress_bar(point, max_points, .true.)
+            print *, "Breaking: ", break_conditions_three_phases(X, ns, S, del_S)
             exit enveloop
          end if
       end do enveloop
@@ -635,7 +652,6 @@ contains
       end if
 
       close (funit_output)
-      call progress_bar(point, max_points, .true.)
       envels%z = z_0
       envels%z_inj = z_injection
       envels%logk = XS(:point, :n)
@@ -644,11 +660,12 @@ contains
       envels%critical_points = cps
    end subroutine
    
-   function break_conditions_three_phases(X, ns, S)
+   function break_conditions_three_phases(X, ns, S, del_S)
       !! Set of conditions to break the tracing.
       real(pr) :: X(:) !! Variables vector
       integer :: ns !! Number of specification
       real(pr) :: S !! Value of specification
+      real(pr) :: del_S
 
       integer :: n
       real(pr) :: p, alpha
@@ -658,8 +675,9 @@ contains
       p = exp(X(2*n + 1))
       alpha = X(2*n + 2)
 
-      break_conditions_three_phases = [ .false.&
-                                      ! p < 1 .or. p > 5000 &
+      break_conditions_three_phases = [ &
+                                       p < 1 .or. p > 5000, &
+                                       abs(del_S) < 1e-5 &
                                       ]
    end function
    ! ===========================================================================
