@@ -75,7 +75,7 @@ contains
                   y = s*(y2 - y1) + y1
 
                   if ( &
-                     abs((x - xold)) > 1e-2 .and. abs((y - yold)) > 1e-2_pr &
+                     abs((x - xold)) > 1e-2_pr .and. abs((y - yold)) > 1e-2_pr &
                      ) then
                      xold = x
                      yold = y
@@ -87,6 +87,10 @@ contains
             end associate
          end do line2
       end do line1
+      if (size(intersections) > 3) then
+         deallocate(intersections)
+         allocate(intersections(0))
+      end if
    end function
 
    function intersect_one_line(lx, ly) result(intersections)
