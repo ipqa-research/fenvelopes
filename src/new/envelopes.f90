@@ -251,6 +251,33 @@ contains
       end if
    end subroutine
 
+   subroutine find_hpl(t, p, k)
+      !! Find a HPLL initial point at a given pressure
+      use legacy_ar_models, only: nc, termo, z
+      real(pr), intent(in out) :: t
+      real(pr), intent(in) :: p
+      real(pr), intent(out) :: k(nc)
+
+      integer :: i
+      real(pr) :: diff
+      real(pr) :: v
+      real(pr) :: x(nc), y(nc), lnfug_z(nc), lnfug_y(nc)
+
+      diff = -1
+
+      y = 0
+      y(nc) = 1
+
+      do while(diff < 0)
+         t = t - 1.0_pr
+         call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
+         call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
+         diff = (log(z(nc)) + lnfug_z(nc)) - (log(y(nc)) + lnfug_y(nc))
+      end do
+
+      k = exp(lnfug_y - lnfug_z)
+   end subroutine
+
    subroutine envelope2(ichoice, n, z, T, P, KFACT, & ! This will probably always exist
                         n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, & ! This shouldnt be here in the future
                         this_envelope) ! This output should encapsulate everything
