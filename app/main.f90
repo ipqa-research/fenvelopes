@@ -474,4 +474,74 @@ contains
       end associate
       end do
    end function
+   function px_three_phase_from_inter(&
+         inter, px_1, px_2, del_S0, beta0 &
+         ) result(px_3)
+      use legacy_ar_models, only: nc
+      use stdlib_optval, only: optval
+      use linalg, only: point, interpol
+      use inj_envelopes, only: injelope, injection_envelope_three_phase, get_z
+      type(point), intent(in) :: inter
+      type(injelope), intent(in) :: px_1, px_2
+      type(injelope) :: px_3(2)
+      real(pr), optional :: del_S0
+      real(pr), optional :: beta0
+
+      integer :: i, j
+
+      real(pr) :: lnKx(nc), lnKy(nc), alpha, p, beta, X(2*nc+3)
+      real(pr) :: phase_y(nc), phase_x(nc)
+      real(pr) :: del_S
+      real(pr) :: z(nc), dzda(nc)
+      integer :: ns
+
+      del_S = optval(del_S0, -0.05_pr)
+      beta = optval(beta0, 1.0_pr)
+
+      i = inter%i
+      j = inter%j
+
+      alpha = inter%x
+      p = inter%y
+
+      lnKx = interpol( &
+               px_1%alpha(i), px_1%alpha(i + 1), &
+               px_1%logk(i, :), px_1%logk(i + 1, :), &
+               alpha &
+               )
+
+      lnKy = interpol( &
+               px_2%alpha(j), px_2%alpha(j + 1), &
+               px_2%logk(j, :), px_2%logk(j + 1, :), &
+               alpha &
+               )
+
+      call get_z(alpha, z, dzda)
+
+      ! Bubble line composition
+      phase_y = exp(lnKy)*z
+      ! Dew line composition
+      phase_x = exp(lnKx)*z
+
+      ns = 2*nc + 3
+
+      ! ==================================================================
+      !  Line with incipient phase gas
+      ! ------------------------------------------------------------------
+      print *, "Three Phase: Gas"
+      lnKx = log(phase_x/phase_y)
+      lnKy = log(z/phase_y)
+      X = [lnKx, lnKy, log(p), alpha, beta]
+      call injection_envelope_three_phase(X, ns, del_S, px_3(1))
+      ! ==================================================================
+
+      ! ==================================================================
+      !  Line with incipient phase liquid
+      ! ------------------------------------------------------------------
+      print *, "Three Phase: Liquid"
+      lnKx = log(phase_y/phase_x)
+      lnKy = log(z/phase_x)
+      X = [lnKx, lnKy, log(p), alpha, beta]
+      call injection_envelope_three_phase(X, ns, del_S, px_3(2))
+   end function
 end program main
