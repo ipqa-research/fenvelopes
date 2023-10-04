@@ -46,7 +46,7 @@ program main
         6.0124425598888385, &
         5.4510132751728753, &
         6.3021529774269105, &
-        1.0000000000000000 ]
+        0.6000000000000000 ]
 
     len_x = size(X)
     allocate(F(len_x), Fdx(len_x), df(len_x, len_x), jac(len_x, len_x), numjac(len_x, len_x) )
@@ -56,7 +56,7 @@ program main
     call pt_F_three_phases(X, ns, S, F, dF)
     jac = df
 
-    numjac = derivative(f=fun, x=X, h=1e-15_pr, method='central')
+    numjac = derivative(f=fun, x=X, h=1e-5_pr, method='central')
     
     do ns=1, len_x
         print *, ns
