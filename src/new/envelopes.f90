@@ -991,4 +991,104 @@ contains
                                       ]
    end function
    ! ===========================================================================
+
+   ! ===========================================================================
+   !  Intersections and crossings
+   ! ---------------------------------------------------------------------------
+   subroutine get_case(dew, bub, hpl, intersections, self_intersections, this_case)
+      use linalg, only: intersection, point
+      type(envelope), intent(in) :: dew
+      type(envelope), intent(in) :: bub
+      type(envelope), intent(in) :: hpl
+      type(point), allocatable, intent(out) :: intersections(:)
+      type(point), allocatable, intent(out) :: self_intersections(:)
+      character(len=:), allocatable, intent(out) :: this_case
+
+      type(point), allocatable :: inter_dew_bub(:)
+      type(point), allocatable :: inter_hpl_bub(:)
+      type(point), allocatable :: inter_hpl_dew(:)
+
+      inter_dew_bub = intersection(dew%t, dew%p, bub%t, bub%p)
+      inter_hpl_bub = intersection(hpl%t, hpl%p, bub%t, bub%p)
+      inter_hpl_dew = intersection(hpl%t, hpl%p, dew%t, dew%p)
+
+      if (size(inter_dew_bub) == 2) then
+         this_case = "2_DEW_BUB"
+         intersections = inter_dew_bub
+      else if (size(inter_hpl_bub) == 1) then
+         this_case = "1_HPL_BUB"
+         intersections = inter_hpl_bub
+      else if (size(inter_hpl_dew) == 1) then
+         this_case = "1_HPL_DEW"
+         intersections = inter_hpl_dew
+      end if
+   end subroutine
+
+   subroutine pt_three_phase_from_intersection(&
+         pt_x, pt_y, intersections, &
+         pt_x_3, pt_y_3 &
+      )
+      use legacy_ar_models, only: z
+      use linalg, only: point, interpol
+      type(envelope), intent(in) :: pt_x, pt_y
+      type(point), intent(in) :: intersections(:)
+      type(PTEnvel3), intent(out) :: pt_x_3(:), pt_y_3(:)
+      
+      real(pr), allocatable :: lnKx(:), lnKy(:)
+      real(pr), allocatable :: X(:)
+      real(pr) :: t, p, beta, del_S0
+      real(pr), allocatable :: phase_y(:), phase_x(:)
+      integer :: i, j, i_inter=1
+      integer :: ns
+
+      do i_inter=1,size(intersections)
+         i = intersections(i_inter)%i
+         j = intersections(i_inter)%j
+
+         t = intersections(i_inter)%x
+         p = intersections(i_inter)%y
+
+         lnKx = interpol( pt_x%t(i), pt_x%t(i + 1), &
+                          pt_x%logk(i, :), pt_x%logk(i + 1, :), &
+                        t &
+                        )
+
+         lnKy = interpol( &
+                  pt_y%t(j), pt_y%t(j + 1), &
+                  pt_y%logk(j, :), pt_y%logk(j + 1, :), &
+                  t &
+               )
+
+         ! Bubble line composition
+         phase_y = exp(lnKy)*z
+         ! Dew line composition
+         phase_x = exp(lnKx)*z
+
+         del_S0 = -0.01_pr
+         beta = 1
+
+         ns = 2*nc + 3
+
+         ! ==================================================================
+         !  Line with incipient phase gas
+         ! ------------------------------------------------------------------
+         print *, "Three Phase: Gas"
+         lnKx = log(phase_x/phase_y)
+         lnKy = log(z/phase_y)
+         X = [lnKx, lnKy, log(p), log(t), beta]
+         call pt_envelope_three_phase(X, ns, del_S0, pt_x_3(i_inter))
+         ! ==================================================================
+         
+         ! ==================================================================
+         !  Line with incipient phase liquid
+         ! ------------------------------------------------------------------
+         print *, "Three Phase: Liquid"
+         lnKx = log(phase_y/phase_x)
+         lnKy = log(z/phase_x)
+         X = [lnKx, lnKy, log(p), log(t), beta]
+         call pt_envelope_three_phase(X, ns, del_S0, pt_y_3(i_inter))
+         ! ==================================================================
+      end do
+      ! ===========================================================================
+   end subroutine
 end module envelopes
