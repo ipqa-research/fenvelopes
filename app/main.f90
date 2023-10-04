@@ -330,6 +330,51 @@ contains
       ! ========================================================================
    end subroutine
 
+   function px_hpl_line(alpha_0, p)
+      ! Find a HPLL PX line at a given pressure, starting from a given alpha
+      use legacy_ar_models, only: termo
+      use inj_envelopes, only: t
+      real(pr), intent(in) :: alpha_0 !! Staring \(\alpha\) to search
+      real(pr), intent(in) :: p !! Pressure of HPLL
+      type(injelope) :: px_hpl_line !! Resulting HPLL line
+      
+      real(pr) :: diff
+      real(pr) :: lnfug_z(nc), lnfug_y(nc)
+      real(pr) :: z(nc), dzda(nc), y(nc), v, k(nc)
+      
+      real(pr), allocatable :: x(:)
+      real(pr) :: del_S0
+      integer :: ns, ncomp
+
+      real(pr) :: alpha_in
+      
+      print *, red // "Running HPLL" // style_reset
+
+      find_hpl: do ncomp = nc, 1, -1
+         alpha_in = alpha_0
+         y = 0
+         y(ncomp) = 1
+         diff = -1
+         
+         do while (diff < 0 .and. alpha_in < 0.9)
+            alpha_in = alpha_in + 0.01_pr
+            call get_z(alpha_in, z, dzda)
+            call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
+            call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
+            diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
+         end do
+
+         if (alpha_in < 1) exit find_hpl
+      end do find_hpl
+
+      k = 1/exp(lnfug_y - lnfug_z)
+      X = [log(K), log(P), alpha_in]
+      del_S0 = -0.005
+      ns = size(X) - 1
+
+      call injection_envelope(X, ns, del_S0, px_hpl_line)
+   end function
+
    function check_intersections(this, other) result(intersections)
       !! Find intersections between two injelopes.
       use linalg, only: point, intersection
