@@ -410,21 +410,21 @@ contains
       !! Calculate three phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
-      !! `pt_env_2`, finds all the points on the PT envelope near `t_inj`, based
+      !! `pt_env_3`, finds all the points on the PT envelope near `t_inj`, based
       !! on an absolute tolerance `t_tol`. These points are used as 
       !! initialization for calculation of Px envelopes.
-      
+
       use linalg, only: interpol
       use inj_envelopes, only: injection_envelope_three_phase
       use stdlib_optval, only: optval
       use envelopes, only: AbsEnvel
-      
+
       real(pr), intent(in) :: t_inj !! Injection temperature [K]
-      type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelope
+      type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelopes
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
       type(injelope) :: px_three_phase !! Output Px envelope
-      
+
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
       real(pr), allocatable :: kx(:), ky(:) !! K values
       real(pr), allocatable :: X(:) !! Vector of variables
@@ -440,40 +440,41 @@ contains
       pold = 0
 
       do i_envel = 1,size(pt_env_3)
-      associate(pt => pt_env_3(i_envel))
-      ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
-      do i = 1, size(ts_envel)
-         idx = findloc(pt%t, value=ts_envel(i), dim=1)
-         p = interpol( &
-               pt%t(idx), pt%t(idx + 1), &
-               pt%p(idx), pt%p(idx + 1), &
-               t_inj)
-
-         if (abs(p - pold) < 5) cycle
-         pold = p
-
-         kx = exp(interpol( &
+         associate(pt => pt_env_3(i_envel))
+         ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
+         do i = 1, size(ts_envel)
+            idx = findloc(pt%t, value=ts_envel(i), dim=1)
+            p = interpol( &
                   pt%t(idx), pt%t(idx + 1), &
-                  pt%lnkx(idx, :), pt%lnkx(idx + 1, :), &
-                  t_inj))
-         ky = exp(interpol( &
-                  pt%t(idx), pt%t(idx + 1), &
-                  pt%lnky(idx, :), pt%lnky(idx + 1, :), &
-                  t_inj))
-         beta = interpol( &
-                  pt%t(idx), pt%t(idx + 1), &
-                  pt%beta(idx), pt%beta(idx + 1), &
+                  pt%p(idx), pt%p(idx + 1), &
                   t_inj)
-         
-         alpha = 0
-         X = [log(Kx), log(Ky), log(P), alpha, beta]
-         ns = size(X) - 1
 
-         call injection_envelope_three_phase(X, ns, del_S, px_three_phase)
-      end do
-      end associate
+            if (abs(p - pold) < 5) cycle
+            pold = p
+
+            kx = exp(interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%lnkx(idx, :), pt%lnkx(idx + 1, :), &
+                     t_inj))
+            ky = exp(interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%lnky(idx, :), pt%lnky(idx + 1, :), &
+                     t_inj))
+            beta = interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%beta(idx), pt%beta(idx + 1), &
+                     t_inj)
+            
+            alpha = 0
+            X = [log(Kx), log(Ky), log(P), alpha, beta]
+            ns = size(X) - 1
+
+            call injection_envelope_three_phase(X, ns, del_S, px_three_phase)
+         end do
+         end associate
       end do
    end function
+
    function px_three_phase_from_inter(&
          inter, px_1, px_2, del_S0, beta0 &
          ) result(px_3)
