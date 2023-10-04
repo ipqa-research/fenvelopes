@@ -365,7 +365,7 @@ contains
       write(fname_env, *) env_number
       fname_env = "env-2ph-PT" // "_" // trim(adjustl(fname_env))
       fname_env = trim(adjustl(ouput_path)) // trim(fname_env) // ".dat"
-      
+
       open(newunit=funit_output, file=fname_env)
       ! ========================================================================
 
@@ -422,9 +422,10 @@ contains
          ! PmaxDewC = maxval(PdewC(1:ilastDewC))
          ns = n + 2
          S = log(P)
-         delS = -0.005
-         y = 0.d0
-         y(n) = 1.d0
+         delS = -0.05
+         y = kfact * z
+         ! y = 0.d0
+         ! y(n) = 1.d0
       end if
 
       Xold = 0.d0
@@ -576,7 +577,7 @@ contains
             end if
 
             do while (maxval(abs(X(:n))) < 0.03)
-               print *, "Jumping critical"
+               ! print *, "Jumping critical"
                ! approaching the black hole... get out of there! (0.03)
                black_i = black_i + 1
                if (black_i > 50) then
@@ -616,9 +617,9 @@ contains
             y = z*KFACT
 
             ! Finish conditions
-            if ((dXdS(n + 1)*delS < 0 .and. P < 0.1 .or. T < 120.0) &  ! dew line stops when P<0.1 bar or T<150K
-                .or. (P > 1.0 .and. T < 150.0) &   ! bubble line stops when T<150K
-                .or. (P > 1500) &
+            if ((dXdS(n + 1)*delS < 0 .and. P < 0.1 .and. T < 120.0) &  ! dew line stops when P<0.1 bar or T<150K
+                .or. (P > 1.0 .and. T < 50.0) &   ! bubble line stops when T<150K
+                .or. (P > 5000) &
                 .or. (abs(dels) < 1.d-10)) then
                 run = .false.
             end if
@@ -885,7 +886,7 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dT
 
-            del_S = sign(1.3_pr, del_S)*minval([ &
+            del_S = sign(1.7_pr, del_S)*minval([ &
                                                max(abs(X(ns)/5), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
@@ -970,7 +971,7 @@ contains
       envel%beta = XS(:point, 2*n + 3)
       envel%critical_points = cps
    end subroutine
-   
+
    function break_conditions_three_phases(X, ns, S)
       !! Set of conditions to break the tracing.
       real(pr) :: X(:) !! Variables vector
