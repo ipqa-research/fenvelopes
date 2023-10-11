@@ -2,10 +2,9 @@ module envelopes
    !! Functions to be used in the different continuation methods to trace
    !! phase envelopes 
    use constants, only: pr
-   use linalg, only: solve_system
+   use linalg, only: solve_system, full_newton
    use dtypes, only: AbsEnvel, envelope, critical_point
    use legacy_ar_models, only: nc, termo
-   use inj_envelopes, only: full_newton
    use progress_bar_module, only: progress_bar
    implicit none
 
@@ -847,7 +846,7 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(pt_F_three_phases, iters, X, ns, S, F, dF)
+         call full_newton(pt_F_three_phases, iters, X, ns, S, max_iters, F, dF)
          if (iters >= max_iters) then
             print *, "Breaking: Above max iterations"
             exit enveloop
@@ -886,7 +885,7 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dT
 
-            del_S = sign(1.7_pr, del_S)*minval([ &
+            del_S = sign(2.5_pr, del_S)*minval([ &
                                                max(abs(X(ns)/5), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
@@ -901,7 +900,7 @@ contains
 
                Xnew = X + dXdS*del_S
                dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-               dT = Xnew(2*n + 2) - X(2*n + 2)
+               dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
             end do
          end block fix_step
 
