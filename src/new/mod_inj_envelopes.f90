@@ -2,7 +2,7 @@ module inj_envelopes
    !! Module to calculate Px phase envelopes
    use constants, only: pr, R
    use dtypes, only: envelope, critical_point
-   use linalg, only: solve_system, interpol
+   use linalg, only: solve_system, interpol, full_newton
    use progress_bar_module, only: progress_bar
 
    implicit none
@@ -17,8 +17,8 @@ module inj_envelopes
    !  Parameters
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 50 !! Maximum number of iterations for a newton step
-   integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
+   integer :: max_iters = 150 !! Maximum number of iterations for a newton step
+   integer, parameter :: max_points = 500 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
@@ -27,12 +27,12 @@ module inj_envelopes
    
    ! Two-phase settings
    real(pr) :: del_S_multiplier = 1.5_pr
-   real(pr) :: max_dp=75.0_pr
-   real(pr) :: max_dalpha=0.05_pr
+   real(pr) :: max_dp=30.0_pr
+   real(pr) :: max_dalpha=0.01_pr
    
    ! Three phase parameters
-   real(pr) :: del_S_multiplier_three_phase = 1.7_pr
-   real(pr) :: critical_fact = 3.0_pr
+   real(pr) :: del_S_multiplier_three_phase = 1.25_pr
+   real(pr) :: critical_fact = 4.0_pr
    ! ===========================================================================
 contains
    subroutine from_nml(filepath)
@@ -186,9 +186,10 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(f_injection, iters, X, ns, S, F, dF)
+         call full_newton(f_injection, iters, X, ns, S, max_iters, F, dF)
 
          if (iters >= max_iters) then
+            call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -549,8 +550,9 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(F_injection_three_phases, iters, X, ns, S, F, dF)
+         call full_newton(F_injection_three_phases, iters, X, ns, S, max_iters, F, dF)
          if (iters >= max_iters) then
+            call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -614,7 +616,7 @@ contains
 
                   ! del_S = dS_c + del_S ! * fact
                   ! del_S = del_S * fact
-                  del_S = dS_c + sign(0.7_pr, dS_c)
+                  del_S = dS_c - sign(1.7_pr, dS_c)*dS_c
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -631,7 +633,7 @@ contains
 
          X = X + dXdS*del_S
          S = X(ns)
-         if (any(break_conditions_three_phases(X, ns, S, del_S))) then
+         if (any(break_conditions_three_phases(X, ns, S, del_S)) .and. point > 10) then
             call progress_bar(point, max_points, .true.)
             print *, "Breaking: ", break_conditions_three_phases(X, ns, S, del_S)
             exit enveloop
@@ -676,71 +678,12 @@ contains
       alpha = X(2*n + 2)
 
       break_conditions_three_phases = [ &
-                                       p < 1 .or. p > 5000, &
+                                       ! p < 0.001_pr .or. p > 5000, &
                                        abs(del_S) < 1e-5 &
                                       ]
    end function
    ! ===========================================================================
    
-   subroutine full_newton(fun, iters, X, ns, S, F, dF)
-      !! Subroutine to solve a point in the envelope.
-      !!
-      !! Procedure that solves a point with the Newton-Raphson method.
-      use constants, only: ouput_path
-      interface
-         subroutine fun(X, ns, S, F, dF)
-            !! Function to solve
-            import pr
-            real(pr), intent(in) :: X(:)
-            integer, intent(in) :: ns
-            real(pr), intent(in) :: S
-            real(pr), intent(out) :: F(size(X))
-            real(pr), intent(out) :: dF(size(X), size(X))
-         end subroutine
-      end interface
-      !&<
-      integer,  intent(out)    :: iters !! Number of iterations needed
-      real(pr), intent(in out) :: X(:)  !! Variables vector
-      integer,  intent(in)     :: ns    !! Number of specification
-      real(pr), intent(in)     :: S     !! Specification value
-      real(pr), intent(out)    :: F(size(X)) !! Function values at solved point
-      real(pr), intent(out)    :: df(size(X), size(X)) !! Jacobian values
-      !&>
-
-      real(pr) :: b(size(X)), A(size(X), size(X))
-      real(pr) :: dX(size(X)), tol = 1e-5
-      integer :: funit_log_newton
-
-      integer :: n
-
-      n = size(X)
-      dX = 20
-
-      call get_environment_variable(name="FE_LOG", value=FE_LOG)
-
-      if (trim(FE_LOG) == "1") then
-         open(newunit=funit_log_newton, file=trim(ouput_path) // "newton_log.dat")
-      end if
-
-      newton: do iters = 1, max_iters*10
-         if (maxval(abs(dx)) < tol) exit newton
-         call fun(X, ns, S, b, a)
-         b = -b
-         dX = solve_system(A, b)
-
-         do while (maxval(abs(dx)) > 0.5*maxval(abs(x)))
-            dX = dX/2
-         end do
-
-         X = X + dX
-         if (trim(FE_LOG) == "1") write(funit_log_newton, *) X
-      end do newton
-      if (trim(FE_LOG) == "1")  close(funit_log_newton)
-
-      F = -b
-      dF = A
-   end subroutine
-
    subroutine get_z(alpha, z, dzda)
       !! Calculate the fluid composition based on an amount of addition
       !! of second fluid.
@@ -771,5 +714,251 @@ contains
       type(injelope), intent(in) :: dew_envel
       type(injelope), intent(in) :: bub_envel
       integer :: n_case
+   end function
+
+   function px_two_phase(t_inj, pt_env_2, t_tol, del_S0)
+      !! Calculate two phase Px envelopes at a given injection temperature.
+      !!
+      !! Given an injection temperature `t_inj` and a base PT envelope 
+      !! `pt_env_2`, finds all the points on the PT envelope near `t_inj`, based
+      !! on an absolute tolerance `t_tol`. These points are used as 
+      !! initialization for calculation of Px envelopes.
+      
+      use linalg, only: interpol
+      use stdlib_optval, only: optval
+      
+      real(pr), intent(in) :: t_inj !! Injection temperature [K]
+      type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
+      real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
+      real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
+      type(injelope) :: px_two_phase !! Output Px envelope
+      
+      real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
+      real(pr), allocatable :: k(:) !! K values
+      real(pr), allocatable :: X(:) !! Vector of variables
+      real(pr) :: alpha !! Amount of injection
+      real(pr) :: p !! Pressure of ocurrence
+      real(pr) :: pold !! Old pressure, used to assure no repeats
+
+      integer :: i, idx, ns
+      real(pr) :: del_S
+
+      del_S = optval(del_S0, 0.1_pr)
+      pold = 0
+
+      ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
+      do i = 1, size(ts_envel)
+         idx = findloc(pt_env_2%t, value=ts_envel(i), dim=1)
+         p = interpol( &
+               pt_env_2%t(idx), pt_env_2%t(idx + 1), &
+               pt_env_2%p(idx), pt_env_2%p(idx + 1), &
+               t_inj)
+
+         if (abs(p - pold) < 1) cycle
+         pold = p
+
+         k = exp(interpol( &
+                  pt_env_2%t(idx), pt_env_2%t(idx + 1), &
+                  pt_env_2%logk(idx, :), pt_env_2%logk(idx + 1, :), &
+                  t_inj))
+
+         alpha = 0
+         X = [log(K), log(P), alpha]
+         ns = size(X)
+
+         call injection_envelope(X, ns, del_S, px_two_phase)
+      end do
+   end function
+
+   function px_three_phase(t_inj, pt_env_3, t_tol, del_S0)
+      !! Calculate three phase Px envelopes at a given injection temperature.
+      !!
+      !! Given an injection temperature `t_inj` and a base PT envelope 
+      !! `pt_env_3`, finds all the points on the PT envelope near `t_inj`, based
+      !! on an absolute tolerance `t_tol`. These points are used as 
+      !! initialization for calculation of Px envelopes.
+
+      use linalg, only: interpol
+      use stdlib_optval, only: optval
+      use envelopes, only: PTEnvel3
+
+      real(pr), intent(in) :: t_inj !! Injection temperature [K]
+      type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelopes
+      real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
+      real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
+      type(injelope) :: px_three_phase !! Output Px envelope
+
+      real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
+      real(pr), allocatable :: kx(:), ky(:) !! K values
+      real(pr), allocatable :: X(:) !! Vector of variables
+      real(pr) :: alpha !! Amount of injection
+      real(pr) :: beta  !! Main phases molar fraction
+      real(pr) :: p !! Pressure of ocurrence
+      real(pr) :: pold !! Old pressure, used to assure no repeats
+
+      integer :: i, idx, ns, i_envel
+      real(pr) :: del_S
+
+      del_S = optval(del_S0, 0.05_pr)
+      pold = 0
+
+      do i_envel = 1, size(pt_env_3)
+         print *, i_envel
+         associate(pt => pt_env_3(i_envel))
+         ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
+         do i = 1, size(ts_envel)
+            idx = findloc(pt%t, value=ts_envel(i), dim=1)
+            p = interpol( &
+                  pt%t(idx), pt%t(idx + 1), &
+                  pt%p(idx), pt%p(idx + 1), &
+                  t_inj)
+
+            if (abs(p - pold) < 5) cycle
+            pold = p
+
+            kx = exp(interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%lnkx(idx, :), pt%lnkx(idx + 1, :), &
+                     t_inj))
+            ky = exp(interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%lnky(idx, :), pt%lnky(idx + 1, :), &
+                     t_inj))
+            beta = interpol( &
+                     pt%t(idx), pt%t(idx + 1), &
+                     pt%beta(idx), pt%beta(idx + 1), &
+                     t_inj)
+            
+            alpha = 0
+            X = [log(Kx), log(Ky), log(P), alpha, beta]
+            ns = size(X) - 1
+
+            print *, "Running isolated PX"
+            call injection_envelope_three_phase(X, ns, del_S, px_three_phase)
+         end do
+         end associate
+      end do
+   end function
+
+   function px_three_phase_from_inter(&
+         inter, px_1, px_2, del_S0, beta0 &
+         ) result(px_3)
+      use legacy_ar_models, only: nc
+      use stdlib_optval, only: optval
+      use linalg, only: point, interpol
+      type(point), intent(in) :: inter
+      type(injelope), intent(in) :: px_1, px_2
+      type(injelope) :: px_3(2)
+      real(pr), optional :: del_S0
+      real(pr), optional :: beta0
+
+      integer :: i, j
+
+      real(pr) :: lnKx(nc), lnKy(nc), alpha, p, beta, X(2*nc+3)
+      real(pr) :: phase_y(nc), phase_x(nc)
+      real(pr) :: del_S
+      real(pr) :: z(nc), dzda(nc)
+      integer :: ns
+
+      del_S = optval(del_S0, -0.05_pr)
+      beta = optval(beta0, 1.0_pr)
+
+      i = inter%i
+      j = inter%j
+
+      alpha = inter%x
+      p = inter%y
+
+      lnKx = interpol( &
+               px_1%alpha(i), px_1%alpha(i + 1), &
+               px_1%logk(i, :), px_1%logk(i + 1, :), &
+               alpha &
+               )
+
+      lnKy = interpol( &
+               px_2%alpha(j), px_2%alpha(j + 1), &
+               px_2%logk(j, :), px_2%logk(j + 1, :), &
+               alpha &
+               )
+
+      call get_z(alpha, z, dzda)
+
+      ! Bubble line composition
+      phase_y = exp(lnKy)*z
+      ! Dew line composition
+      phase_x = exp(lnKx)*z
+
+      ns = 2*nc + 3
+
+      ! ==================================================================
+      !  Line with incipient phase gas
+      ! ------------------------------------------------------------------
+      print *, "Three Phase: Gas"
+      lnKx = log(phase_x/phase_y)
+      lnKy = log(z/phase_y)
+      X = [lnKx, lnKy, log(p), alpha, beta]
+      call injection_envelope_three_phase(X, ns, del_S, px_3(1))
+      ! ==================================================================
+
+      ! ==================================================================
+      !  Line with incipient phase liquid
+      ! ------------------------------------------------------------------
+      print *, "Three Phase: Liquid"
+      lnKx = log(phase_y/phase_x)
+      lnKy = log(z/phase_x)
+      X = [lnKx, lnKy, log(p), alpha, beta]
+      call injection_envelope_three_phase(X, ns, del_S, px_3(2))
+   end function
+   
+   function px_hpl_line(alpha_0, p)
+      ! Find a HPLL PX line at a given pressure, starting from a given alpha
+      use legacy_ar_models, only: nc, termo
+      use linalg, only: solve_system
+      real(pr), intent(in) :: alpha_0 !! Staring \(\alpha\) to search
+      real(pr), intent(in) :: p !! Pressure of HPLL
+      type(injelope) :: px_hpl_line !! Resulting HPLL line
+
+      real(pr) :: diff
+      real(pr) :: lnfug_z(nc), lnfug_y(nc), dlnphi_dz(nc, nc), dlnphi_dy(nc, nc), &
+                  dlnphi_dp_z(nc), dlnphi_dp_y(nc)
+      real(pr) :: z(nc), dzda(nc), y(nc), v, k(nc)
+      real(pr) :: p_in, alpha_in, dp, da
+      real(pr) :: sol_x(2), sol_df(1, 2)
+
+      real(pr), allocatable :: x(:)
+      real(pr) :: del_S0
+      integer :: ns, ncomp
+
+      find_hpl: do ncomp = nc, 1, -1
+         alpha_in = alpha_0
+         y = 0
+         y(ncomp) = 1
+         
+         p_in = p
+         call get_z(alpha_in, z, dzda)
+         call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
+         call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
+         diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
+         
+         do while (diff > 0 .and. p_in < 15000)
+            print *, p_in, diff
+            p_in = p_in + 10.0_pr
+            call get_z(alpha_in, z, dzda)
+            call termo(nc, 4, 1, t, p_in, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
+            call termo(nc, 4, 1, t, p_in, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
+            diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
+
+            sol_x = [p_in, alpha_in]
+         end do
+
+         if (alpha_in < 1) then
+            k = exp(lnfug_y - lnfug_z)
+            X = [log(K), log(P), alpha_in]
+            del_S0 = -0.01_pr
+            ns = size(X) - 1
+            call injection_envelope(X, ns, del_S0, px_hpl_line)
+            exit find_hpl
+         end if
+      end do find_hpl
    end function
 end module
