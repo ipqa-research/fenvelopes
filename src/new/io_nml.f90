@@ -130,9 +130,9 @@ contains
       
       select case (mixrule)
       case ("ClassicVdW")
-         ! Read kij and lij matrixes
-         ! Since in the ClassicVdW mixing rules the bij matrix is constant
-         ! it's stored beforehand
+         !! Read kij and lij matrixes
+         !! Since in the ClassicVdW mixing rules the bij matrix is constant
+         !! it's stored beforehand
          call read_kij_lij()
          do i=1, nc
             do j=i,nc
@@ -144,15 +144,15 @@ contains
    end subroutine
 
    subroutine read_srk()
-      !> Read SRK model parameters
-      !
-      ! options:
-      !
-      ! * spec="critical" -> Use critical constants 
-      ! * spec="parameters" -> Use EoS parameters
-      !
-      namelist /nml_critical/ tc, pc, w
-      namelist /nml_parameters/ ac, b, k
+      !! Read SRK model parameters
+      !!
+      !! options:
+      !! 
+      !! - spec=`critical` -> Use critical constants 
+      !! - spec=`parameters` -> Use EoS parameters
+      !!
+      namelist /nml_critical/ tc, pc, w !! Critical constants
+      namelist /nml_parameters/ ac, b, k !! EoS parameters
       select case (spec)
       case ("critical")
          open (newunit=nunit_input, file=path_to_file)
@@ -168,7 +168,7 @@ contains
    end subroutine
 
    subroutine read_pr76()
-      ! Read PR76 model
+      !! Read PR76 model
       namelist /nml_critical/ tc, pc, w
       namelist /nml_parameters/ ac, b, k
       select case (spec)
@@ -208,7 +208,7 @@ contains
       namelist /nml_classicvdw/ kij, lij
       integer :: i, j
 
-     kij = 0
+      kij = 0
       lij = 0
 
       open (newunit=nunit_input, file=path_to_file)
@@ -240,7 +240,7 @@ contains
 
       character(len=20) :: fmt_pure
       character(len=20) :: fmt_names
-      fmt_pure = "(xG,"//adjustl(trim(str(nc)))//"F8.2)"
+      fmt_pure = "(xG,"//adjustl(trim(str(nc)))//"F10.4)"
       fmt_names = "(8x, "//adjustl(trim(str(nc)))//"(A8))"
 
       write (file_unit, *) "====================="
@@ -249,7 +249,7 @@ contains
       write (file_unit, *) "Model: ", model
       write (file_unit, *) "MixingRule: ", mixrule
       write (file_unit, *) "Names: ", (trim(names(i))//" ", i=1, nc)
-      write (file_unit, fmt_pure) "Z: ", z
+      write (file_unit, "(xA,2x,*(F8.6, 2x))") "Z:", z
 
       write (file_unit, *) "===================="
       write (file_unit, *) "Critical Constants: "
