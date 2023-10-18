@@ -922,11 +922,11 @@ contains
       type(injelope) :: px_hpl_line !! Resulting HPLL line
 
       real(pr) :: diff
-      real(pr) :: lnfug_z(nc), lnfug_y(nc), dlnphi_dz(nc, nc), dlnphi_dy(nc, nc), &
+      real(pr) :: lnfug_z(nc), lnfug_y(nc), &
+                  dlnphi_dz(nc, nc), dlnphi_dy(nc, nc), &
                   dlnphi_dp_z(nc), dlnphi_dp_y(nc)
-      real(pr) :: z(nc), dzda(nc), y(nc), v, k(nc)
-      real(pr) :: p_in, alpha_in, dp, da
-      real(pr) :: sol_x(2), sol_df(1, 2)
+      real(pr) :: z(nc), y(nc), v, k(nc)
+      real(pr) :: p_in, alpha_in
 
       real(pr), allocatable :: x(:)
       real(pr) :: del_S0
@@ -934,34 +934,65 @@ contains
 
       find_hpl: do ncomp = nc, 1, -1
          alpha_in = alpha_0
-         y = 0
-         y(ncomp) = 1
-         
          p_in = p
-         call get_z(alpha_in, z, dzda)
-         call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
-         call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
-         diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
          
-         do while (diff > 0 .and. p_in < 15000)
-            print *, p_in, diff
+         y = 0
+         y(ncomp) = 1.0
+         
+         diff = foo([alpha_in, p_in, y] )
+         do while (abs(diff) > 0.01 .and. p_in < 5000)
             p_in = p_in + 10.0_pr
-            call get_z(alpha_in, z, dzda)
-            call termo(nc, 4, 1, t, p_in, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
-            call termo(nc, 4, 1, t, p_in, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
-            diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
-
-            sol_x = [p_in, alpha_in]
+            diff = foo([alpha_in, p_in, y])
          end do
 
-         if (alpha_in < 1) then
-            k = exp(lnfug_y - lnfug_z)
-            X = [log(K), log(P), alpha_in]
-            del_S0 = -0.01_pr
+         if (p_in >= 5000) then
+            do while (abs(diff) > 0.001 .and. alpha_in > 0)
+               alpha_in = alpha_in - 0.01_pr
+               diff = foo([alpha_in, p_in, y])
+            end do
+         end if
+
+         if (alpha_in > 0 .or. p_in < 5000) then
+            call optim
+            k = 1/exp(lnfug_y - lnfug_z)
+
+            X = [log(K), log(P_in), alpha_in]
+
+            del_S0 = 0.1_pr
             ns = size(X) - 1
             call injection_envelope(X, ns, del_S0, px_hpl_line)
             exit find_hpl
          end if
       end do find_hpl
+
+      contains 
+         function foo(x) result(f)
+            real(pr) :: x(:)
+            real(pr) :: f
+
+            if (x(1) > 1) x(1) = 0.97_pr
+            alpha_in = x(1)
+            p_in = x(2)
+            y = abs(x(3:))
+
+            call get_z(alpha_in, z)
+            call termo(nc, 4, 1, t, p_in, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
+            call termo(nc, 4, 1, t, p_in, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
+            f = abs((log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp)))
+         end function
+
+         subroutine optim
+            use optimization, only: nm_opt
+            real(pr) :: x0(size(z) + 2)
+            integer :: stat
+            real(pr) :: step(size(x0))
+
+            x0 = [alpha_in, p_in, y]
+            step = 0.1
+            step(1) = 0.1
+            step(2) = -100
+            call nm_opt(foo, x0, stat, step)
+         end subroutine
    end function
+   ! ========================================================================}}}
 end module
