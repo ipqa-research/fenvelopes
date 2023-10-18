@@ -403,6 +403,8 @@ contains
          incipient_phase = "2ndliquid"
       end select
       write(funit_output, *) "#", incipient_phase
+      write(funit_output, "(*(A,2x))") "STAT", "iter", "ns", "T", "P", &
+         ("lnK"//str(i),i=1,n), ("y"//str(i), i=1,n)
 
       if (ichoice <= 2) then
          ! low T bub (1) or dew (2)
@@ -430,6 +432,8 @@ contains
       Xold = 0.d0
       dFdS = 0.d0
       dFdS(n + 2) = -1.d0
+
+      i=0
 
       do while (run)
          i = i + 1
