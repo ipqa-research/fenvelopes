@@ -138,9 +138,9 @@ contains
    end subroutine
 
    subroutine injection_envelope(X0, spec_number, del_S0, envels)
+      !! Subroutine to calculate Px phase envelopes via continuation method
       use constants, only: ouput_path
       use io, only: str
-      !! Subroutine to calculate Px phase envelopes via continuation method
       real(pr), intent(in) :: X0(:) !! Vector of variables
       integer, intent(in) :: spec_number !! Number of specification
       real(pr), intent(in) :: del_S0 !! \(\Delta S_0\)
@@ -156,6 +156,8 @@ contains
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
 
+      real(pr) :: z(size(X0) - 2)
+
       integer :: point, iters, n
       integer :: i
       integer :: funit_output
@@ -168,9 +170,11 @@ contains
       S = X(ns)
       del_S = del_S0
 
-      ! ======================================================================
+      call get_z(X(n+2), z)
+
+      ! ========================================================================
       !  Output file
-      ! ----------------------------------------------------------------------
+      ! ------------------------------------------------------------------------
       env_number = env_number + 1
 
       write (fname_env, *) env_number
@@ -180,9 +184,9 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
       write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
-         (" lnK"//str(i), i=1,n)
-      write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n)
-      ! ======================================================================
+         (" lnK"//str(i), i=1,n), (" z"//str(i), i=1,n)
+      write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n), z
+      ! ========================================================================
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
@@ -237,8 +241,10 @@ contains
             print *, "Breaking: ", break_conditions(X, ns, S, del_S)
             exit enveloop
          end if
+
+         call get_z(X(n+2), z)
          write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
-            X(:n)
+            X(:n), z
       end do enveloop
 
       write (funit_output, *) ""
