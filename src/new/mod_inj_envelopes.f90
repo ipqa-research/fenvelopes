@@ -693,20 +693,20 @@ contains
       !! - Addition:  \( z = \frac{\alpha z_i + (1-\alpha) z_0}{\sum_{i=1}^N \alpha z_i + (1-\alpha) z_0} \)
       real(pr), intent(in)  :: alpha !! Addition percentaje \( \alpha \)
       real(pr), intent(out) :: z(size(z_0)) !! New composition
-      real(pr), intent(out) :: dzda(size(z_0)) !! Derivative wrt \(\alpha\)
+      real(pr), optional, intent(out) :: dzda(size(z_0)) !! Derivative wrt \(\alpha\)
 
       select case (injection_case)
       case ("displace")
          z = (z_injection*alpha + (1.0_pr - alpha)*z_0)
-         dzda = z_injection - z_0
+         if (present(dzda)) dzda = z_injection - z_0
       case ("dilute")
          z = (z_injection*alpha + z_0)/sum(z_injection*alpha + z_0)
-         dzda = -(alpha*z_injection + z_0) &
+         if (present(dzda)) dzda = -(alpha*z_injection + z_0) &
                 *sum(z_injection)/sum(alpha*z_injection + z_0)**2 &
                 + z_injection/sum(alpha*z_injection + z_0)
       case default
          z = (z_injection*alpha + (1.0_pr - alpha)*z_0)
-         dzda = z_injection - z_0
+         if (present(dzda)) dzda = z_injection - z_0
       end select
    end subroutine
 
