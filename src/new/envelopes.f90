@@ -478,7 +478,7 @@ contains
          if (iter > max_iter) run = .false.
          if (P > maxP) maxP = P
 
-         if (run) write(funit_output, *) "SOL", iter, ns, T, P, exp(X(:n))
+         if (run) write(funit_output, *) "SOL", iter, ns, T, P, X(:n), z*exp(X(:n))
 
          if (incipient_phase == "liquid" .and. i > 1) then
             ! TODO: If this is the way the low p dew line finishes, 
