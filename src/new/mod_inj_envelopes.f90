@@ -716,7 +716,10 @@ contains
       integer :: n_case
    end function
 
-   function px_two_phase(t_inj, pt_env_2, t_tol, del_S0)
+   ! ===========================================================================
+   ! Initialization procedures
+   ! ------------------------------------------------------------------------{{{
+   function px_two_phase_from_pt(t_inj, pt_env_2, t_tol, del_S0) result(envel)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -731,7 +734,7 @@ contains
       type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
-      type(injelope) :: px_two_phase !! Output Px envelope
+      type(injelope) :: envel !! Output Px envelope
       
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
       real(pr), allocatable :: k(:) !! K values
@@ -754,7 +757,7 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 1) cycle
+         if (abs(p - pold) < 5) cycle
          pold = p
 
          k = exp(interpol( &
@@ -766,11 +769,11 @@ contains
          X = [log(K), log(P), alpha]
          ns = size(X)
 
-         call injection_envelope(X, ns, del_S, px_two_phase)
+         call injection_envelope(X, ns, del_S, envel)
       end do
    end function
 
-   function px_three_phase(t_inj, pt_env_3, t_tol, del_S0)
+   function px_three_phase_from_pt(t_inj, pt_env_3, t_tol, del_S0) result(envel)
       !! Calculate three phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -786,7 +789,7 @@ contains
       type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelopes
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
-      type(injelope) :: px_three_phase !! Output Px envelope
+      type(injelope) :: envel !! Output Px envelope
 
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
       real(pr), allocatable :: kx(:), ky(:) !! K values
@@ -834,7 +837,7 @@ contains
             ns = size(X) - 1
 
             print *, "Running isolated PX"
-            call injection_envelope_three_phase(X, ns, del_S, px_three_phase)
+            call injection_envelope_three_phase(X, ns, del_S, envel)
          end do
          end associate
       end do
@@ -842,13 +845,13 @@ contains
 
    function px_three_phase_from_inter(&
          inter, px_1, px_2, del_S0, beta0 &
-         ) result(px_3)
+         ) result(envels)
       use legacy_ar_models, only: nc
       use stdlib_optval, only: optval
       use linalg, only: point, interpol
       type(point), intent(in) :: inter
       type(injelope), intent(in) :: px_1, px_2
-      type(injelope) :: px_3(2)
+      type(injelope) :: envels(2)
       real(pr), optional :: del_S0
       real(pr), optional :: beta0
 
@@ -897,7 +900,7 @@ contains
       lnKx = log(phase_x/phase_y)
       lnKy = log(z/phase_y)
       X = [lnKx, lnKy, log(p), alpha, beta]
-      call injection_envelope_three_phase(X, ns, del_S, px_3(1))
+      call injection_envelope_three_phase(X, ns, del_S, envels(1))
       ! ==================================================================
 
       ! ==================================================================
@@ -907,7 +910,7 @@ contains
       lnKx = log(phase_y/phase_x)
       lnKy = log(z/phase_x)
       X = [lnKx, lnKy, log(p), alpha, beta]
-      call injection_envelope_three_phase(X, ns, del_S, px_3(2))
+      call injection_envelope_three_phase(X, ns, del_S, envels(2))
    end function
    
    function px_hpl_line(alpha_0, p)

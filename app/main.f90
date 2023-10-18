@@ -151,7 +151,9 @@ contains
       ! ------------------------------------------------------------------------
       t = 700.0_pr
       t = pt_bub%t(maxloc(pt_bub%p, dim=1))
-      p = maxval(pt_bub%p)*2.5_pr
+      p = maxval([pt_bub%p, pt_dew%p])*1.5_pr
+
+      p = 400
 
       call find_hpl(t, p, k)
       k = 1/k
@@ -210,11 +212,13 @@ contains
       use inj_envelopes, only: full_newton, z_injection, &
                                T_inj => T, injection_envelope, z_0, &
                                injelope, injection_envelope_three_phase, get_z, &
-                               px_two_phase, px_three_phase, px_three_phase_from_inter, &
+                               px_two_phase_from_pt, &
+                               px_three_phase_from_pt, &
+                               px_three_phase_from_inter, &
                                px_hpl_line
       use envelopes, only: envelope, k_wilson, p_wilson
       use linalg, only: interpol, point, intersection
-      
+
       type(point), allocatable :: inter(:), self_inter(:)
 
       real(pr) :: del_S0
@@ -222,7 +226,7 @@ contains
       real(pr) :: p
       real(pr) :: t_tol = 2
       real(pr) :: dzda(nc)
-      
+
       print *, style_underline // "----------" // style_reset
       print *, style_underline // "Px Regions" // style_reset
       print *, style_underline // "----------" // style_reset
@@ -231,13 +235,13 @@ contains
       !  Two phase envelopes
       ! ------------------------------------------------------------------------
       print *, red // "Running Bubble" // style_reset
-      px_bub = px_two_phase(t_inj, pt_bub, t_tol=5.0_pr)
-      
+      px_bub = px_two_phase_from_pt(t_inj, pt_bub, t_tol=5.0_pr)
+
       print *, blue // "Running Dew" // style_reset
-      px_dew = px_two_phase(t_inj, pt_dew, t_tol=5.0_pr)
-      
+      px_dew = px_two_phase_from_pt(t_inj, pt_dew, t_tol=15.0_pr)
+
       print *, blue // "Running HPLL" // style_reset
-      px_hpl = px_hpl_line(0.0_pr, maxval(px_bub%p))
+      px_hpl = px_hpl_line(0.99_pr, maxval(px_bub%p))
       ! ========================================================================
 
       ! ========================================================================
@@ -248,7 +252,7 @@ contains
       print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
       print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
       ! ========================================================================
-      
+
       ! ========================================================================
       !  Three phase regions
       ! ------------------------------------------------------------------------
@@ -258,9 +262,9 @@ contains
 
          if (size(inter) == 0) then
             print *, "Isolated Bub"
-            px_bub_3 = px_three_phase(t_inj, pt_bub_3, t_tol)
+            px_bub_3 = px_three_phase_from_pt(t_inj, pt_bub_3, t_tol)
             print *, "Isolated Dew"
-            px_dew_3 = px_three_phase(t_inj, pt_dew_3, t_tol)
+            px_dew_3 = px_three_phase_from_pt(t_inj, pt_dew_3, t_tol)
          else
             do i=1,size(inter)
                print *, "Intersection: ", inter(i)
