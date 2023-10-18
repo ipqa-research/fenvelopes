@@ -3,7 +3,7 @@ summary: Calculation of phase envelops using Equations of State
 project_github: https://github.com/fedebenelli/fenvelopes
 author: Federico Benelli
 author_description: PhD student with focus on reservoir PVT simulation.
-author_email: federico.benelli@mi.unc.edu.ar
+email: federico.benelli@mi.unc.edu.ar
 github: https://github.com/fedebenelli
 src_dir: ../src 
          ../app
@@ -25,5 +25,7 @@ md_extensions: markdown.extensions.toc
                markdown.extensions.smarty
 graph: true
 license: MIT
+page_dir: pages
+media_dir: ./media
 
 {!../README.md!}
