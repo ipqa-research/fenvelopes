@@ -207,7 +207,7 @@ contains
       !&>
 
       real(pr) :: b(size(X)), A(size(X), size(X))
-      real(pr) :: dX(size(X)), tol = 1e-5
+      real(pr) :: dX(size(X)), tol = 1e-2
       integer :: funit_log_newton
 
       integer :: n
@@ -215,8 +215,8 @@ contains
       n = size(X)
       dX = 20
 
-      newton: do iters = 1, max_iters*10
-         if (maxval(abs(dx)) < tol) exit newton
+      newton: do iters = 1, max_iters
+         if (maxval(abs(dx/x)) < tol) exit newton
          call fun(X, ns, S, b, a)
          b = -b
          dX = solve_system(A, b)
