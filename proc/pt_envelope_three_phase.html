@@ -43,6 +43,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
+            <li><a href='../page/index.html'>User Guide</a></li>
             <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
               <a href="#" class="dropdown-toggle"
               data-toggle="dropdown" role="button"
@@ -118,21 +119,21 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-f~9">F</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-s~13">S</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-x~16">X</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-xs~3">XS</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-cps~3">cps</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-df~5">dF</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-dxds~6">dXdS</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-del_s~10">del_S</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-fname_env~4">fname_env</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-funit_output~4">funit_output</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-i~24">i</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-iters~4">iters</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-n~22">n</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-ns~18">ns</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-point~4">point</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-f~5">F</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-s~6">S</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-x~6">X</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-xs">XS</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-cps">cps</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-df~2">dF</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-dxds~2">dXdS</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-del_s">del_S</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-fname_env~2">fname_env</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-funit_output~2">funit_output</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-i~13">i</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-iters~2">iters</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-n~15">n</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-ns~6">ns</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-point~2">point</a>
     </div>
   </div>
 </div>
@@ -287,19 +288,19 @@ Three phases version.</p>
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x0~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x0"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>X0</strong>(:)</td><td><p>Vector of variables</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-spec_number~3"></span>integer,</td>
+  <td><span class="anchor" id="variable-spec_number"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>spec_number</strong></td><td><p>Number of specification</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s0~7"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s0"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>del_S0</strong></td><td><p>
@@ -307,7 +308,7 @@ Three phases version.</p>
 </p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-envel~3"></span>type(<a href='../type/ptenvel3.html'>PTEnvel3</a>),</td>
+  <td><span class="anchor" id="variable-envel"></span>type(<a href='../type/ptenvel3.html'>PTEnvel3</a>),</td>
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>envel</strong></td><td><p>Calculated envelopes</p></td>
@@ -350,128 +351,128 @@ Three phases version.</p>
 <path fill="none" stroke="#000000" d="M80.35,-188.14C93.54,-216.56 130.44,-287.64 184,-323 199.31,-333.1 218.96,-338.36 235.8,-341.09"/>
 <polygon fill="#000000" stroke="#000000" points="235.48,-344.58 245.87,-342.48 236.44,-337.64 235.48,-344.58"/>
 </g>
-<!-- k -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node3" class="node">
-<title>k</title>
-<polygon fill="#777777" stroke="#777777" points="300,-314 246,-314 246,-290 300,-290 300,-314"/>
-<text text-anchor="middle" x="273" y="-299.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">k</text>
-</g>
-<!-- proc~pt_envelope_three_phase&#45;&gt;k -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge4" class="edge">
-<title>proc~pt_envelope_three_phase&#45;&gt;k</title>
-<path fill="none" stroke="#000000" d="M84,-188.21C100.96,-210.32 139.97,-256.92 184,-281 199.86,-289.68 219.25,-294.8 235.79,-297.8"/>
-<polygon fill="#000000" stroke="#000000" points="235.23,-301.26 245.66,-299.41 236.36,-294.35 235.23,-301.26"/>
-</g>
-<!-- progress_bar -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node4" class="node">
-<title>progress_bar</title>
-<polygon fill="#777777" stroke="#777777" points="313.5,-272 232.5,-272 232.5,-248 313.5,-248 313.5,-272"/>
-<text text-anchor="middle" x="273" y="-257.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
-</g>
-<!-- proc~pt_envelope_three_phase&#45;&gt;progress_bar -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge2" class="edge">
-<title>proc~pt_envelope_three_phase&#45;&gt;progress_bar</title>
-<path fill="none" stroke="#000000" d="M92.32,-188.15C113.17,-202.25 149.69,-225.33 184,-239 196.09,-243.82 209.57,-247.72 222.28,-250.79"/>
-<polygon fill="#000000" stroke="#000000" points="221.73,-254.25 232.26,-253.07 223.29,-247.43 221.73,-254.25"/>
-</g>
-<!-- dxds_in -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node5" class="node">
-<title>dxds_in</title>
-<polygon fill="#777777" stroke="#777777" points="300,-230 246,-230 246,-206 300,-206 300,-230"/>
-<text text-anchor="middle" x="273" y="-215.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dxds_in</text>
-</g>
-<!-- proc~pt_envelope_three_phase&#45;&gt;dxds_in -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge5" class="edge">
-<title>proc~pt_envelope_three_phase&#45;&gt;dxds_in</title>
-<path fill="none" stroke="#000000" d="M131.45,-188.04C164.97,-195.18 206.48,-204.03 235.68,-210.26"/>
-<polygon fill="#000000" stroke="#000000" points="235.32,-213.76 245.83,-212.42 236.78,-206.91 235.32,-213.76"/>
-</g>
 <!-- proc~full_newton -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node6" class="node">
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node3" class="node">
 <title>proc~full_newton</title>
-<g id="a_proc~~pt_envelope_three_phase~~CallsGraph_node6"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
-<polygon fill="#d9534f" stroke="#d9534f" points="309.5,-188 236.5,-188 236.5,-164 309.5,-164 309.5,-188"/>
-<text text-anchor="middle" x="273" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
+<g id="a_proc~~pt_envelope_three_phase~~CallsGraph_node3"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
+<polygon fill="#d9534f" stroke="#d9534f" points="309.5,-314 236.5,-314 236.5,-290 309.5,-290 309.5,-314"/>
+<text text-anchor="middle" x="273" y="-299.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
 </a>
 </g>
 </g>
 <!-- proc~pt_envelope_three_phase&#45;&gt;proc~full_newton -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge3" class="edge">
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge2" class="edge">
 <title>proc~pt_envelope_three_phase&#45;&gt;proc~full_newton</title>
-<path fill="none" stroke="#000000" d="M148.08,-176C174.19,-176 202.86,-176 226.04,-176"/>
-<polygon fill="#000000" stroke="#000000" points="226.28,-179.5 236.28,-176 226.28,-172.5 226.28,-179.5"/>
+<path fill="none" stroke="#000000" d="M84,-188.21C100.96,-210.32 139.97,-256.92 184,-281 196.86,-288.04 212.05,-292.73 226.15,-295.86"/>
+<polygon fill="#000000" stroke="#000000" points="225.68,-299.34 236.17,-297.87 227.06,-292.47 225.68,-299.34"/>
 </g>
-<!-- proc~break_conditions_three_phases~2 -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node7" class="node">
-<title>proc~break_conditions_three_phases~2</title>
-<g id="a_proc~~pt_envelope_three_phase~~CallsGraph_node7"><a xlink:href=".././proc/break_conditions_three_phases~2.html" xlink:title="break_conditions_three_phases">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="362,-146 184,-146 184,-122 362,-122 362,-146"/>
-<text text-anchor="middle" x="273" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions_three_phases</text>
-</a>
+<!-- k -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node4" class="node">
+<title>k</title>
+<polygon fill="#777777" stroke="#777777" points="300,-272 246,-272 246,-248 300,-248 300,-272"/>
+<text text-anchor="middle" x="273" y="-257.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">k</text>
 </g>
+<!-- proc~pt_envelope_three_phase&#45;&gt;k -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge4" class="edge">
+<title>proc~pt_envelope_three_phase&#45;&gt;k</title>
+<path fill="none" stroke="#000000" d="M92.32,-188.15C113.17,-202.25 149.69,-225.33 184,-239 200.52,-245.58 219.63,-250.45 235.82,-253.83"/>
+<polygon fill="#000000" stroke="#000000" points="235.49,-257.33 245.98,-255.84 236.85,-250.47 235.49,-257.33"/>
 </g>
-<!-- proc~pt_envelope_three_phase&#45;&gt;proc~break_conditions_three_phases~2 -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge6" class="edge">
-<title>proc~pt_envelope_three_phase&#45;&gt;proc~break_conditions_three_phases~2</title>
-<path fill="none" stroke="#000000" d="M131.45,-163.96C154.64,-159.02 181.65,-153.26 205.76,-148.12"/>
-<polygon fill="#000000" stroke="#000000" points="206.49,-151.55 215.54,-146.04 205.03,-144.7 206.49,-151.55"/>
+<!-- knew -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node5" class="node">
+<title>knew</title>
+<polygon fill="#777777" stroke="#777777" points="300,-230 246,-230 246,-206 300,-206 300,-230"/>
+<text text-anchor="middle" x="273" y="-215.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">knew</text>
+</g>
+<!-- proc~pt_envelope_three_phase&#45;&gt;knew -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge5" class="edge">
+<title>proc~pt_envelope_three_phase&#45;&gt;knew</title>
+<path fill="none" stroke="#000000" d="M131.45,-188.04C164.97,-195.18 206.48,-204.03 235.68,-210.26"/>
+<polygon fill="#000000" stroke="#000000" points="235.32,-213.76 245.83,-212.42 236.78,-206.91 235.32,-213.76"/>
 </g>
 <!-- xnew -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_node8" class="node">
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node6" class="node">
 <title>xnew</title>
-<polygon fill="#777777" stroke="#777777" points="300,-104 246,-104 246,-80 300,-80 300,-104"/>
-<text text-anchor="middle" x="273" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">xnew</text>
+<polygon fill="#777777" stroke="#777777" points="300,-188 246,-188 246,-164 300,-164 300,-188"/>
+<text text-anchor="middle" x="273" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">xnew</text>
 </g>
 <!-- proc~pt_envelope_three_phase&#45;&gt;xnew -->
-<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge7" class="edge">
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge3" class="edge">
 <title>proc~pt_envelope_three_phase&#45;&gt;xnew</title>
-<path fill="none" stroke="#000000" d="M92.32,-163.85C113.17,-149.75 149.69,-126.67 184,-113 200.52,-106.42 219.63,-101.55 235.82,-98.17"/>
-<polygon fill="#000000" stroke="#000000" points="236.85,-101.53 245.98,-96.16 235.49,-94.67 236.85,-101.53"/>
+<path fill="none" stroke="#000000" d="M148.08,-176C177.84,-176 210.92,-176 235.41,-176"/>
+<polygon fill="#000000" stroke="#000000" points="235.68,-179.5 245.68,-176 235.68,-172.5 235.68,-179.5"/>
+</g>
+<!-- dxds_in -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node7" class="node">
+<title>dxds_in</title>
+<polygon fill="#777777" stroke="#777777" points="300,-146 246,-146 246,-122 300,-122 300,-146"/>
+<text text-anchor="middle" x="273" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dxds_in</text>
+</g>
+<!-- proc~pt_envelope_three_phase&#45;&gt;dxds_in -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge6" class="edge">
+<title>proc~pt_envelope_three_phase&#45;&gt;dxds_in</title>
+<path fill="none" stroke="#000000" d="M131.45,-163.96C164.97,-156.82 206.48,-147.97 235.68,-141.74"/>
+<polygon fill="#000000" stroke="#000000" points="236.78,-145.09 245.83,-139.58 235.32,-138.24 236.78,-145.09"/>
+</g>
+<!-- progress_bar -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_node8" class="node">
+<title>progress_bar</title>
+<polygon fill="#777777" stroke="#777777" points="313.5,-104 232.5,-104 232.5,-80 313.5,-80 313.5,-104"/>
+<text text-anchor="middle" x="273" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
+</g>
+<!-- proc~pt_envelope_three_phase&#45;&gt;progress_bar -->
+<g id="proc~~pt_envelope_three_phase~~CallsGraph_edge7" class="edge">
+<title>proc~pt_envelope_three_phase&#45;&gt;progress_bar</title>
+<path fill="none" stroke="#000000" d="M92.32,-163.85C113.17,-149.75 149.69,-126.67 184,-113 196.09,-108.18 209.57,-104.28 222.28,-101.21"/>
+<polygon fill="#000000" stroke="#000000" points="223.29,-104.57 232.26,-98.93 221.73,-97.75 223.29,-104.57"/>
 </g>
 <!-- proc~solve_system -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_node9" class="node">
 <title>proc~solve_system</title>
 <g id="a_proc~~pt_envelope_three_phase~~CallsGraph_node9"><a xlink:href=".././proc/solve_system.html" xlink:title="solve_system">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="481,-126 398,-126 398,-102 481,-102 481,-126"/>
-<text text-anchor="middle" x="439.5" y="-111.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="481,-189 398,-189 398,-165 481,-165 481,-189"/>
+<text text-anchor="middle" x="439.5" y="-174.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
 </a>
 </g>
 </g>
 <!-- proc~pt_envelope_three_phase&#45;&gt;proc~solve_system -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_edge8" class="edge">
 <title>proc~pt_envelope_three_phase&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M82.76,-163.86C98.5,-140.53 136.73,-90.07 184,-71 257.37,-41.41 285.47,-50.97 362,-71 380.92,-75.95 400.1,-86.75 414.52,-96.28"/>
-<polygon fill="#000000" stroke="#000000" points="412.62,-99.22 422.84,-101.99 416.58,-93.45 412.62,-99.22"/>
+<path fill="none" stroke="#000000" d="M82.76,-163.86C98.5,-140.53 136.73,-90.07 184,-71 257.37,-41.41 291.57,-34.97 362,-71 396.45,-88.62 418.95,-129.79 430.13,-155.33"/>
+<polygon fill="#000000" stroke="#000000" points="427.04,-157 434.11,-164.89 433.5,-154.31 427.04,-157"/>
 </g>
-<!-- knew -->
+<!-- proc~break_conditions_three_phases -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_node10" class="node">
-<title>knew</title>
-<polygon fill="#777777" stroke="#777777" points="300,-24 246,-24 246,0 300,0 300,-24"/>
-<text text-anchor="middle" x="273" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">knew</text>
+<title>proc~break_conditions_three_phases</title>
+<g id="a_proc~~pt_envelope_three_phase~~CallsGraph_node10"><a xlink:href=".././proc/break_conditions_three_phases.html" xlink:title="break_conditions_three_phases">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="362,-24 184,-24 184,0 362,0 362,-24"/>
+<text text-anchor="middle" x="273" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions_three_phases</text>
+</a>
 </g>
-<!-- proc~pt_envelope_three_phase&#45;&gt;knew -->
+</g>
+<!-- proc~pt_envelope_three_phase&#45;&gt;proc~break_conditions_three_phases -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_edge9" class="edge">
-<title>proc~pt_envelope_three_phase&#45;&gt;knew</title>
-<path fill="none" stroke="#000000" d="M81.11,-163.99C95.35,-137.2 133.42,-72.21 184,-38 199.41,-27.58 219.07,-21.25 235.89,-17.46"/>
-<polygon fill="#000000" stroke="#000000" points="236.85,-20.84 245.94,-15.41 235.45,-13.98 236.85,-20.84"/>
+<title>proc~pt_envelope_three_phase&#45;&gt;proc~break_conditions_three_phases</title>
+<path fill="none" stroke="#000000" d="M81.11,-163.99C95.35,-137.2 133.42,-72.21 184,-38 189.76,-34.1 196.12,-30.78 202.7,-27.94"/>
+<polygon fill="#000000" stroke="#000000" points="204.42,-31.03 212.46,-24.13 201.87,-24.51 204.42,-31.03"/>
 </g>
 <!-- proc~full_newton&#45;&gt;proc~solve_system -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_edge10" class="edge">
 <title>proc~full_newton&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M309.74,-169.65C325.98,-166.22 345.26,-161.36 362,-155 378.75,-148.63 396.45,-139.33 410.6,-131.2"/>
-<polygon fill="#000000" stroke="#000000" points="412.5,-134.15 419.34,-126.06 408.95,-128.11 412.5,-134.15"/>
+<path fill="none" stroke="#000000" d="M309.68,-299.2C326.65,-296.5 346.55,-291.24 362,-281 393.22,-260.3 416.28,-222.3 428.53,-198.42"/>
+<polygon fill="#000000" stroke="#000000" points="431.82,-199.65 433.11,-189.13 425.55,-196.55 431.82,-199.65"/>
 </g>
 <!-- none~dgesv -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_node11" class="node">
 <title>none~dgesv</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="571,-126 517,-126 517,-102 571,-102 571,-126"/>
-<text text-anchor="middle" x="544" y="-111.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
+<polygon fill="#a7506f" stroke="#a7506f" points="571,-189 517,-189 517,-165 571,-165 571,-189"/>
+<text text-anchor="middle" x="544" y="-174.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
 </g>
 <!-- proc~solve_system&#45;&gt;none~dgesv -->
 <g id="proc~~pt_envelope_three_phase~~CallsGraph_edge11" class="edge">
 <title>proc~solve_system&#45;&gt;none~dgesv</title>
-<path fill="none" stroke="#000000" d="M481.01,-114C489.51,-114 498.42,-114 506.75,-114"/>
-<polygon fill="#000000" stroke="#000000" points="506.92,-117.5 516.92,-114 506.92,-110.5 506.92,-117.5"/>
+<path fill="none" stroke="#000000" d="M481.01,-177C489.51,-177 498.42,-177 506.75,-177"/>
+<polygon fill="#000000" stroke="#000000" points="506.92,-180.5 516.92,-177 506.92,-173.5 506.92,-180.5"/>
 </g>
 </g>
 </svg>
@@ -675,21 +676,21 @@ Three phases version.</p>
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-f~9">F</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-s~13">S</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-x~16">X</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-xs~3">XS</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-cps~3">cps</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-df~5">dF</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-dxds~6">dXdS</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-del_s~10">del_S</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-fname_env~4">fname_env</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-funit_output~4">funit_output</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-i~24">i</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-iters~4">iters</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-n~22">n</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-ns~18">ns</a>
-      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-point~4">point</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-f~5">F</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-s~6">S</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-x~6">X</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-xs">XS</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-cps">cps</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-df~2">dF</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-dxds~2">dXdS</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-del_s">del_S</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-fname_env~2">fname_env</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-funit_output~2">funit_output</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-i~13">i</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-iters~2">iters</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-n~15">n</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-ns~6">ns</a>
+      <a class="list-group-item" href="../proc/pt_envelope_three_phase.html#variable-point~2">point</a>
     </div>
   </div>
 </div>
@@ -704,77 +705,77 @@ Three phases version.</p>
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-f~9"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-f~5"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>F</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-s~13"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-s~6"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-x~16"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~6"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>X</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-xs~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-xs"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>XS</strong>(max_points,size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-cps~3"></span>type(<a href='../type/critical_point.html'>critical_point</a>),</td>
+  <td><span class="anchor" id="variable-cps"></span>type(<a href='../type/critical_point.html'>critical_point</a>),</td>
 <td>public,</td>  <td>allocatable</td><td>::</td>
   <td><strong>cps</strong>(:)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-df~5"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-df~2"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dF</strong>(size(X0),size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dxds~6"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dxds~2"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dXdS</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s~10"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>del_S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-fname_env~4"></span>character(len=254),</td>
+  <td><span class="anchor" id="variable-fname_env~2"></span>character(len=254),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>fname_env</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-funit_output~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-funit_output~2"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>funit_output</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-i~24"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~13"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-iters~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-iters~2"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>iters</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-n~22"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~15"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>n</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~18"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~6"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-point~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-point~2"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>point</strong></td><td></td><td></td><td></td>
 </tr>
@@ -807,7 +808,7 @@ Three phases version.</p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-10-18 14:16            </p>
+ on 2023-10-18 17:31            </p>
         </div>
       </div>
       <br>

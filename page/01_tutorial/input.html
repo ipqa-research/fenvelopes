@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
    <meta name="description" content="Calculation of phase envelops using Equations of State">
     <meta name="author" content="Federico Benelli" >
-    <link rel="icon" href="./favicon.png">
+    <link rel="icon" href="../../favicon.png">
 
-    <title> fenvelopes </title>
+    <title>Setting up the config file &ndash; fenvelopes</title>
 
-    <link href="./css/bootstrap.min.css" rel="stylesheet">
-    <link href="./css/pygments.css" rel="stylesheet">
-    <link href="./css/font-awesome.min.css" rel="stylesheet">
-    <link href="./css/local.css" rel="stylesheet">
-    <link  href="./tipuesearch/tipuesearch.css" rel="stylesheet">
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/pygments.css" rel="stylesheet">
+    <link href="../../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../../css/local.css" rel="stylesheet">
+    <link  href="../../tipuesearch/tipuesearch.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -22,8 +22,8 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
-    <script src="./js/jquery-2.1.3.min.js"></script>
-    <script src="./js/svg-pan-zoom.min.js"></script>
+    <script src="../../js/jquery-2.1.3.min.js"></script>
+    <script src="../../js/svg-pan-zoom.min.js"></script>
 
   </head>
 
@@ -39,33 +39,33 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="./index.html">fenvelopes </a>
+          <a class="navbar-brand" href="../../index.html">fenvelopes </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href='./page/index.html'>User Guide</a></li>
+            <li><a href='../../page/index.html'>User Guide</a></li>
             <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
               <a href="#" class="dropdown-toggle"
               data-toggle="dropdown" role="button"
               aria-haspopup="true"
      aria-expanded="false">Contents <span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <li><a href="./lists/files.html">Source Files</a></li>
-            <li><a href="./lists/modules.html">Modules</a></li>
-            <li><a href="./lists/procedures.html">Procedures</a></li>
-                   <li><a href="./lists/types.html">Derived Types</a></li>
-            <li><a href="./program/main.html">Program</a></li>
+            <li><a href="../../lists/files.html">Source Files</a></li>
+            <li><a href="../../lists/modules.html">Modules</a></li>
+            <li><a href="../../lists/procedures.html">Procedures</a></li>
+                   <li><a href="../../lists/types.html">Derived Types</a></li>
+            <li><a href="../../program/main.html">Program</a></li>
        
             </ul>
         
             </li>
-<li class="visible-xs hidden-sm visible-lg"><a href="./lists/files.html">Source Files</a></li>
-<li class="visible-xs hidden-sm visible-lg"><a href="./lists/modules.html">Modules</a></li>
-<li class="visible-xs hidden-sm visible-lg"><a href="./lists/procedures.html">Procedures</a></li>
-                             <li class="visible-xs hidden-sm visible-lg"><a href="./lists/types.html">Derived Types</a></li>
-<li class="visible-xs hidden-sm visible-lg"><a href="./program/main.html">Program</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../../lists/files.html">Source Files</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../../lists/modules.html">Modules</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../../lists/procedures.html">Procedures</a></li>
+                             <li class="visible-xs hidden-sm visible-lg"><a href="../../lists/types.html">Derived Types</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../../program/main.html">Program</a></li>
           </ul>
-        <form action="./search.html" class="navbar-form navbar-right" role="search">
+        <form action="../../search.html" class="navbar-form navbar-right" role="search">
         <div class="form-group">
           <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
         </div>
@@ -78,49 +78,29 @@
     </nav>
 
     <div class="container">
-      <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <p>Calculation of phase envelops using Equations of State</p>
-	<p> Find us on&hellip;</p>
-        <p>
-          <a class="btn btn-lg btn-primary" href="https://github.com/fedebenelli/fenvelopes" role="button">GitHub</a>
-        </p>
-      </div>
-
-      <div class="row" id='text'>
-        <div class="col-md-8">
-          <h1>fenvelopes</h1>
-          <h1 id="fenvelopes">fenvelopes</h1>
-<p>Fortran program to calculate phase envelopes.</p>
-<p>This is an ongoing project that intends te be a fully fledged generator of phase
-equilibria diagrams using Equations of State.</p>
-<h2 id="capabilities">Capabilities</h2>
-<p>Right now <code>fenvelopes</code> calculates three kinds of phase-envelopes.</p>
-<ul>
-<li>[x] Two-phase PT envelopes</li>
-<li>[o] Three-phase PT envelopes<ul>
-<li>[x] PT envelopes based on double saturation points.</li>
-<li>[ ] Isolated PT envelopes</li>
-</ul>
-</li>
-<li>[x] Two-phase Px envelopes</li>
-<li>[ ] Three-phase Px envelopes<ul>
-<li>[x] Px envelopes based on double saturation points.</li>
-<li>[ ] Isolated Px envelopes.</li>
-</ul>
-</li>
-<li>[ ] Python wrappers to ease up scripting and plotting.</li>
-</ul>
-<h2 id="usage">Usage</h2>
-<p>This program is intended to be used as a <code>CLI</code> software. The command used to
-calculate phase diagrams is:</p>
-<div class="codehilite"><pre><span></span><code>fenvelopes --infile input_file.nml
-</code></pre></div>
-
-<p>This will generate an <code>fenvelopes_output</code> directory. Which contains all the
-generated output files with the relevant data.</p>
-<h3 id="input-files">Input files</h3>
-<p>The input files </p>
+  <div class="row">
+    <h1>Setting up the config file</h1>
+    <div class="row">
+    <div class="col-lg-12">
+    <div class="well well-sm" style="min-height: 40px;">
+      <ul class="list-inline" style="margin-bottom:0px; display:inline">
+<!--
+-->
+      </ul>
+        <ol class="breadcrumb in-well">
+         <li><a href='../../page/index.html'>User Guide</a></li>
+         <li><a href='../../page/01_tutorial/index.html'>User documentation</a></li>
+         <li class="active">Setting up the config file</li>
+      </ol>
+    </div>
+    </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-9 col-md-push-3" id='text'>
+      <p>The input files are based on the <code>namelist</code> format provided intrisicly in the
+Fortran standard. An usual input file is structured like:</p>
 <div class="codehilite"><pre><span></span><code><span class="c">! input.nml</span>
 <span class="c">!</span>
 <span class="c">! Namelist based input file</span>
@@ -171,7 +151,8 @@ generated output files with the relevant data.</p>
 <span class="w">    </span><span class="n">w</span><span class="o">=</span><span class="mf">0.098</span><span class="w"> </span><span class="mf">0.535</span><span class="w"> </span><span class="mf">0.891</span><span class="w"> </span><span class="mf">1.085</span><span class="w"> </span><span class="mf">0.344</span><span class="w"></span>
 <span class="o">/</span><span class="w"></span>
 
-<span class="p">&amp;</span><span class="n">nml_px</span><span class="w"> </span><span class="c">! Px envelopes relevant info</span>
+<span class="p">&amp;</span><span class="n">nml_px</span><span class="w"> </span>
+<span class="w">    </span><span class="c">! Px envelopes relevant info</span>
 <span class="w">    </span><span class="c">! Temperature</span>
 <span class="w">    </span><span class="n">T</span><span class="o">=</span><span class="mi">35</span><span class="mf">0.0</span><span class="w"></span>
 
@@ -185,98 +166,37 @@ generated output files with the relevant data.</p>
 <span class="w">    </span><span class="n">injection_case</span><span class="o">=</span><span class="s2">&quot;displace&quot;</span><span class="w"> </span><span class="c">! [dilute|displace]</span>
 <span class="o">/</span><span class="w"></span>
 </code></pre></div>
+    </div>
+    <div class="col-md-3 col-md-pull-9">
+      <hr class="visible-xs visible-sm">
+        <div class="well toc">
+          <ul class="nav nav-stacked nav-pills">
+            <li role="presentation" class="title"><a href='../../page/index.html'>User Guide</a></li>
+          </ul>
+          <hr>
+          <ul class="nav nav-stacked nav-pills">
+            <li role="presentation">
+            <a href='../../page/01_tutorial/index.html'>User documentation</a>
+            <ul class="nav nav-stacked nav-pills">
+                          <li role="presentation" class="disabled">
+            <a href='../../page/01_tutorial/input.html'>Setting up the config file</a>
+            </li>
 
-<h3 id="output">Output</h3>
-<p>All the output is directed to a generated folder <code>fenvelopes_output</code>. With the files</p>
-<p><code>env-&lt;nphases&gt;ph-&lt;env_kind&gt;_&lt;envnumber&gt;.dat</code></p>
-<p>Were all the envelope&rsquo;s calculated points are written in a <code>csv-like</code> format,
-delimited by spaces.</p>
-<h2 id="installation">Installation</h2>
-<p>This program uses <a href="https://fpm.fortran-lang.org"><code>fpm</code></a> as a builder. <code>fpm</code>
-handles all the needed dependencies and compiling procedures.
-It is distributed in many ways, but we recommend the <code>pip</code> distribution. </p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># using pipx</span>
-pipx install fpm
-</code></pre></div>
+            </ul>
+            </li>
+            <li role="presentation">
+            <a href='../../page/02_theory/index.html'>Theory behind this software</a>
+            <ul class="nav nav-stacked nav-pills">
+                          <li role="presentation">
+            <a href='../../page/02_theory/continuation.html'>Continuation method</a>
+            </li>
 
-<p>To install this program is as simple as:</p>
-<div class="codehilite"><pre><span></span><code>git clone https://www.github.com/fedebenelli/envelopes
-cd envelopes
-fpm install --profile release
-</code></pre></div>
-
-<p>This will make <code>fenvelopes</code> accessible from any directory of your computer</p>
-<p>If you don&rsquo;t want to install the program and just run it you can also run it
-with <code>fpm</code></p>
-<div class="codehilite"><pre><span></span><code>fpm run --profile release -- --infile &lt;infile.nml PATH&gt;
-</code></pre></div>
+            </ul>
+            </li>
+          </ul>
         </div>
-        <div class="col-md-4">
-	  <div class="well">
-          <h2>Developer Info</h2>
-          <h4>Federico Benelli</h4>
-          <p>PhD student with focus on reservoir PVT simulation.</p>
-            <div class="text-center"><div class="btn-group" role="group">
-              <a class="btn btn-lg btn-primary" href="mailto:federico.benelli@mi.unc.edu.ar"><i class="fa fa-envelope fa-lg"></i></a>
-              <a class="btn btn-lg btn-primary" href="https://github.com/fedebenelli"><i class="fa fa-github fa-lg"></i></a>
-            </div></div>
-       </div>
-       </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-6 col-sm-3">
-              <h3>Source Files</h3>
-              <ul>                    <li><a href='./sourcefile/constants.f90.html'>constants.f90</a></li>
-                    <li><a href='./sourcefile/envelopes.f90.html'>envelopes.f90</a></li>
-                    <li><a href='./sourcefile/flash.f90.html'>Flash.f90</a></li>
-                    <li><a href='./sourcefile/io_nml.f90.html'>io_nml.f90</a></li>
-                    <li><a href='./sourcefile/linalg.f90.html'>linalg.f90</a></li>
-                    <li><a href='./sourcefile/main.f90.html'>main.f90</a></li>
-                    <li><a href='./sourcefile/mod_continuation.f90.html'>mod_continuation.f90</a></li>
-                    <li><a href='./sourcefile/mod_inj_envelopes.f90.html'>mod_inj_envelopes.f90</a></li>
-                    <li><a href='./sourcefile/optim.f90.html'>optim.f90</a></li>
-                    <li><a href='./sourcefile/types.f90.html'>types.f90</a></li>
-</ul>
-          </div>
-		  <div class="col-xs-6 col-sm-3">
-              <h3>Modules</h3>
-              <ul>                    <li><a href='./module/constants.html'>constants</a></li>
-                    <li><a href='./module/dtypes.html'>dtypes</a></li>
-                    <li><a href='./module/envelopes.html'>envelopes</a></li>
-                    <li><a href='./module/inj_envelopes.html'>inj_envelopes</a></li>
-                    <li><a href='./module/io_nml.html'>io_nml</a></li>
-                    <li><a href='./module/linalg.html'>linalg</a></li>
-                    <li><a href='./module/nelder_mead.html'>nelder_mead</a></li>
-                    <li><a href='./module/optimization.html'>optimization</a></li>
-                    <li><a href='./module/phase_equilibria.html'>phase_equilibria</a></li>
-</ul>
-          </div>
-		  <div class="col-xs-6 col-sm-3">
-              <h3>Procedures</h3>
-              <ul>                    <li><a href='./proc/betalimits.html'>betalimits</a></li>
-                    <li><a href='./proc/betato01.html'>betato01</a></li>
-                    <li><a href='./proc/break_conditions.html'>break_conditions</a></li>
-                    <li><a href='./proc/break_conditions_three_phases.html'>break_conditions_three_phases</a></li>
-                    <li><a href='./proc/break_conditions_three_phases~2.html'>break_conditions_three_phases</a></li>
-                    <li><a href='./proc/dfds.html'>dFdS</a></li>
-                    <li><a href='./proc/envelope2.html'>envelope2</a></li>
-                    <li><a href='./interface/f.html'>F</a></li>
-                    <li><a href='./proc/f2.html'>F2</a></li>
-                    <li><a href='./proc/f_injection.html'>F_injection</a></li>
-</ul>
-          </div>
-		  <div class="col-xs-6 col-sm-3">
-              <h3>Derived Types</h3>
-              <ul>                    <li><a href='./type/absenvel.html'>AbsEnvel</a></li>
-                    <li><a href='./type/critical_point.html'>critical_point</a></li>
-                    <li><a href='./type/env3.html'>env3</a></li>
-                    <li><a href='./type/envelope.html'>envelope</a></li>
-                    <li><a href='./type/injelope.html'>injelope</a></li>
-                    <li><a href='./type/point.html'>point</a></li>
-                    <li><a href='./type/ptenvel3.html'>PTEnvel3</a></li>
-</ul>
-          </div>
-      </div>
+    </div>
+  </div>
     <hr>    
     </div> <!-- /container -->
     <footer>
@@ -302,9 +222,9 @@ with <code>fpm</code></p>
 <!--
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 -->
-    <script src="./js/bootstrap.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="./js/ie10-viewport-bug-workaround.js"></script>
+    <script src="../../js/ie10-viewport-bug-workaround.js"></script>
 
     <!-- MathJax JavaScript
     ================================================== -->
@@ -318,9 +238,9 @@ with <code>fpm</code></p>
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
-    <script src="./tipuesearch/tipuesearch_content.js"></script>
-    <script src="./tipuesearch/tipuesearch_set.js"></script>
-    <script src="./tipuesearch/tipuesearch.js"></script>
+    <script src="../../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../../tipuesearch/tipuesearch.js"></script>
     
   </body>
 </html>

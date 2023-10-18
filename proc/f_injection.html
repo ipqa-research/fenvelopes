@@ -43,6 +43,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
+            <li><a href='../page/index.html'>User Guide</a></li>
             <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
               <a href="#" class="dropdown-toggle"
               data-toggle="dropdown" role="button"
@@ -119,24 +120,24 @@
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
       <a class="list-group-item" href="../proc/f_injection.html#variable-k">K</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-p~2">P</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-vy~2">Vy</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-p~6">P</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-vy~4">Vy</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-vz">Vz</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-alpha~8">alpha</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_y">dlnphi_dn_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_y~3">dlnphi_dn_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_z">dlnphi_dn_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_y~2">dlnphi_dp_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_y~4">dlnphi_dp_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_z~2">dlnphi_dp_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_y">dlnphi_dt_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_y~3">dlnphi_dt_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_z">dlnphi_dt_z</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dzda~2">dzda</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-i~13">i</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-j~7">j</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_y~2">lnfug_y</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_z~2">lnfug_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-n~12">n</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-y~10">y</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-z~9">z</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-i~18">i</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-j~10">j</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_y~5">lnfug_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_z~3">lnfug_z</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-n~18">n</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-y~14">y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-z~13">z</a>
     </div>
   </div>
 </div>
@@ -287,31 +288,31 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x~7"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~15"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>X</strong>(:)</td><td><p>Vector of variables</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~8"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~16"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td><p>Number of specification</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-s~4"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-s~11"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>S</strong></td><td><p>Specification value</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-f~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-f~7"></span>real(kind=pr),</td>
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>F</strong>(size(X))</td><td><p>Vector of functions valuated</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-df~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-df~3"></span>real(kind=pr),</td>
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>df</strong>(size(x),size(X))</td><td><p>Jacobian matrix</p></td>
@@ -442,24 +443,24 @@
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
       <a class="list-group-item" href="../proc/f_injection.html#variable-k">K</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-p~2">P</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-vy~2">Vy</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-p~6">P</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-vy~4">Vy</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-vz">Vz</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-alpha~8">alpha</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_y">dlnphi_dn_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_y~3">dlnphi_dn_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dn_z">dlnphi_dn_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_y~2">dlnphi_dp_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_y~4">dlnphi_dp_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dp_z~2">dlnphi_dp_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_y">dlnphi_dt_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_y~3">dlnphi_dt_y</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dlnphi_dt_z">dlnphi_dt_z</a>
       <a class="list-group-item" href="../proc/f_injection.html#variable-dzda~2">dzda</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-i~13">i</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-j~7">j</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_y~2">lnfug_y</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_z~2">lnfug_z</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-n~12">n</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-y~10">y</a>
-      <a class="list-group-item" href="../proc/f_injection.html#variable-z~9">z</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-i~18">i</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-j~10">j</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_y~5">lnfug_y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-lnfug_z~3">lnfug_z</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-n~18">n</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-y~14">y</a>
+      <a class="list-group-item" href="../proc/f_injection.html#variable-z~13">z</a>
     </div>
   </div>
 </div>
@@ -479,12 +480,12 @@
   <td><strong>K</strong>(size(X)-2)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-p~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-p~6"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>P</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-vy~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-vy~4"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>Vy</strong></td><td></td><td></td><td></td>
 </tr>
@@ -499,7 +500,7 @@
   <td><strong>alpha</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dlnphi_dn_y"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dlnphi_dn_y~3"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2, size(X) - 2)</td><td>::</td>
   <td><strong>dlnphi_dn_y</strong></td><td></td><td></td><td></td>
 </tr>
@@ -509,7 +510,7 @@
   <td><strong>dlnphi_dn_z</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dlnphi_dp_y~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dlnphi_dp_y~4"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>dlnphi_dp_y</strong></td><td></td><td></td><td></td>
 </tr>
@@ -519,7 +520,7 @@
   <td><strong>dlnphi_dp_z</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dlnphi_dt_y"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dlnphi_dt_y~3"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>dlnphi_dt_y</strong></td><td></td><td></td><td></td>
 </tr>
@@ -534,37 +535,37 @@
   <td><strong>dzda</strong>(size(X)-2)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-i~13"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~18"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-j~7"></span>integer,</td>
+  <td><span class="anchor" id="variable-j~10"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>j</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-lnfug_y~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-lnfug_y~5"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>lnfug_y</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-lnfug_z~2"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-lnfug_z~3"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>lnfug_z</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-n~12"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~18"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>n</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-y~10"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-y~14"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>y</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-z~9"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-z~13"></span>real(kind=pr),</td>
 <td>public,</td>  <td>dimension(size(X) - 2)</td><td>::</td>
   <td><strong>z</strong></td><td></td><td></td><td></td>
 </tr>
@@ -597,7 +598,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-10-18 14:16            </p>
+ on 2023-10-18 17:31            </p>
         </div>
       </div>
       <br>
