@@ -716,6 +716,23 @@ contains
       integer :: n_case
    end function
 
+   function remove_duplicates(envels) result(clean_envels)
+      !! From a set of envelopes check if they are the same line
+      class(injelope) :: envels(:)
+      type(injelope), allocatable :: clean_envels(:)
+
+      if (size(envels) /= 1) then
+      else
+         clean_envels = envels
+      end if
+   end function
+
+   function same_line(env1, env2)
+      !! 
+      class(injelope), intent(in) :: env1, env2
+      logical :: same_line
+   end function
+
    ! ===========================================================================
    ! Initialization procedures
    ! ------------------------------------------------------------------------{{{
