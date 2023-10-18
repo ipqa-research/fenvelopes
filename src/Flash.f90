@@ -4,6 +4,19 @@ module phase_equilibria
    implicit none
 
 contains
+
+   subroutine flash_pt(z, p, t, x, y, beta, its)
+      real(pr), intent(in) :: z(:) !! Feed phase molar fractions
+      real(pr), intent(in) :: p !! Pressure [bar]
+      real(pr), intent(in) :: t !! Temperature [K]
+      real(pr), intent(out) :: x(size(z)) !! Phase X molar fractions
+      real(pr), intent(out) :: y(size(z)) !! Phase Y molar fractions
+      real(pr), intent(out) :: beta !! Molar Y fraction
+      real(pr), optional, intent(out) :: its !! Number of iterations
+
+      real(pr) :: rho_x, rho_y
+   end subroutine
+
    subroutine flash(spec, FIRST, z, t, p, v, x, y, rho_x, rho_y, beta, iter)
       ! Flash specification, eos id and  number of compounds in the system
       character(len=*), intent(in) :: spec !! Flash specification [PT | VT]
@@ -229,7 +242,6 @@ contains
       ! print *, beta
    end subroutine flash
 
-
    subroutine betato01(n, z, KFACT)
       implicit none
       integer, intent(in) :: n  ! number of compounds in the system
@@ -248,7 +260,6 @@ contains
          end if
       end do
    end subroutine betato01
-
 
    subroutine betalimits(n, z, KFACT, bmin, bmax)
       implicit none

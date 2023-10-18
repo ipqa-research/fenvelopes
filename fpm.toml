@@ -24,7 +24,7 @@ forsolver = { git="https://github.com/gha3mi/forsolver.git" }
 progress-bar = { git="https://github.com/zoziha/progress-bar" }
 
 [fortran]
-implicit-external = true # default: false
+implicit-external = false # default: false
 implicit-typing   = false # default: false
 
 [preprocess]

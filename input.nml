@@ -46,7 +46,7 @@
 /
 
 &nml_px
-    T=500.0
+    T=273.0
     z_0=0.0246 0.3694 0.0752 0.0193 0.0157 0.0162 0.47145 0.00815
     z_injection=1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
     injection_case="displace" ![dilute|displace]

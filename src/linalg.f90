@@ -179,4 +179,56 @@ contains
       real(pr) :: y !! y value at `x_obj`
       y = (y2 - y1)/(x2 - x1)*(x_obj - x1) + y1
    end function
+
+   subroutine full_newton(fun, iters, X, ns, S, max_iters, F, dF)
+      !! Subroutine to solve a point in the envelope.
+      !!
+      !! Procedure that solves a point with the Newton-Raphson method.
+      use constants, only: ouput_path
+      interface
+         subroutine fun(X, ns, S, F, dF)
+            !! Function to solve
+            import pr
+            real(pr), intent(in) :: X(:)
+            integer, intent(in) :: ns
+            real(pr), intent(in) :: S
+            real(pr), intent(out) :: F(size(X))
+            real(pr), intent(out) :: dF(size(X), size(X))
+         end subroutine
+      end interface
+      !&<
+      integer,  intent(out)    :: iters !! Number of iterations needed
+      real(pr), intent(in out) :: X(:)  !! Variables vector
+      integer,  intent(in)     :: ns    !! Number of specification
+      real(pr), intent(in)     :: S     !! Specification value
+      integer, intent(in)      :: max_iters !! Maximum iterations
+      real(pr), intent(out)    :: F(size(X)) !! Function values at solved point
+      real(pr), intent(out)    :: df(size(X), size(X)) !! Jacobian values
+      !&>
+
+      real(pr) :: b(size(X)), A(size(X), size(X))
+      real(pr) :: dX(size(X)), tol = 1e-2
+      integer :: funit_log_newton
+
+      integer :: n
+
+      n = size(X)
+      dX = 20
+
+      newton: do iters = 1, max_iters
+         if (maxval(abs(dx/x)) < tol) exit newton
+         call fun(X, ns, S, b, a)
+         b = -b
+         dX = solve_system(A, b)
+
+         do while (maxval(abs(dx)) > 0.5*maxval(abs(x)))
+            dX = dX/2
+         end do
+
+         X = X + dX
+      end do newton
+
+      F = -b
+      dF = A
+   end subroutine
 end module linalg

@@ -2,10 +2,9 @@ module envelopes
    !! Functions to be used in the different continuation methods to trace
    !! phase envelopes 
    use constants, only: pr
-   use linalg, only: solve_system
+   use linalg, only: solve_system, full_newton
    use dtypes, only: AbsEnvel, envelope, critical_point
    use legacy_ar_models, only: nc, termo
-   use inj_envelopes, only: full_newton
    use progress_bar_module, only: progress_bar
    implicit none
 
@@ -124,6 +123,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
+      delS = delS*3
 
       S = S + delS
    end subroutine
@@ -284,6 +284,7 @@ contains
       use dtypes, only: envelope, critical_point
       use linalg, only: point, solve_system
       use constants, only: ouput_path
+      use io, only: str
       implicit none
 
       ! number of compounds in the system and starting point type
@@ -404,6 +405,8 @@ contains
          incipient_phase = "2ndliquid"
       end select
       write(funit_output, *) "#", incipient_phase
+      write(funit_output, "(*(A,2x))") "STAT", "iter", "ns", "T", "P", &
+         ("lnK"//str(i),i=1,n), ("y"//str(i), i=1,n)
 
       if (ichoice <= 2) then
          ! low T bub (1) or dew (2)
@@ -431,6 +434,8 @@ contains
       Xold = 0.d0
       dFdS = 0.d0
       dFdS(n + 2) = -1.d0
+
+      i=0
 
       do while (run)
          i = i + 1
@@ -475,7 +480,7 @@ contains
          if (iter > max_iter) run = .false.
          if (P > maxP) maxP = P
 
-         if (run) write(funit_output, *) "SOL", iter, ns, T, P, exp(X(:n))
+         if (run) write(funit_output, *) "SOL", iter, ns, T, P, X(:n), z*exp(X(:n))
 
          if (incipient_phase == "liquid" .and. i > 1) then
             ! TODO: If this is the way the low p dew line finishes, 
@@ -495,7 +500,7 @@ contains
             ! Stop and start a new one from low T false bubble point
             run = .false.
          end if
-         
+
          if (i > max_points - 50) exit
 
          if (sum(X(:n) * Xold(:n)) < 0) then  ! critical point detected
@@ -547,19 +552,23 @@ contains
                   real(pr) :: m(size(X))
                   real(pr) :: max_lnK, max_lnK2, delta_lnK
                   real(pr) :: delta_X(size(x))
+                  real(pr) :: Xin(size(X))
 
                   its = 0
                   delta = delS
 
+                  exit extrapolation
+
                   ! Variation of lnK based on deltaS
-                  m = 15.0_pr * (X - Xold2)/(delta)
-                  lnK_extrapolated = (delta) * m(:n) + X(:n)
+                  ! m = 37.0_pr * (X - Xold2)/(delta)
+                  ! lnK_extrapolated = (delta) * m(:n) + X(:n)
+                  lnK_extrapolated = X(:n) + 4 * delS * dXdS
 
                   if (all((X(:n) * lnK_extrapolated < 0), dim=1)) then
                      ! All lnK changed sign, so a CP is inminent
                      ! aproach it enough to force the jumping algorithm
                      do while( &
-                           maxval(abs(X(:n))) > 0.03 &
+                           maxval(abs(X(:n))) >= 0.03 &
                            .and. all(X(:n)*lnK_extrapolated > 0, dim=1)&
                         )
                         print *, its, "Getting to critical", &
@@ -847,7 +856,7 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(pt_F_three_phases, iters, X, ns, S, F, dF)
+         call full_newton(pt_F_three_phases, iters, X, ns, S, max_iters, F, dF)
          if (iters >= max_iters) then
             print *, "Breaking: Above max iterations"
             exit enveloop
@@ -886,7 +895,7 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dT
 
-            del_S = sign(1.7_pr, del_S)*minval([ &
+            del_S = sign(2.5_pr, del_S)*minval([ &
                                                max(abs(X(ns)/5), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
@@ -901,7 +910,7 @@ contains
 
                Xnew = X + dXdS*del_S
                dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-               dT = Xnew(2*n + 2) - X(2*n + 2)
+               dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
             end do
          end block fix_step
 
@@ -995,7 +1004,9 @@ contains
    ! ===========================================================================
    !  Intersections and crossings
    ! ---------------------------------------------------------------------------
-   subroutine get_case(dew, bub, hpl, intersections, self_intersections, this_case)
+   subroutine get_case(&
+      dew, bub, hpl, intersections, self_intersections, this_case &
+   )
       use linalg, only: intersection, point
       type(envelope), intent(in) :: dew
       type(envelope), intent(in) :: bub
@@ -1015,12 +1026,18 @@ contains
       if (size(inter_dew_bub) == 2) then
          this_case = "2_DEW_BUB"
          intersections = inter_dew_bub
+      else if (size(inter_hpl_bub) == 1 .and. size(inter_dew_bub) == 1) then
+         this_case = "2_HPL_BUB_DEW_BUB"
+         intersections = [inter_hpl_bub, inter_dew_bub]
       else if (size(inter_hpl_bub) == 1) then
          this_case = "1_HPL_BUB"
          intersections = inter_hpl_bub
       else if (size(inter_hpl_dew) == 1) then
          this_case = "1_HPL_DEW"
          intersections = inter_hpl_dew
+      else
+         this_case = "0"
+         allocate(intersections(0))
       end if
    end subroutine
 
