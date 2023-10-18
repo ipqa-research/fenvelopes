@@ -300,6 +300,7 @@ contains
 
       real(pr) :: Xnew(size(X-1))
       real(pr) :: dP, dalpha
+      real(pr) :: dP_tol, dalpha_tol
       integer :: n
       
       n = size(X) - 2
@@ -316,7 +317,15 @@ contains
       dP = exp(Xnew(n + 1)) - exp(X(n + 1))
       dalpha = Xnew(n + 2) - X(n + 2)
 
-      do while (abs(dP) > max_dP .or. abs(dalpha) > max_dalpha)
+      if (X(n+2) > 1.9) then 
+         dP_tol = max_dP/2
+         dalpha_tol = max_dalpha/2
+      else
+         dP_tol = max_dp
+         dalpha_tol = max_dalpha
+      end if
+
+      do while (abs(dP) > dp_tol .or. abs(dalpha) > dalpha_tol)
          dXdS = dXdS/2.0_pr
 
          Xnew = X + dXdS*del_S
@@ -735,7 +744,7 @@ contains
 
    ! ===========================================================================
    ! Initialization procedures
-   ! ------------------------------------------------------------------------{{{
+   ! ---------------------------------------------------------------------------
    function px_two_phase_from_pt(t_inj, pt_env_2, t_tol, del_S0) result(envel)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
@@ -1011,5 +1020,5 @@ contains
             call nm_opt(foo, x0, stat, step)
          end subroutine
    end function
-   ! ========================================================================}}}
+   ! ===========================================================================
 end module
