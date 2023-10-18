@@ -18,7 +18,7 @@ module inj_envelopes
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
    integer :: max_iters = 150 !! Maximum number of iterations for a newton step
-   integer, parameter :: max_points = 500 !! Maximum number of points for each envelope
+   integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
@@ -26,12 +26,12 @@ module inj_envelopes
    character(len=255) :: FE_LOG
    
    ! Two-phase settings
-   real(pr) :: del_S_multiplier = 1.5_pr
-   real(pr) :: max_dp=30.0_pr
+   real(pr) :: del_S_multiplier = 1.6_pr
+   real(pr) :: max_dp=50.0_pr
    real(pr) :: max_dalpha=0.01_pr
    
    ! Three phase parameters
-   real(pr) :: del_S_multiplier_three_phase = 1.25_pr
+   real(pr) :: del_S_multiplier_three_phase = 1.5_pr
    real(pr) :: critical_fact = 4.0_pr
    ! ===========================================================================
 contains
