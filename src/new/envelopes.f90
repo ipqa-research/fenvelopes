@@ -123,6 +123,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
+      delS = delS*3
 
       S = S + delS
    end subroutine
