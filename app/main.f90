@@ -169,7 +169,7 @@ contains
          pt_dew, pt_bub, pt_hpl, &
          intersections, self_intersections, pt_case &
       )
-      ! print *, style_bold // pt_case // style_reset
+      print *, style_bold // pt_case // style_reset
       ! ========================================================================
 
       three_phase: block
@@ -182,10 +182,24 @@ contains
                   pt_dew, pt_bub, intersections, &
                   pt_bub_3, pt_dew_3 &
             )
+         case("2_HPL_BUB_DEW_BUB")
+            call pt_three_phase_from_intersection(&
+                  pt_hpl, pt_bub, [intersections(1)], &
+                  pt_bub_3, pt_dew_3 &
+            )
+            call pt_three_phase_from_intersection(&
+                  pt_dew, pt_bub, [intersections(2)], &
+                  pt_bub_3, pt_dew_3 &
+            )
          case("1_HPL_DEW")
             call pt_three_phase_from_intersection(&
                   pt_hpl, pt_dew, intersections, &
                   pt_bub_3, pt_dew_3 &
+            )
+         case("1_HPL_BUB")
+            call pt_three_phase_from_intersection(&
+                  pt_hpl, pt_bub, intersections, &
+                  pt_dew_3, pt_bub_3 &
             )
          end select
       end block three_phase
