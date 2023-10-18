@@ -498,7 +498,7 @@ contains
             ! Stop and start a new one from low T false bubble point
             run = .false.
          end if
-         
+
          if (i > max_points - 50) exit
 
          if (sum(X(:n) * Xold(:n)) < 0) then  ! critical point detected
@@ -550,19 +550,23 @@ contains
                   real(pr) :: m(size(X))
                   real(pr) :: max_lnK, max_lnK2, delta_lnK
                   real(pr) :: delta_X(size(x))
+                  real(pr) :: Xin(size(X))
 
                   its = 0
                   delta = delS
 
+                  exit extrapolation
+
                   ! Variation of lnK based on deltaS
-                  m = 15.0_pr * (X - Xold2)/(delta)
-                  lnK_extrapolated = (delta) * m(:n) + X(:n)
+                  ! m = 37.0_pr * (X - Xold2)/(delta)
+                  ! lnK_extrapolated = (delta) * m(:n) + X(:n)
+                  lnK_extrapolated = X(:n) + 4 * delS * dXdS
 
                   if (all((X(:n) * lnK_extrapolated < 0), dim=1)) then
                      ! All lnK changed sign, so a CP is inminent
                      ! aproach it enough to force the jumping algorithm
                      do while( &
-                           maxval(abs(X(:n))) > 0.03 &
+                           maxval(abs(X(:n))) >= 0.03 &
                            .and. all(X(:n)*lnK_extrapolated > 0, dim=1)&
                         )
                         print *, its, "Getting to critical", &
