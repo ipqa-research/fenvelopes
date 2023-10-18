@@ -53,6 +53,7 @@
             <li><a href="../lists/modules.html">Modules</a></li>
             <li><a href="../lists/procedures.html">Procedures</a></li>
                    <li><a href="../lists/types.html">Derived Types</a></li>
+            <li><a href="../program/main.html">Program</a></li>
        
             </ul>
         
@@ -61,6 +62,7 @@
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
                              <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../program/main.html">Program</a></li>
           </ul>
         <form action="../search.html" class="navbar-form navbar-right" role="search">
         <div class="form-group">
@@ -87,7 +89,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.9% of total for procedures.">26 statements</a>
+    title=" 1.2% of total for procedures.">26 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/io_nml.f90"> Source File</a></li>
   </ul>
@@ -116,8 +118,8 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/read_components.html#variable-i~10">i</a>
-      <a class="list-group-item" href="../proc/read_components.html#variable-j~5">j</a>
+      <a class="list-group-item" href="../proc/read_components.html#variable-i~18">i</a>
+      <a class="list-group-item" href="../proc/read_components.html#variable-j~9">j</a>
     </div>
   </div>
 </div>
@@ -130,6 +132,10 @@
     <h2>private subroutine read_components()</h2>
     
 
+    <p>Read components
+Read kij and lij matrixes
+Since in the ClassicVdW mixing rules the bij matrix is constant
+it&rsquo;s stored beforehand</p>
 
     <h3>Arguments</h3>
     <em>None</em>
@@ -154,8 +160,8 @@
 <!-- proc~read_components -->
 <g id="proc~~read_components~~CallsGraph_node1" class="node">
 <title>proc~read_components</title>
-<polygon fill="none" stroke="black" points="108,-146 0,-146 0,-122 108,-122 108,-146"/>
-<text text-anchor="middle" x="54" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50">read_components</text>
+<polygon fill="none" stroke="black" points="108,-148 0,-148 0,-124 108,-124 108,-148"/>
+<text text-anchor="middle" x="54" y="-133.6" font-family="Helvetica,sans-Serif" font-size="10.50">read_components</text>
 </g>
 <!-- proc~read_srk -->
 <g id="proc~~read_components~~CallsGraph_node2" class="node">
@@ -169,89 +175,89 @@
 <!-- proc~read_components&#45;&gt;proc~read_srk -->
 <g id="proc~~read_components~~CallsGraph_edge1" class="edge">
 <title>proc~read_components&#45;&gt;proc~read_srk</title>
-<path fill="none" stroke="#000000" d="M63.34,-146.04C78.01,-166.69 110.14,-209.47 144,-239 145.12,-239.98 146.29,-240.94 147.49,-241.88"/>
-<polygon fill="#000000" stroke="#000000" points="145.56,-244.81 155.73,-247.8 149.65,-239.12 145.56,-244.81"/>
-</g>
-<!-- proc~read_kij_lij -->
-<g id="proc~~read_components~~CallsGraph_node3" class="node">
-<title>proc~read_kij_lij</title>
-<g id="a_proc~~read_components~~CallsGraph_node3"><a xlink:href=".././proc/read_kij_lij.html" xlink:title="read_kij_lij">
-<polygon fill="#d9534f" stroke="#d9534f" points="212,-146 144,-146 144,-122 212,-122 212,-146"/>
-<text text-anchor="middle" x="178" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_kij_lij</text>
-</a>
-</g>
-</g>
-<!-- proc~read_components&#45;&gt;proc~read_kij_lij -->
-<g id="proc~~read_components~~CallsGraph_edge2" class="edge">
-<title>proc~read_components&#45;&gt;proc~read_kij_lij</title>
-<path fill="none" stroke="#000000" d="M108.16,-134C116.64,-134 125.34,-134 133.57,-134"/>
-<polygon fill="#000000" stroke="#000000" points="133.69,-137.5 143.69,-134 133.69,-130.5 133.69,-137.5"/>
-</g>
-<!-- b -->
-<g id="proc~~read_components~~CallsGraph_node4" class="node">
-<title>b</title>
-<polygon fill="#777777" stroke="#777777" points="205,-188 151,-188 151,-164 205,-164 205,-188"/>
-<text text-anchor="middle" x="178" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">b</text>
-</g>
-<!-- proc~read_components&#45;&gt;b -->
-<g id="proc~~read_components~~CallsGraph_edge3" class="edge">
-<title>proc~read_components&#45;&gt;b</title>
-<path fill="none" stroke="#000000" d="M89.96,-146.04C106.05,-151.58 125.12,-158.14 141.31,-163.71"/>
-<polygon fill="#000000" stroke="#000000" points="140.36,-167.09 150.96,-167.03 142.64,-160.47 140.36,-167.09"/>
+<path fill="none" stroke="#000000" d="M63.62,-148.12C78.48,-168.47 110.56,-210.11 144,-239 145.12,-239.97 146.3,-240.93 147.5,-241.87"/>
+<polygon fill="#000000" stroke="#000000" points="145.58,-244.8 155.75,-247.77 149.65,-239.11 145.58,-244.8"/>
 </g>
 <!-- proc~read_pr78 -->
-<g id="proc~~read_components~~CallsGraph_node5" class="node">
+<g id="proc~~read_components~~CallsGraph_node3" class="node">
 <title>proc~read_pr78</title>
-<g id="a_proc~~read_components~~CallsGraph_node5"><a xlink:href=".././proc/read_pr78.html" xlink:title="read_pr78">
+<g id="a_proc~~read_components~~CallsGraph_node3"><a xlink:href=".././proc/read_pr78.html" xlink:title="read_pr78">
 <polygon fill="#d9534f" stroke="#d9534f" points="211.5,-230 144.5,-230 144.5,-206 211.5,-206 211.5,-230"/>
 <text text-anchor="middle" x="178" y="-215.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_pr78</text>
 </a>
 </g>
 </g>
 <!-- proc~read_components&#45;&gt;proc~read_pr78 -->
-<g id="proc~~read_components~~CallsGraph_edge5" class="edge">
+<g id="proc~~read_components~~CallsGraph_edge2" class="edge">
 <title>proc~read_components&#45;&gt;proc~read_pr78</title>
-<path fill="none" stroke="#000000" d="M71.56,-146.09C89.31,-158.96 118.38,-179.8 144,-197 145.65,-198.11 147.35,-199.24 149.08,-200.37"/>
-<polygon fill="#000000" stroke="#000000" points="147.4,-203.45 157.7,-205.94 151.2,-197.57 147.4,-203.45"/>
+<path fill="none" stroke="#000000" d="M72.28,-148.1C90.12,-160.54 118.84,-180.38 144,-197 145.66,-198.09 147.37,-199.21 149.09,-200.34"/>
+<polygon fill="#000000" stroke="#000000" points="147.43,-203.43 157.73,-205.9 151.22,-197.54 147.43,-203.43"/>
 </g>
 <!-- bij -->
-<g id="proc~~read_components~~CallsGraph_node6" class="node">
+<g id="proc~~read_components~~CallsGraph_node4" class="node">
 <title>bij</title>
-<polygon fill="#777777" stroke="#777777" points="205,-104 151,-104 151,-80 205,-80 205,-104"/>
-<text text-anchor="middle" x="178" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">bij</text>
+<polygon fill="#777777" stroke="#777777" points="205,-188 151,-188 151,-164 205,-164 205,-188"/>
+<text text-anchor="middle" x="178" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">bij</text>
 </g>
 <!-- proc~read_components&#45;&gt;bij -->
-<g id="proc~~read_components~~CallsGraph_edge4" class="edge">
+<g id="proc~~read_components~~CallsGraph_edge3" class="edge">
 <title>proc~read_components&#45;&gt;bij</title>
-<path fill="none" stroke="#000000" d="M89.96,-121.96C106.05,-116.42 125.12,-109.86 141.31,-104.29"/>
-<polygon fill="#000000" stroke="#000000" points="142.64,-107.53 150.96,-100.97 140.36,-100.91 142.64,-107.53"/>
+<path fill="none" stroke="#000000" d="M91.6,-148C107.26,-153.14 125.49,-159.11 141.08,-164.22"/>
+<polygon fill="#000000" stroke="#000000" points="140.29,-167.65 150.88,-167.44 142.47,-161 140.29,-167.65"/>
+</g>
+<!-- proc~read_kij_lij -->
+<g id="proc~~read_components~~CallsGraph_node5" class="node">
+<title>proc~read_kij_lij</title>
+<g id="a_proc~~read_components~~CallsGraph_node5"><a xlink:href=".././proc/read_kij_lij.html" xlink:title="read_kij_lij">
+<polygon fill="#d9534f" stroke="#d9534f" points="212,-108 144,-108 144,-84 212,-84 212,-108"/>
+<text text-anchor="middle" x="178" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_kij_lij</text>
+</a>
+</g>
+</g>
+<!-- proc~read_components&#45;&gt;proc~read_kij_lij -->
+<g id="proc~~read_components~~CallsGraph_edge4" class="edge">
+<title>proc~read_components&#45;&gt;proc~read_kij_lij</title>
+<path fill="none" stroke="#000000" d="M91.6,-124C104.93,-119.63 120.12,-114.65 133.96,-110.11"/>
+<polygon fill="#000000" stroke="#000000" points="135.34,-113.34 143.75,-106.9 133.16,-106.69 135.34,-113.34"/>
+</g>
+<!-- lij -->
+<g id="proc~~read_components~~CallsGraph_node6" class="node">
+<title>lij</title>
+<polygon fill="#777777" stroke="#777777" points="315,-149 261,-149 261,-125 315,-125 315,-149"/>
+<text text-anchor="middle" x="288" y="-134.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">lij</text>
+</g>
+<!-- proc~read_components&#45;&gt;lij -->
+<g id="proc~~read_components~~CallsGraph_edge5" class="edge">
+<title>proc~read_components&#45;&gt;lij</title>
+<path fill="none" stroke="#000000" d="M108.23,-136.23C151.88,-136.42 212.51,-136.68 250.74,-136.84"/>
+<polygon fill="#000000" stroke="#000000" points="250.88,-140.34 260.9,-136.89 250.91,-133.34 250.88,-140.34"/>
 </g>
 <!-- proc~read_pr76 -->
 <g id="proc~~read_components~~CallsGraph_node7" class="node">
 <title>proc~read_pr76</title>
 <g id="a_proc~~read_components~~CallsGraph_node7"><a xlink:href=".././proc/read_pr76.html" xlink:title="read_pr76">
-<polygon fill="#d9534f" stroke="#d9534f" points="211.5,-24 144.5,-24 144.5,0 211.5,0 211.5,-24"/>
-<text text-anchor="middle" x="178" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_pr76</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="211.5,-66 144.5,-66 144.5,-42 211.5,-42 211.5,-66"/>
+<text text-anchor="middle" x="178" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_pr76</text>
 </a>
 </g>
 </g>
 <!-- proc~read_components&#45;&gt;proc~read_pr76 -->
 <g id="proc~~read_components~~CallsGraph_edge6" class="edge">
 <title>proc~read_components&#45;&gt;proc~read_pr76</title>
-<path fill="none" stroke="#000000" d="M65.13,-121.91C81.09,-103.14 113.43,-66.21 144,-38 146.73,-35.48 149.69,-32.93 152.67,-30.46"/>
-<polygon fill="#000000" stroke="#000000" points="154.86,-33.19 160.47,-24.21 150.48,-27.73 154.86,-33.19"/>
+<path fill="none" stroke="#000000" d="M72.28,-123.9C90.12,-111.46 118.84,-91.62 144,-75 145.66,-73.91 147.37,-72.79 149.09,-71.66"/>
+<polygon fill="#000000" stroke="#000000" points="151.22,-74.46 157.73,-66.1 147.43,-68.57 151.22,-74.46"/>
 </g>
-<!-- lij -->
+<!-- b -->
 <g id="proc~~read_components~~CallsGraph_node8" class="node">
-<title>lij</title>
-<polygon fill="#777777" stroke="#777777" points="315,-85 261,-85 261,-61 315,-61 315,-85"/>
-<text text-anchor="middle" x="288" y="-70.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">lij</text>
+<title>b</title>
+<polygon fill="#777777" stroke="#777777" points="205,-24 151,-24 151,0 205,0 205,-24"/>
+<text text-anchor="middle" x="178" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">b</text>
 </g>
-<!-- proc~read_components&#45;&gt;lij -->
+<!-- proc~read_components&#45;&gt;b -->
 <g id="proc~~read_components~~CallsGraph_edge7" class="edge">
-<title>proc~read_components&#45;&gt;lij</title>
-<path fill="none" stroke="#000000" d="M66.88,-121.82C82.78,-106.5 112.61,-80.99 144,-71 178.98,-59.87 221.25,-62.26 250.73,-66.27"/>
-<polygon fill="#000000" stroke="#000000" points="250.56,-69.79 260.97,-67.8 251.59,-62.86 250.56,-69.79"/>
+<title>proc~read_components&#45;&gt;b</title>
+<path fill="none" stroke="#000000" d="M63.62,-123.88C78.48,-103.53 110.56,-61.89 144,-33 145.12,-32.03 146.3,-31.07 147.5,-30.13"/>
+<polygon fill="#000000" stroke="#000000" points="149.65,-32.89 155.75,-24.23 145.58,-27.2 149.65,-32.89"/>
 </g>
 <!-- srk_factory -->
 <g id="proc~~read_components~~CallsGraph_node9" class="node">
@@ -265,47 +271,47 @@
 <path fill="none" stroke="#000000" d="M207.09,-260C217.83,-260 230.35,-260 242.25,-260"/>
 <polygon fill="#000000" stroke="#000000" points="242.49,-263.5 252.49,-260 242.49,-256.5 242.49,-263.5"/>
 </g>
-<!-- proc~read_kij_lij&#45;&gt;lij -->
-<g id="proc~~read_components~~CallsGraph_edge10" class="edge">
-<title>proc~read_kij_lij&#45;&gt;lij</title>
-<path fill="none" stroke="#000000" d="M200.34,-121.95C216.46,-112.84 238.81,-100.22 256.77,-90.07"/>
-<polygon fill="#000000" stroke="#000000" points="258.72,-92.99 265.71,-85.03 255.28,-86.9 258.72,-92.99"/>
-</g>
-<!-- kij -->
-<g id="proc~~read_components~~CallsGraph_node11" class="node">
-<title>kij</title>
-<polygon fill="#777777" stroke="#777777" points="315,-146 261,-146 261,-122 315,-122 315,-146"/>
-<text text-anchor="middle" x="288" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">kij</text>
-</g>
-<!-- proc~read_kij_lij&#45;&gt;kij -->
-<g id="proc~~read_components~~CallsGraph_edge9" class="edge">
-<title>proc~read_kij_lij&#45;&gt;kij</title>
-<path fill="none" stroke="#000000" d="M212.28,-134C224.49,-134 238.35,-134 250.8,-134"/>
-<polygon fill="#000000" stroke="#000000" points="250.85,-137.5 260.85,-134 250.85,-130.5 250.85,-137.5"/>
-</g>
 <!-- pr78_factory -->
-<g id="proc~~read_components~~CallsGraph_node10" class="node">
+<g id="proc~~read_components~~CallsGraph_node11" class="node">
 <title>pr78_factory</title>
 <polygon fill="#777777" stroke="#777777" points="328,-230 248,-230 248,-206 328,-206 328,-230"/>
 <text text-anchor="middle" x="288" y="-215.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pr78_factory</text>
 </g>
 <!-- proc~read_pr78&#45;&gt;pr78_factory -->
-<g id="proc~~read_components~~CallsGraph_edge11" class="edge">
+<g id="proc~~read_components~~CallsGraph_edge9" class="edge">
 <title>proc~read_pr78&#45;&gt;pr78_factory</title>
 <path fill="none" stroke="#000000" d="M211.7,-218C219.91,-218 228.9,-218 237.72,-218"/>
 <polygon fill="#000000" stroke="#000000" points="237.95,-221.5 247.95,-218 237.95,-214.5 237.95,-221.5"/>
 </g>
+<!-- proc~read_kij_lij&#45;&gt;lij -->
+<g id="proc~~read_components~~CallsGraph_edge11" class="edge">
+<title>proc~read_kij_lij&#45;&gt;lij</title>
+<path fill="none" stroke="#000000" d="M210.82,-108.08C223.51,-112.9 238.18,-118.47 251.24,-123.43"/>
+<polygon fill="#000000" stroke="#000000" points="250.26,-126.8 260.86,-127.08 252.75,-120.25 250.26,-126.8"/>
+</g>
+<!-- kij -->
+<g id="proc~~read_components~~CallsGraph_node10" class="node">
+<title>kij</title>
+<polygon fill="#777777" stroke="#777777" points="315,-107 261,-107 261,-83 315,-83 315,-107"/>
+<text text-anchor="middle" x="288" y="-92.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">kij</text>
+</g>
+<!-- proc~read_kij_lij&#45;&gt;kij -->
+<g id="proc~~read_components~~CallsGraph_edge10" class="edge">
+<title>proc~read_kij_lij&#45;&gt;kij</title>
+<path fill="none" stroke="#000000" d="M212.28,-95.69C224.49,-95.58 238.35,-95.45 250.8,-95.34"/>
+<polygon fill="#000000" stroke="#000000" points="250.88,-98.83 260.85,-95.24 250.82,-91.83 250.88,-98.83"/>
+</g>
 <!-- pr76_factory -->
 <g id="proc~~read_components~~CallsGraph_node12" class="node">
 <title>pr76_factory</title>
-<polygon fill="#777777" stroke="#777777" points="328,-24 248,-24 248,0 328,0 328,-24"/>
-<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pr76_factory</text>
+<polygon fill="#777777" stroke="#777777" points="328,-65 248,-65 248,-41 328,-41 328,-65"/>
+<text text-anchor="middle" x="288" y="-50.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pr76_factory</text>
 </g>
 <!-- proc~read_pr76&#45;&gt;pr76_factory -->
 <g id="proc~~read_components~~CallsGraph_edge12" class="edge">
 <title>proc~read_pr76&#45;&gt;pr76_factory</title>
-<path fill="none" stroke="#000000" d="M211.7,-12C219.91,-12 228.9,-12 237.72,-12"/>
-<polygon fill="#000000" stroke="#000000" points="237.95,-15.5 247.95,-12 237.95,-8.5 237.95,-15.5"/>
+<path fill="none" stroke="#000000" d="M211.7,-53.7C219.91,-53.62 228.9,-53.54 237.72,-53.46"/>
+<polygon fill="#000000" stroke="#000000" points="237.98,-56.95 247.95,-53.36 237.92,-49.95 237.98,-56.95"/>
 </g>
 </g>
 </svg>
@@ -381,31 +387,61 @@
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: proc~~read_components~~CalledByGraph Pages: 1 -->
-<svg id="procread_componentsCalledByGraph" width="231pt" height="32pt"
- viewBox="0.00 0.00 231.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg id="procread_componentsCalledByGraph" width="411pt" height="32pt"
+ viewBox="0.00 0.00 411.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="proc~~read_components~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>proc~~read_components~~CalledByGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 227,-28 227,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 407,-28 407,4 -4,4"/>
 <!-- proc~read_components -->
 <g id="proc~~read_components~~CalledByGraph_node1" class="node">
 <title>proc~read_components</title>
-<polygon fill="none" stroke="black" points="223,-24 115,-24 115,0 223,0 223,-24"/>
-<text text-anchor="middle" x="169" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">read_components</text>
+<polygon fill="none" stroke="black" points="403,-24 295,-24 295,0 403,0 403,-24"/>
+<text text-anchor="middle" x="349" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">read_components</text>
 </g>
 <!-- proc~read_system -->
 <g id="proc~~read_components~~CalledByGraph_node2" class="node">
 <title>proc~read_system</title>
 <g id="a_proc~~read_components~~CalledByGraph_node2"><a xlink:href=".././proc/read_system.html" xlink:title="read_system">
-<polygon fill="#d9534f" stroke="#d9534f" points="79,-24 0,-24 0,0 79,0 79,-24"/>
-<text text-anchor="middle" x="39.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_system</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="259,-24 180,-24 180,0 259,0 259,-24"/>
+<text text-anchor="middle" x="219.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">read_system</text>
 </a>
 </g>
 </g>
 <!-- proc~read_system&#45;&gt;proc~read_components -->
 <g id="proc~~read_components~~CalledByGraph_edge1" class="edge">
 <title>proc~read_system&#45;&gt;proc~read_components</title>
-<path fill="none" stroke="#000000" d="M79.1,-12C87.21,-12 95.97,-12 104.72,-12"/>
-<polygon fill="#000000" stroke="#000000" points="104.95,-15.5 114.95,-12 104.95,-8.5 104.95,-15.5"/>
+<path fill="none" stroke="#000000" d="M259.1,-12C267.21,-12 275.97,-12 284.72,-12"/>
+<polygon fill="#000000" stroke="#000000" points="284.95,-15.5 294.95,-12 284.95,-8.5 284.95,-15.5"/>
+</g>
+<!-- proc~setup -->
+<g id="proc~~read_components~~CalledByGraph_node3" class="node">
+<title>proc~setup</title>
+<g id="a_proc~~read_components~~CalledByGraph_node3"><a xlink:href=".././proc/setup.html" xlink:title="setup">
+<polygon fill="#d9534f" stroke="#d9534f" points="144,-24 90,-24 90,0 144,0 144,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setup</text>
+</a>
+</g>
+</g>
+<!-- proc~setup&#45;&gt;proc~read_system -->
+<g id="proc~~read_components~~CalledByGraph_edge2" class="edge">
+<title>proc~setup&#45;&gt;proc~read_system</title>
+<path fill="none" stroke="#000000" d="M144.14,-12C152,-12 160.89,-12 169.72,-12"/>
+<polygon fill="#000000" stroke="#000000" points="169.99,-15.5 179.99,-12 169.99,-8.5 169.99,-15.5"/>
+</g>
+<!-- program~main -->
+<g id="proc~~read_components~~CalledByGraph_node4" class="node">
+<title>program~main</title>
+<g id="a_proc~~read_components~~CalledByGraph_node4"><a xlink:href=".././program/main.html" xlink:title="main">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">main</text>
+</a>
+</g>
+</g>
+<!-- program~main&#45;&gt;proc~setup -->
+<g id="proc~~read_components~~CalledByGraph_edge3" class="edge">
+<title>program~main&#45;&gt;proc~setup</title>
+<path fill="none" stroke="#000000" d="M54.4,-12C62.39,-12 71.31,-12 79.82,-12"/>
+<polygon fill="#000000" stroke="#000000" points="79.92,-15.5 89.92,-12 79.92,-8.5 79.92,-15.5"/>
 </g>
 </g>
 </svg>
@@ -479,8 +515,8 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/read_components.html#variable-i~10">i</a>
-      <a class="list-group-item" href="../proc/read_components.html#variable-j~5">j</a>
+      <a class="list-group-item" href="../proc/read_components.html#variable-i~18">i</a>
+      <a class="list-group-item" href="../proc/read_components.html#variable-j~9">j</a>
     </div>
   </div>
 </div>
@@ -495,12 +531,12 @@
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-i~10"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~18"></span>integer,</td>
 <td>private</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-j~5"></span>integer,</td>
+  <td><span class="anchor" id="variable-j~9"></span>integer,</td>
 <td>private</td>  <td></td><td>::</td>
   <td><strong>j</strong></td><td></td><td></td><td></td>
 </tr>
@@ -533,7 +569,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-09-18 15:58            </p>
+ on 2023-10-18 14:16            </p>
         </div>
       </div>
       <br>
