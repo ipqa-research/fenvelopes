@@ -283,6 +283,7 @@ contains
       use dtypes, only: envelope, critical_point
       use linalg, only: point, solve_system
       use constants, only: ouput_path
+      use io, only: str
       implicit none
 
       ! number of compounds in the system and starting point type
@@ -1002,7 +1003,9 @@ contains
    ! ===========================================================================
    !  Intersections and crossings
    ! ---------------------------------------------------------------------------
-   subroutine get_case(dew, bub, hpl, intersections, self_intersections, this_case)
+   subroutine get_case(&
+      dew, bub, hpl, intersections, self_intersections, this_case &
+   )
       use linalg, only: intersection, point
       type(envelope), intent(in) :: dew
       type(envelope), intent(in) :: bub
@@ -1022,12 +1025,18 @@ contains
       if (size(inter_dew_bub) == 2) then
          this_case = "2_DEW_BUB"
          intersections = inter_dew_bub
+      else if (size(inter_hpl_bub) == 1 .and. size(inter_dew_bub) == 1) then
+         this_case = "2_HPL_BUB_DEW_BUB"
+         intersections = [inter_hpl_bub, inter_dew_bub]
       else if (size(inter_hpl_bub) == 1) then
          this_case = "1_HPL_BUB"
          intersections = inter_hpl_bub
       else if (size(inter_hpl_dew) == 1) then
          this_case = "1_HPL_DEW"
          intersections = inter_hpl_dew
+      else
+         this_case = "0"
+         allocate(intersections(0))
       end if
    end subroutine
 
