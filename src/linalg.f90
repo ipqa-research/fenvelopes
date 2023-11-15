@@ -104,7 +104,7 @@ contains
 
       allocate (intersections(0))
       line1: do i = 2, size(lx) - 1
-         line2: do j = i + 15, size(lx)
+         line2: do j = i + 2, size(lx)
             associate ( &
                x1 => lx(i - 1), x2 => lx(i), &
                x3 => lx(j), x4 => lx(j - 1), &
