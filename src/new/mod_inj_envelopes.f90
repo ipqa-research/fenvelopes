@@ -986,14 +986,17 @@ contains
       find_hpl: do ncomp = nc, 1, -1
          alpha_in = alpha_0
          p_in = p
-         
+
          y = 0
          y(ncomp) = 1.0
-         
-         diff = foo([alpha_in, p_in, y] )
-         do while (abs(diff) > 0.01 .and. p_in < 5000)
+
+         diff = foo([alpha_in, p_in, y])
+         return 
+         ! print *, ncomp, diff
+         do while (abs(diff) > 0.001 .and. p_in < 5000)
             p_in = p_in + 10.0_pr
             diff = foo([alpha_in, p_in, y])
+            ! print *, diff
          end do
 
          if (p_in >= 5000) then
@@ -1003,8 +1006,12 @@ contains
             end do
          end if
 
-         if (alpha_in > 0 .or. p_in < 5000) then
-            call optim
+         p_in = 600
+         alpha_in = 0.9
+
+         if (.true.) then!(alpha_in > 0 .or. p_in < 5000) then
+            ! call optim
+            ! print *, alpha_in, p_in
             k = 1/exp(lnfug_y - lnfug_z)
 
             X = [log(K), log(P_in), alpha_in]
@@ -1022,7 +1029,7 @@ contains
             real(pr) :: f
 
             if (x(1) > 1) x(1) = 0.97_pr
-            alpha_in = x(1)
+            ! alpha_in = x(1)
             p_in = x(2)
             y = abs(x(3:))
 
