@@ -278,7 +278,7 @@ contains
       !  Look for crossings
       ! ------------------------------------------------------------------------
       inter = intersection(px_dew%alpha, px_dew%p, px_bub%alpha, px_bub%p)
-      self_inter = intersection(px_dew%alpha, px_dew%p)
+      self_inter = intersection(px_bub%alpha, px_bub%p)
       print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
       print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
       ! ========================================================================
@@ -307,7 +307,7 @@ contains
                !TODO: Add a check if one of the previous lines already
                !      in this DSP
                px_branch_3 = px_three_phase_from_inter(&
-                  self_inter(i), px_dew, px_dew &
+                  self_inter(i), px_bub, px_bub &
                )
             end do
          end if
