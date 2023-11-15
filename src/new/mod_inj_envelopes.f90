@@ -280,6 +280,7 @@ contains
 
       real(pr) :: dFdS(size(X))
       integer  :: ns_new
+      integer :: n
 
       dFdS = 0
       dFdS(size(dFdS)) = 1
@@ -294,7 +295,6 @@ contains
          dXdS = dXdS/dXdS(ns_new)
          ns = ns_new
       end if
-
    end subroutine
 
    subroutine fix_step_two_phases(X, ns, S, solve_its, del_S, dXdS)
@@ -915,7 +915,7 @@ contains
       integer :: ns
 
       del_S = optval(del_S0, -0.05_pr)
-      beta = optval(beta0, 1.0_pr)
+      beta = optval(beta0, 0.99_pr)
 
       i = inter%i
       j = inter%j
