@@ -35,20 +35,21 @@ contains
    ! ===========================================================================
    !  Initializators
    ! ---------------------------------------------------------------------------
-   subroutine k_wilson_bubble(z, t, p, k)
+   subroutine k_wilson_bubble(z, t_0, p_end, t, p, k)
       !! Find the Wilson Kfactors at ~10 bar to initialize a bubble point
-      ! use system, only: pc, tc, w
       use legacy_ar_models, only: pc, tc, w
       real(pr), intent(in) :: z(:)
+      real(pr), intent(in) :: t_0
+      real(pr), intent(in) :: p_end
       real(pr), intent(in out) :: p
       real(pr), intent(in out) :: t
 
       real(pr), intent(out) :: k(size(z))
 
       P = 100.0
-      T = 200.0
+      T = t_0
 
-      do while (P > 10)
+      do while (P > p_end)
          T = T - 5._pr
          P = 1.0_pr/sum(z * pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
       end do
