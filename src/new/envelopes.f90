@@ -163,7 +163,7 @@ contains
    end function
 
    subroutine F2(incipient, z, y, X, S, ns, F, dF)
-      character(len=:), allocatable, intent(in) :: incipient
+      character(len=*), intent(in) :: incipient
       real(pr), intent(in) :: z(:)
       real(pr), intent(in) :: X(nc + 2)
       real(pr), intent(in) :: y(nc)
@@ -199,6 +199,9 @@ contains
       case ("2ndliquid")
          ix = 1
          iy = 1
+      case default
+         ix = 0
+         iy = 0
       end select
 
       call TERMO(n, iy, 4, T, P, y, Vy, lnfug_y, dlnphi_dp_y, dlnphi_dt_y, dlnphi_dn_y)
