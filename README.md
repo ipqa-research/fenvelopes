@@ -1,5 +1,6 @@
-# fenvelopes
-Fortran program to calculate phase envelopes.
+# fenvelopes: Phase diagrams with Equations of State.
+
+![Phase diagram PTA](figs/pta.png)
 
 This is an ongoing project that intends te be a fully fledged generator of
 phase equilibria diagrams from multicomponent systems, using Equations of
@@ -135,3 +136,4 @@ with `fpm`
 ```bash
 fpm run --profile release -- --infile <infile.nml PATH>
 ```
+
