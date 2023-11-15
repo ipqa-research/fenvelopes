@@ -262,21 +262,23 @@ contains
       real(pr), intent(in) :: p
       real(pr), intent(out) :: k(nc)
 
-      integer :: i
+      integer :: i, ncomp
       real(pr) :: diff
       real(pr) :: v
       real(pr) :: x(nc), y(nc), lnfug_z(nc), lnfug_y(nc)
 
       diff = -1
 
+      ncomp = nc
+
       y = 0
-      y(nc) = 1
+      y(ncomp) = 1
 
       do while(diff < 0)
          t = t - 1.0_pr
          call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
          call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
-         diff = (log(z(nc)) + lnfug_z(nc)) - (log(y(nc)) + lnfug_y(nc))
+         diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
       end do
 
       k = exp(lnfug_y - lnfug_z)
