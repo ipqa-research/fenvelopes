@@ -1,9 +1,9 @@
 program main
-   use envelopes, only: PTEnvel3
    use dtypes, only: envelope
-   use inj_envelopes, only: injelope
+   use envelopes, only: PTEnvel3
+   use inj_envelopes, only: injelope, get_z
    use constants, only: pr, ouput_path
-   use legacy_ar_models, only: nc
+   use legacy_ar_models, only: nc, z
    use flap, only: command_line_interface
    use stdlib_ansi, only: blue => fg_color_blue, red => fg_color_red, &
                           operator(//), operator(+), &
@@ -20,9 +20,12 @@ program main
    type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:) !! Shared 3ph-PT envelopes
    type(injelope) :: px_bub, px_dew, px_hpl !! Shared 2ph-Px envelopes
 
+   real(pr) :: alpha=0.0
+
    ! Setup everything
    call setup
 
+   call get_z(alpha, z)
    ! PT Envelopes
    call cpu_time(st)
    call pt_envelopes
