@@ -17,22 +17,23 @@ module inj_envelopes
    !  Parameters
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 150 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 50 !! Maximum number of iterations for a newton step
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
    character(len=10) :: injection_case !! Kind of injection displace|dilute
    character(len=255) :: FE_LOG
-   
+
    ! Two-phase settings
-   real(pr) :: del_S_multiplier = 1.6_pr
+   real(pr) :: del_S_multiplier = 2.0_pr
    real(pr) :: max_dp=50.0_pr
    real(pr) :: max_dalpha=0.01_pr
+   real(pr) :: critical_multiplier = 2.0_pr
    
    ! Three phase parameters
-   real(pr) :: del_S_multiplier_three_phase = 1.5_pr
-   real(pr) :: critical_fact = 4.0_pr
+   real(pr) :: del_S_multiplier_three_phase = 1.7_pr
+   real(pr) :: critical_fact = 3.0_pr
    ! ===========================================================================
 contains
    subroutine from_nml(filepath)
@@ -208,7 +209,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c
             integer :: max_changing
-            fact = 2.5
+            fact = critical_fact ! 2.5
 
             Xnew = X + fact*dXdS*del_S
 
@@ -219,16 +220,17 @@ contains
                max_changing = maxloc(abs(K - Knew), dim=1)
 
                dS_c = ( &
-                      -k(max_changing)*(Xnew(ns) - X(ns)) &
+                      -K(max_changing)*(Xnew(max_changing) - X(max_changing)) &
                       /(Knew(max_changing) - K(max_changing)) &
                       )
-               del_S = dS_c*1.1
 
-               Xnew = X + dXdS*dS_c
+               Xnew = X + dXdS * dS_c
                alpha_c = Xnew(n + 2)
-               pc = Xnew(n + 1)
-
+               pc = exp(Xnew(n + 1))
                cps = [cps, critical_point(t, pc, alpha_c)]
+               
+               del_S = dS_c + critical_multiplier * dS_c
+
                write (funit_output, *) ""
                write (funit_output, *) ""
             end if
@@ -252,7 +254,7 @@ contains
       write (funit_output, *) "#critical"
       if (size(cps) > 0) then
          do i = 1, size(cps)
-            write (funit_output, *) cps(i)%t, cps(i)%p
+            write (funit_output, *) cps(i)%alpha, cps(i)%p
          end do
       else
          write (funit_output, *) "NaN NaN"
@@ -278,6 +280,7 @@ contains
 
       real(pr) :: dFdS(size(X))
       integer  :: ns_new
+      integer :: n
 
       dFdS = 0
       dFdS(size(dFdS)) = 1
@@ -292,7 +295,6 @@ contains
          dXdS = dXdS/dXdS(ns_new)
          ns = ns_new
       end if
-
    end subroutine
 
    subroutine fix_step_two_phases(X, ns, S, solve_its, del_S, dXdS)
@@ -308,9 +310,9 @@ contains
       real(pr) :: dP, dalpha
       real(pr) :: dP_tol, dalpha_tol
       integer :: n
-      
+
       n = size(X) - 2
-      
+
       del_S = sign(del_S_multiplier, del_S)*minval([ &
                                          max(sqrt(abs(X(ns)))/10, 0.1), &
                                          abs(del_S)*3/solve_its &
@@ -486,10 +488,12 @@ contains
                           )
          df(i + n, 2*n + 2) = sum(Ky*dlnphi_dn_y(i, :)*dwda &
                                   - dlnphi_dn_w(i, :)*dwda)
+         ! Derivatives wrt beta
          df(i, 2*n + 3) = sum(Kx*dlnphi_dn_x(i, :)*dwdb &
                               - dlnphi_dn_w(i, :)*dwdb)
          df(i + n, 2*n + 3) = sum(Ky*dlnphi_dn_y(i, :)*dwdb &
                                   - dlnphi_dn_w(i, :)*dwdb)
+         
          df(2*n + 1, i) = Kx(i)*dwdKx(i)
          df(2*n + 1, i + n) = Ky(i)*dwdKy(i)
 
@@ -526,13 +530,20 @@ contains
 
       type(critical_point), allocatable :: cps(:)
 
-      real(pr) :: X(size(X0))
+      real(pr), target :: X(size(X0))
       integer :: ns
       real(pr) :: S
       real(pr) :: XS(max_points, size(X0))
       real(pr) :: del_S
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
+
+      real(pr), pointer :: lnP
+      real(pr), pointer :: alpha
+      real(pr), pointer :: beta
+      real(pr), pointer :: lnKx(:)
+      real(pr), pointer :: lnKy(:)
+      real(pr) :: z(size(z_0))
 
       integer :: point, iters, n
       integer :: i
@@ -546,6 +557,13 @@ contains
       S = X(ns)
       del_S = del_S0
 
+      lnKx => X(:n)
+      lnKy => X(n+1:2*n)
+      lnP => X(2*n+1)
+      alpha => X(2*n+2)
+      beta => X(2*n+3)
+      call get_z(alpha, z)
+
       ! ======================================================================
       !  Output file
       ! ----------------------------------------------------------------------
@@ -558,7 +576,7 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
       write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
-         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n), (" z" //str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), &
          X(2*n + 3), X(:2*n)
       ! ======================================================================
@@ -572,8 +590,9 @@ contains
             exit enveloop
          end if
 
-         write (funit_output, *) "SOL", iters, ns, X(2*n + 2), &
-            exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
+         call get_z(alpha, z)
+         write (funit_output, *) "SOL", iters, ns, alpha, &
+            exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z
          XS(point, :) = X
 
          call update_spec(X, ns, del_S, dF, dXdS)
@@ -779,7 +798,7 @@ contains
       real(pr) :: del_S
 
       del_S = optval(del_S0, 0.1_pr)
-      pold = 0
+      pold = 1e9
 
       ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
       do i = 1, size(ts_envel)
@@ -789,7 +808,7 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 5) cycle
+         if (abs(p - pold) < 2) cycle
          pold = p
 
          k = exp(interpol( &
@@ -896,7 +915,7 @@ contains
       integer :: ns
 
       del_S = optval(del_S0, -0.05_pr)
-      beta = optval(beta0, 1.0_pr)
+      beta = optval(beta0, 0.99_pr)
 
       i = inter%i
       j = inter%j
@@ -967,14 +986,17 @@ contains
       find_hpl: do ncomp = nc, 1, -1
          alpha_in = alpha_0
          p_in = p
-         
+
          y = 0
          y(ncomp) = 1.0
-         
-         diff = foo([alpha_in, p_in, y] )
-         do while (abs(diff) > 0.01 .and. p_in < 5000)
+
+         diff = foo([alpha_in, p_in, y])
+         return 
+         ! print *, ncomp, diff
+         do while (abs(diff) > 0.001 .and. p_in < 5000)
             p_in = p_in + 10.0_pr
             diff = foo([alpha_in, p_in, y])
+            ! print *, diff
          end do
 
          if (p_in >= 5000) then
@@ -984,8 +1006,12 @@ contains
             end do
          end if
 
-         if (alpha_in > 0 .or. p_in < 5000) then
-            call optim
+         p_in = 600
+         alpha_in = 0.9
+
+         if (.true.) then!(alpha_in > 0 .or. p_in < 5000) then
+            ! call optim
+            ! print *, alpha_in, p_in
             k = 1/exp(lnfug_y - lnfug_z)
 
             X = [log(K), log(P_in), alpha_in]
@@ -1003,7 +1029,7 @@ contains
             real(pr) :: f
 
             if (x(1) > 1) x(1) = 0.97_pr
-            alpha_in = x(1)
+            ! alpha_in = x(1)
             p_in = x(2)
             y = abs(x(3:))
 
