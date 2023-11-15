@@ -927,7 +927,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, tc, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 3.0_pr
+            fact = 4.0_pr
 
             loop: do i = 0, 1
                Xnew = X + fact*dXdS*del_S
@@ -948,8 +948,7 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(tc, pc, 0.0_pr)]
 
-                  del_S = dS_c + sign(0.04_pr, dS_c) ! dS_c + 2*del_S ! * fact
-                  ! del_S = del_S * fact
+                  del_S = dS_c + sign(0.04_pr, dS_c)
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -958,7 +957,6 @@ contains
             end do loop
          end block detect_critical
 
-         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) exit enveloop
 
          X = X + dXdS*del_S
          S = X(ns)
