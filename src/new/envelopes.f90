@@ -604,16 +604,18 @@ contains
 
                ! the step given by the most changing logK to fall into 
                ! the black hole
-               passingcri = .true.
-               if (stepX > 0.07) then
-                  !  half step back
-                  S = S - delS/2
-                  X = X - dXdS*delS/2   
-               else
-                  ! one more step to jump over the critical point
-                  S = S + delS
-                  X = X + dXdS*delS   
-               end if
+               S = S + delS
+               X = X + dXdS*delS
+               ! passingcri = .true.
+               ! if (stepX > 0.07) then
+               !    !  half step back
+               !    S = S - delS/2
+               !    X = X - dXdS*delS/2   
+               ! else
+               !    ! one more step to jump over the critical point
+               !    S = S + delS
+               !    X = X + dXdS*delS   
+               ! end if
             end do
             end block critical_region
 
@@ -1035,12 +1037,15 @@ contains
       else if (size(inter_hpl_bub) == 1 .and. size(inter_dew_bub) == 1) then
          this_case = "2_HPL_BUB_DEW_BUB"
          intersections = [inter_hpl_bub, inter_dew_bub]
-      else if (size(inter_hpl_bub) == 1) then
-         this_case = "1_HPL_BUB"
-         intersections = inter_hpl_bub
+      else if (size(inter_hpl_bub) == 2) then
+         this_case = "2_HPL_BUB"
+         intersections = [inter_hpl_bub(1), inter_hpl_bub(2)]
       else if (size(inter_hpl_dew) == 1) then
          this_case = "1_HPL_DEW"
          intersections = inter_hpl_dew
+      else if (size(inter_hpl_bub) == 1) then
+         this_case = "1_HPL_BUB"
+         intersections = inter_hpl_bub
       else
          this_case = "0"
          allocate(intersections(0))
