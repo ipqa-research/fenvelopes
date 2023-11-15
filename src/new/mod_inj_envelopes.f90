@@ -209,7 +209,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c
             integer :: max_changing
-            fact = 2.5
+            fact = critical_fact ! 2.5
 
             Xnew = X + fact*dXdS*del_S
 
@@ -220,16 +220,17 @@ contains
                max_changing = maxloc(abs(K - Knew), dim=1)
 
                dS_c = ( &
-                      -k(max_changing)*(Xnew(ns) - X(ns)) &
+                      -K(max_changing)*(Xnew(max_changing) - X(max_changing)) &
                       /(Knew(max_changing) - K(max_changing)) &
                       )
-               del_S = dS_c*1.1
 
-               Xnew = X + dXdS*dS_c
+               Xnew = X + dXdS * dS_c
                alpha_c = Xnew(n + 2)
-               pc = Xnew(n + 1)
-
+               pc = exp(Xnew(n + 1))
                cps = [cps, critical_point(t, pc, alpha_c)]
+               
+               del_S = dS_c + critical_multiplier * dS_c
+
                write (funit_output, *) ""
                write (funit_output, *) ""
             end if
@@ -253,7 +254,7 @@ contains
       write (funit_output, *) "#critical"
       if (size(cps) > 0) then
          do i = 1, size(cps)
-            write (funit_output, *) cps(i)%t, cps(i)%p
+            write (funit_output, *) cps(i)%alpha, cps(i)%p
          end do
       else
          write (funit_output, *) "NaN NaN"
