@@ -166,10 +166,17 @@ contains
 
       three_phase: block
          use envelopes, only: pt_three_phase_from_intersection
-
          allocate(pt_bub_3(size(intersections)), pt_dew_3(size(intersections)))
          select case(pt_case)
          case("2_DEW_BUB")
+            dsp_line: block
+               use dsp_lines, only: injelope, dsp_line_from_dsp
+               type(injelope):: dsps(2)
+               integer :: i
+               do i=1,size(intersections)
+                  dsps = dsp_line_from_dsp(intersections(i), pt_dew, pt_bub)
+               end do
+            end block dsp_line
             call pt_three_phase_from_intersection(&
                   pt_dew, pt_bub, intersections, &
                   pt_bub_3, pt_dew_3 &
@@ -183,12 +190,45 @@ contains
                   pt_dew, pt_bub, [intersections(2)], &
                   pt_bub_3, pt_dew_3 &
             )
+         case("2_HPL_BUB")
+            call pt_three_phase_from_intersection(&
+                  pt_hpl, pt_bub, [intersections(1)], &
+                  pt_bub_3, pt_dew_3 &
+            )
+            call pt_three_phase_from_intersection(&
+                  pt_hpl, pt_bub, [intersections(2)], &
+                  pt_bub_3, pt_dew_3 &
+            )
+            dsp_line_2hpl_bub: block
+               use dsp_lines, only: injelope, dsp_line_from_dsp
+               type(injelope):: dsps(2)
+               integer :: i
+               do i=1,size(intersections)
+                  dsps = dsp_line_from_dsp(intersections(i), pt_hpl, pt_bub, alpha0=alpha)
+               end do
+            end block dsp_line_2hpl_bub
          case("1_HPL_DEW")
+            dsp_line_hpl: block
+               use dsp_lines, only: injelope, dsp_line_from_dsp
+               type(injelope):: dsps(2)
+               integer :: i
+               do i=1,size(intersections)
+                  dsps = dsp_line_from_dsp(intersections(i), pt_hpl, pt_dew, alpha0=alpha)
+               end do
+            end block dsp_line_hpl
             call pt_three_phase_from_intersection(&
                   pt_hpl, pt_dew, intersections, &
                   pt_bub_3, pt_dew_3 &
             )
          case("1_HPL_BUB")
+            dsp_line_hpl_bub: block
+               use dsp_lines, only: injelope, dsp_line_from_dsp
+               type(injelope):: dsps(2)
+               integer :: i
+               do i=1,size(intersections)
+                  dsps = dsp_line_from_dsp(intersections(i), pt_hpl, pt_bub)
+               end do
+            end block dsp_line_hpl_bub
             call pt_three_phase_from_intersection(&
                   pt_hpl, pt_bub, intersections, &
                   pt_dew_3, pt_bub_3 &
