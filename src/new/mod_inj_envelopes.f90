@@ -779,7 +779,7 @@ contains
       real(pr) :: del_S
 
       del_S = optval(del_S0, 0.1_pr)
-      pold = 0
+      pold = 1e9
 
       ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
       do i = 1, size(ts_envel)
@@ -789,7 +789,7 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 5) cycle
+         if (abs(p - pold) < 2) cycle
          pold = p
 
          k = exp(interpol( &
