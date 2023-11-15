@@ -619,21 +619,21 @@ contains
 
             T = exp(X(n + 1))
 
-            if (.not. passingcri .and. abs(T - Told) > 7) then 
+            do while (.not. passingcri .and. abs(T - Told) > 15)
                ! Delta T estimations > 7K are not allowed
                delS = delS/2
                S = S - delS
                X = Xold + dXdS*delS
                T = exp(X(n + 1))
-            end if
+            end do
 
             P = exp(X(n + 2))
             KFACT = exp(X(:n))
             y = z*KFACT
 
             ! Finish conditions
-            if ((dXdS(n + 1)*delS < 0 .and. P < 0.1 .and. T < 120.0) &  ! dew line stops when P<0.1 bar or T<150K
-                .or. (P > 1.0 .and. T < 50.0) &   ! bubble line stops when T<150K
+            if ((dXdS(n + 1)*delS < 0 .and. P < 0.05 .and. T < 50.0) &  ! dew line stops when P<0.1 bar or T<50K
+                .or. (P > 1.0 .and. T < 50.0) &   ! bubble line stops when T<50K
                 .or. (P > 5000) &
                 .or. (abs(dels) < 1.d-10)) then
                 run = .false.
