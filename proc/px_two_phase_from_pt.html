@@ -90,7 +90,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.4% of total for procedures.">31 statements</a>
+    title=" 1.2% of total for procedures.">31 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/mod_inj_envelopes.f90"> Source File</a></li>
   </ul>
@@ -119,14 +119,14 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-x~14">X</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-alpha~7">alpha</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-del_s~6">del_S</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-i~17">i</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-x~18">X</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-alpha~10">alpha</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-del_s~10">del_S</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-i~24">i</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-idx~2">idx</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-k~5">k</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ns~15">ns</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-p~17">p</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ns~20">ns</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-p~19">p</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-pold~3">pold</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ts_envel~2">ts_envel</a>
     </div>
@@ -319,7 +319,7 @@ initialization for calculation of Px envelopes.</p>
   <td><strong>t_tol</strong></td><td><p>Absolute temperature tolerance</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s0~6"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s0~8"></span>real(kind=pr),</td>
 <td>intent(in),</td>
   <td>optional</td>  <td></td><td>::</td>
   <td><strong>del_S0</strong></td><td><p>First point <script type="math/tex">\Delta S</script>
@@ -350,131 +350,131 @@ initialization for calculation of Px envelopes.</p>
 <!-- proc~px_two_phase_from_pt -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node1" class="node">
 <title>proc~px_two_phase_from_pt</title>
-<polygon fill="none" stroke="black" points="133,-192 0,-192 0,-168 133,-168 133,-192"/>
-<text text-anchor="middle" x="66.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50">px_two_phase_from_pt</text>
+<polygon fill="none" stroke="black" points="133,-234 0,-234 0,-210 133,-210 133,-234"/>
+<text text-anchor="middle" x="66.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50">px_two_phase_from_pt</text>
 </g>
 <!-- optval -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node2" class="node">
 <title>optval</title>
-<polygon fill="#777777" stroke="#777777" points="252.5,-234 198.5,-234 198.5,-210 252.5,-210 252.5,-234"/>
-<text text-anchor="middle" x="225.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">optval</text>
+<polygon fill="#777777" stroke="#777777" points="252.5,-276 198.5,-276 198.5,-252 252.5,-252 252.5,-276"/>
+<text text-anchor="middle" x="225.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">optval</text>
 </g>
 <!-- proc~px_two_phase_from_pt&#45;&gt;optval -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge1" class="edge">
 <title>proc~px_two_phase_from_pt&#45;&gt;optval</title>
-<path fill="none" stroke="#000000" d="M112.49,-192.04C136.53,-198.47 165.74,-206.28 188.3,-212.32"/>
-<polygon fill="#000000" stroke="#000000" points="187.59,-215.75 198.16,-214.95 189.4,-208.99 187.59,-215.75"/>
+<path fill="none" stroke="#000000" d="M112.49,-234.04C136.53,-240.47 165.74,-248.28 188.3,-254.32"/>
+<polygon fill="#000000" stroke="#000000" points="187.59,-257.75 198.16,-256.95 189.4,-250.99 187.59,-257.75"/>
+</g>
+<!-- proc~interpol -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node3" class="node">
+<title>proc~interpol</title>
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node3"><a xlink:href=".././proc/interpol.html" xlink:title="interpol">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="252.5,-234 198.5,-234 198.5,-210 252.5,-210 252.5,-234"/>
+<text text-anchor="middle" x="225.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpol</text>
+</a>
+</g>
+</g>
+<!-- proc~px_two_phase_from_pt&#45;&gt;proc~interpol -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge2" class="edge">
+<title>proc~px_two_phase_from_pt&#45;&gt;proc~interpol</title>
+<path fill="none" stroke="#000000" d="M133.17,-222C151.92,-222 171.67,-222 187.99,-222"/>
+<polygon fill="#000000" stroke="#000000" points="188.18,-225.5 198.18,-222 188.18,-218.5 188.18,-225.5"/>
 </g>
 <!-- proc~injection_envelope -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node3" class="node">
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node4" class="node">
 <title>proc~injection_envelope</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node3"><a xlink:href=".././proc/injection_envelope.html" xlink:title="injection_envelope">
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node4"><a xlink:href=".././proc/injection_envelope.html" xlink:title="injection_envelope">
 <polygon fill="#d9534f" stroke="#d9534f" points="282,-192 169,-192 169,-168 282,-168 282,-192"/>
 <text text-anchor="middle" x="225.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">injection_envelope</text>
 </a>
 </g>
 </g>
 <!-- proc~px_two_phase_from_pt&#45;&gt;proc~injection_envelope -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge2" class="edge">
-<title>proc~px_two_phase_from_pt&#45;&gt;proc~injection_envelope</title>
-<path fill="none" stroke="#000000" d="M133.17,-180C141.54,-180 150.1,-180 158.47,-180"/>
-<polygon fill="#000000" stroke="#000000" points="158.55,-183.5 168.55,-180 158.55,-176.5 158.55,-183.5"/>
-</g>
-<!-- proc~interpol -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node4" class="node">
-<title>proc~interpol</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node4"><a xlink:href=".././proc/interpol.html" xlink:title="interpol">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="252.5,-150 198.5,-150 198.5,-126 252.5,-126 252.5,-150"/>
-<text text-anchor="middle" x="225.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpol</text>
-</a>
-</g>
-</g>
-<!-- proc~px_two_phase_from_pt&#45;&gt;proc~interpol -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge3" class="edge">
-<title>proc~px_two_phase_from_pt&#45;&gt;proc~interpol</title>
-<path fill="none" stroke="#000000" d="M112.49,-167.96C136.53,-161.53 165.74,-153.72 188.3,-147.68"/>
-<polygon fill="#000000" stroke="#000000" points="189.4,-151.01 198.16,-145.05 187.59,-144.25 189.4,-151.01"/>
-</g>
-<!-- proc~full_newton -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node5" class="node">
-<title>proc~full_newton</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node5"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
-<polygon fill="#d9534f" stroke="#d9534f" points="414.5,-360 341.5,-360 341.5,-336 414.5,-336 414.5,-360"/>
-<text text-anchor="middle" x="378" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
-</a>
-</g>
-</g>
-<!-- proc~injection_envelope&#45;&gt;proc~full_newton -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge4" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~full_newton</title>
-<path fill="none" stroke="#000000" d="M270.52,-192.01C274.78,-194.47 278.72,-197.44 282,-201 321.43,-243.86 278.15,-284.53 318,-327 321.91,-331.16 326.69,-334.5 331.83,-337.18"/>
-<polygon fill="#000000" stroke="#000000" points="330.78,-340.54 341.35,-341.32 333.58,-334.12 330.78,-340.54"/>
-</g>
-<!-- knew -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node6" class="node">
-<title>knew</title>
-<polygon fill="#777777" stroke="#777777" points="405,-318 351,-318 351,-294 405,-294 405,-318"/>
-<text text-anchor="middle" x="378" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">knew</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;knew -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge6" class="edge">
-<title>proc~injection_envelope&#45;&gt;knew</title>
-<path fill="none" stroke="#000000" d="M269.53,-192.14C274.07,-194.58 278.35,-197.51 282,-201 311.33,-229.09 288.39,-257.2 318,-285 324.44,-291.04 332.73,-295.37 341.05,-298.45"/>
-<polygon fill="#000000" stroke="#000000" points="340.13,-301.83 350.72,-301.54 342.26,-295.16 340.13,-301.83"/>
-</g>
-<!-- proc~break_conditions -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node7" class="node">
-<title>proc~break_conditions</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node7"><a xlink:href=".././proc/break_conditions.html" xlink:title="break_conditions">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="429.5,-276 326.5,-276 326.5,-252 429.5,-252 429.5,-276"/>
-<text text-anchor="middle" x="378" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions</text>
-</a>
-</g>
-</g>
-<!-- proc~injection_envelope&#45;&gt;proc~break_conditions -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge8" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~break_conditions</title>
-<path fill="none" stroke="#000000" d="M265.97,-192.09C271.59,-194.61 277.11,-197.57 282,-201 302.12,-215.12 297.74,-229.08 318,-243 320.35,-244.62 322.84,-246.12 325.42,-247.52"/>
-<polygon fill="#000000" stroke="#000000" points="323.9,-250.68 334.42,-251.89 326.95,-244.38 323.9,-250.68"/>
-</g>
-<!-- str -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node8" class="node">
-<title>str</title>
-<polygon fill="#777777" stroke="#777777" points="405,-234 351,-234 351,-210 405,-210 405,-234"/>
-<text text-anchor="middle" x="378" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;str -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge5" class="edge">
-<title>proc~injection_envelope&#45;&gt;str</title>
-<path fill="none" stroke="#000000" d="M269.63,-192.04C292.27,-198.36 319.7,-206.01 341.16,-212"/>
-<polygon fill="#000000" stroke="#000000" points="340.29,-215.39 350.87,-214.71 342.18,-208.65 340.29,-215.39"/>
-</g>
-<!-- xnew -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node9" class="node">
-<title>xnew</title>
-<polygon fill="#777777" stroke="#777777" points="405,-192 351,-192 351,-168 405,-168 405,-192"/>
-<text text-anchor="middle" x="378" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">xnew</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;xnew -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge7" class="edge">
-<title>proc~injection_envelope&#45;&gt;xnew</title>
-<path fill="none" stroke="#000000" d="M282.11,-180C301.53,-180 322.82,-180 340.31,-180"/>
-<polygon fill="#000000" stroke="#000000" points="340.65,-183.5 350.65,-180 340.65,-176.5 340.65,-183.5"/>
+<title>proc~px_two_phase_from_pt&#45;&gt;proc~injection_envelope</title>
+<path fill="none" stroke="#000000" d="M112.49,-209.96C130.31,-205.2 150.96,-199.67 169.65,-194.67"/>
+<polygon fill="#000000" stroke="#000000" points="170.75,-198 179.5,-192.04 168.94,-191.24 170.75,-198"/>
 </g>
 <!-- proc~get_z -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_node10" class="node">
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node5" class="node">
 <title>proc~get_z</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node10"><a xlink:href=".././proc/get_z.html" xlink:title="get_z">
-<polygon fill="#d9534f" stroke="#d9534f" points="405,-150 351,-150 351,-126 405,-126 405,-150"/>
-<text text-anchor="middle" x="378" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">get_z</text>
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node5"><a xlink:href=".././proc/get_z.html" xlink:title="get_z">
+<polygon fill="#d9534f" stroke="#d9534f" points="405,-360 351,-360 351,-336 405,-336 405,-360"/>
+<text text-anchor="middle" x="378" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">get_z</text>
 </a>
 </g>
 </g>
 <!-- proc~injection_envelope&#45;&gt;proc~get_z -->
-<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge9" class="edge">
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge4" class="edge">
 <title>proc~injection_envelope&#45;&gt;proc~get_z</title>
-<path fill="none" stroke="#000000" d="M269.63,-167.96C292.27,-161.64 319.7,-153.99 341.16,-148"/>
-<polygon fill="#000000" stroke="#000000" points="342.18,-151.35 350.87,-145.29 340.29,-144.61 342.18,-151.35"/>
+<path fill="none" stroke="#000000" d="M270.52,-192.01C274.78,-194.47 278.72,-197.44 282,-201 321.43,-243.86 278.15,-284.53 318,-327 324.22,-333.62 332.66,-338.16 341.21,-341.27"/>
+<polygon fill="#000000" stroke="#000000" points="340.22,-344.63 350.81,-344.2 342.27,-337.93 340.22,-344.63"/>
+</g>
+<!-- progress_bar -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node6" class="node">
+<title>progress_bar</title>
+<polygon fill="#777777" stroke="#777777" points="418.5,-318 337.5,-318 337.5,-294 418.5,-294 418.5,-318"/>
+<text text-anchor="middle" x="378" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
+</g>
+<!-- proc~injection_envelope&#45;&gt;progress_bar -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge5" class="edge">
+<title>proc~injection_envelope&#45;&gt;progress_bar</title>
+<path fill="none" stroke="#000000" d="M269.53,-192.14C274.07,-194.58 278.35,-197.51 282,-201 311.33,-229.09 288.39,-257.2 318,-285 321.08,-287.89 324.58,-290.38 328.3,-292.54"/>
+<polygon fill="#000000" stroke="#000000" points="326.79,-295.69 337.3,-296.97 329.88,-289.42 326.79,-295.69"/>
+</g>
+<!-- str -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node7" class="node">
+<title>str</title>
+<polygon fill="#777777" stroke="#777777" points="405,-276 351,-276 351,-252 405,-252 405,-276"/>
+<text text-anchor="middle" x="378" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
+</g>
+<!-- proc~injection_envelope&#45;&gt;str -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge6" class="edge">
+<title>proc~injection_envelope&#45;&gt;str</title>
+<path fill="none" stroke="#000000" d="M265.97,-192.09C271.59,-194.61 277.11,-197.57 282,-201 302.12,-215.12 297.74,-229.08 318,-243 325.01,-247.82 333.24,-251.65 341.29,-254.65"/>
+<polygon fill="#000000" stroke="#000000" points="340.34,-258.02 350.94,-257.91 342.58,-251.39 340.34,-258.02"/>
+</g>
+<!-- proc~fix_step_two_phases -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node8" class="node">
+<title>proc~fix_step_two_phases</title>
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node8"><a xlink:href=".././proc/fix_step_two_phases.html" xlink:title="fix_step_two_phases">
+<polygon fill="#d9534f" stroke="#d9534f" points="438,-234 318,-234 318,-210 438,-210 438,-234"/>
+<text text-anchor="middle" x="378" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step_two_phases</text>
+</a>
+</g>
+</g>
+<!-- proc~injection_envelope&#45;&gt;proc~fix_step_two_phases -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge7" class="edge">
+<title>proc~injection_envelope&#45;&gt;proc~fix_step_two_phases</title>
+<path fill="none" stroke="#000000" d="M269.63,-192.04C286.63,-196.78 306.33,-202.28 324.17,-207.26"/>
+<polygon fill="#000000" stroke="#000000" points="323.29,-210.65 333.87,-209.96 325.18,-203.9 323.29,-210.65"/>
+</g>
+<!-- knew -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node9" class="node">
+<title>knew</title>
+<polygon fill="#777777" stroke="#777777" points="405,-192 351,-192 351,-168 405,-168 405,-192"/>
+<text text-anchor="middle" x="378" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">knew</text>
+</g>
+<!-- proc~injection_envelope&#45;&gt;knew -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge8" class="edge">
+<title>proc~injection_envelope&#45;&gt;knew</title>
+<path fill="none" stroke="#000000" d="M282.11,-180C301.53,-180 322.82,-180 340.31,-180"/>
+<polygon fill="#000000" stroke="#000000" points="340.65,-183.5 350.65,-180 340.65,-176.5 340.65,-183.5"/>
+</g>
+<!-- proc~full_newton -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_node10" class="node">
+<title>proc~full_newton</title>
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node10"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
+<polygon fill="#d9534f" stroke="#d9534f" points="414.5,-150 341.5,-150 341.5,-126 414.5,-126 414.5,-150"/>
+<text text-anchor="middle" x="378" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
+</a>
+</g>
+</g>
+<!-- proc~injection_envelope&#45;&gt;proc~full_newton -->
+<g id="proc~~px_two_phase_from_pt~~CallsGraph_edge9" class="edge">
+<title>proc~injection_envelope&#45;&gt;proc~full_newton</title>
+<path fill="none" stroke="#000000" d="M269.63,-167.96C289.1,-162.53 312.1,-156.11 331.8,-150.61"/>
+<polygon fill="#000000" stroke="#000000" points="332.79,-153.97 341.48,-147.91 330.91,-147.23 332.79,-153.97"/>
 </g>
 <!-- proc~update_spec -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node11" class="node">
@@ -488,68 +488,68 @@ initialization for calculation of Px envelopes.</p>
 <!-- proc~injection_envelope&#45;&gt;proc~update_spec -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge10" class="edge">
 <title>proc~injection_envelope&#45;&gt;proc~update_spec</title>
-<path fill="none" stroke="#000000" d="M265.97,-167.91C271.59,-165.39 277.11,-162.43 282,-159 302.12,-144.88 297.74,-130.92 318,-117 321.28,-114.74 324.84,-112.7 328.51,-110.86"/>
-<polygon fill="#000000" stroke="#000000" points="330.13,-113.97 337.83,-106.69 327.27,-107.58 330.13,-113.97"/>
+<path fill="none" stroke="#000000" d="M241.59,-167.77C259.12,-154 289.32,-131.66 318,-117 321.55,-115.19 325.29,-113.46 329.09,-111.84"/>
+<polygon fill="#000000" stroke="#000000" points="330.64,-114.99 338.62,-108.02 328.03,-108.49 330.64,-114.99"/>
 </g>
-<!-- progress_bar -->
+<!-- xnew -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node12" class="node">
-<title>progress_bar</title>
-<polygon fill="#777777" stroke="#777777" points="418.5,-66 337.5,-66 337.5,-42 418.5,-42 418.5,-66"/>
-<text text-anchor="middle" x="378" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
+<title>xnew</title>
+<polygon fill="#777777" stroke="#777777" points="405,-66 351,-66 351,-42 405,-42 405,-66"/>
+<text text-anchor="middle" x="378" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">xnew</text>
 </g>
-<!-- proc~injection_envelope&#45;&gt;progress_bar -->
+<!-- proc~injection_envelope&#45;&gt;xnew -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge11" class="edge">
-<title>proc~injection_envelope&#45;&gt;progress_bar</title>
-<path fill="none" stroke="#000000" d="M269.53,-167.86C274.07,-165.42 278.35,-162.49 282,-159 311.33,-130.91 288.39,-102.8 318,-75 321.08,-72.11 324.58,-69.62 328.3,-67.46"/>
-<polygon fill="#000000" stroke="#000000" points="329.88,-70.58 337.3,-63.03 326.79,-64.31 329.88,-70.58"/>
+<title>proc~injection_envelope&#45;&gt;xnew</title>
+<path fill="none" stroke="#000000" d="M234.04,-167.82C248.02,-146.17 280.03,-100.86 318,-75 325.03,-70.21 333.27,-66.39 341.32,-63.39"/>
+<polygon fill="#000000" stroke="#000000" points="342.61,-66.65 350.96,-60.13 340.37,-60.02 342.61,-66.65"/>
 </g>
-<!-- proc~fix_step_two_phases -->
+<!-- proc~break_conditions -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node13" class="node">
-<title>proc~fix_step_two_phases</title>
-<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node13"><a xlink:href=".././proc/fix_step_two_phases.html" xlink:title="fix_step_two_phases">
-<polygon fill="#d9534f" stroke="#d9534f" points="438,-24 318,-24 318,0 438,0 438,-24"/>
-<text text-anchor="middle" x="378" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step_two_phases</text>
+<title>proc~break_conditions</title>
+<g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node13"><a xlink:href=".././proc/break_conditions.html" xlink:title="break_conditions">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="429.5,-24 326.5,-24 326.5,0 429.5,0 429.5,-24"/>
+<text text-anchor="middle" x="378" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions</text>
 </a>
 </g>
 </g>
-<!-- proc~injection_envelope&#45;&gt;proc~fix_step_two_phases -->
+<!-- proc~injection_envelope&#45;&gt;proc~break_conditions -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge12" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~fix_step_two_phases</title>
-<path fill="none" stroke="#000000" d="M270.52,-167.99C274.78,-165.53 278.72,-162.56 282,-159 321.43,-116.14 278.15,-75.47 318,-33 319.05,-31.89 320.16,-30.83 321.32,-29.83"/>
-<polygon fill="#000000" stroke="#000000" points="323.46,-32.6 329.65,-24.01 319.45,-26.87 323.46,-32.6"/>
+<title>proc~injection_envelope&#45;&gt;proc~break_conditions</title>
+<path fill="none" stroke="#000000" d="M230.84,-167.81C241.37,-139.91 270.94,-70.9 318,-33 319.75,-31.59 321.61,-30.27 323.54,-29.03"/>
+<polygon fill="#000000" stroke="#000000" points="325.34,-32.04 332.4,-24.14 321.95,-25.91 325.34,-32.04"/>
 </g>
 <!-- proc~solve_system -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node14" class="node">
 <title>proc~solve_system</title>
 <g id="a_proc~~px_two_phase_from_pt~~CallsGraph_node14"><a xlink:href=".././proc/solve_system.html" xlink:title="solve_system">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="557,-234 474,-234 474,-210 557,-210 557,-234"/>
-<text text-anchor="middle" x="515.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="557,-129 474,-129 474,-105 557,-105 557,-129"/>
+<text text-anchor="middle" x="515.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
 </a>
 </g>
 </g>
 <!-- proc~full_newton&#45;&gt;proc~solve_system -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge13" class="edge">
 <title>proc~full_newton&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M414.74,-339.14C422.87,-336.11 431.12,-332.14 438,-327 468.04,-304.56 491.33,-266.98 503.96,-243.39"/>
-<polygon fill="#000000" stroke="#000000" points="507.22,-244.71 508.71,-234.22 501,-241.49 507.22,-244.71"/>
+<path fill="none" stroke="#000000" d="M414.6,-132.48C429.67,-130.15 447.49,-127.39 463.88,-124.84"/>
+<polygon fill="#000000" stroke="#000000" points="464.52,-128.29 473.87,-123.3 463.45,-121.37 464.52,-128.29"/>
 </g>
 <!-- proc~update_spec&#45;&gt;proc~solve_system -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge14" class="edge">
 <title>proc~update_spec&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M418.14,-106.18C425.14,-109.02 432.08,-112.58 438,-117 468.04,-139.44 491.33,-177.02 503.96,-200.61"/>
-<polygon fill="#000000" stroke="#000000" points="501,-202.51 508.71,-209.78 507.22,-199.29 501,-202.51"/>
+<path fill="none" stroke="#000000" d="M418.19,-102.07C432.42,-104.28 448.7,-106.8 463.78,-109.14"/>
+<polygon fill="#000000" stroke="#000000" points="463.57,-112.65 473.98,-110.72 464.64,-105.73 463.57,-112.65"/>
 </g>
 <!-- none~dgesv -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_node15" class="node">
 <title>none~dgesv</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="647,-234 593,-234 593,-210 647,-210 647,-234"/>
-<text text-anchor="middle" x="620" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
+<polygon fill="#a7506f" stroke="#a7506f" points="647,-129 593,-129 593,-105 647,-105 647,-129"/>
+<text text-anchor="middle" x="620" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
 </g>
 <!-- proc~solve_system&#45;&gt;none~dgesv -->
 <g id="proc~~px_two_phase_from_pt~~CallsGraph_edge15" class="edge">
 <title>proc~solve_system&#45;&gt;none~dgesv</title>
-<path fill="none" stroke="#000000" d="M557.01,-222C565.51,-222 574.42,-222 582.75,-222"/>
-<polygon fill="#000000" stroke="#000000" points="582.92,-225.5 592.92,-222 582.92,-218.5 582.92,-225.5"/>
+<path fill="none" stroke="#000000" d="M557.01,-117C565.51,-117 574.42,-117 582.75,-117"/>
+<polygon fill="#000000" stroke="#000000" points="582.92,-120.5 592.92,-117 582.92,-113.5 582.92,-120.5"/>
 </g>
 </g>
 </svg>
@@ -738,14 +738,14 @@ initialization for calculation of Px envelopes.</p>
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-x~14">X</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-alpha~7">alpha</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-del_s~6">del_S</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-i~17">i</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-x~18">X</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-alpha~10">alpha</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-del_s~10">del_S</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-i~24">i</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-idx~2">idx</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-k~5">k</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ns~15">ns</a>
-      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-p~17">p</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ns~20">ns</a>
+      <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-p~19">p</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-pold~3">pold</a>
       <a class="list-group-item" href="../proc/px_two_phase_from_pt.html#variable-ts_envel~2">ts_envel</a>
     </div>
@@ -762,22 +762,22 @@ initialization for calculation of Px envelopes.</p>
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x~14"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~18"></span>real(kind=pr),</td>
 <td>public,</td>  <td>allocatable</td><td>::</td>
   <td><strong>X</strong>(:)</td><td></td><td></td><td><p>Vector of variables</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-alpha~7"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-alpha~10"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>alpha</strong></td><td></td><td></td><td><p>Amount of injection</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s~6"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s~10"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>del_S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-i~17"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~24"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
@@ -792,12 +792,12 @@ initialization for calculation of Px envelopes.</p>
   <td><strong>k</strong>(:)</td><td></td><td></td><td><p>K values</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~15"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~20"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-p~17"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-p~19"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>p</strong></td><td></td><td></td><td><p>Pressure of ocurrence</p></td>
 </tr>
@@ -840,7 +840,7 @@ initialization for calculation of Px envelopes.</p>
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-10-18 17:31            </p>
+ on 2023-11-15 13:38            </p>
         </div>
       </div>
       <br>

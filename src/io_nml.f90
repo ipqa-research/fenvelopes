@@ -260,9 +260,9 @@ contains
       write (file_unit, *) "===================="
       write (file_unit, *) "EoS Parameters: "
       write (file_unit, *) "--------------------"
-      write (file_unit, fmt_pure) "ac: ", ac
-      write (file_unit, fmt_pure) "b: ", b
-      write (file_unit, fmt_pure) "k: ", k
+      write (file_unit, fmt_pure) "ac:", ac
+      write (file_unit, fmt_pure) "b :", b
+      write (file_unit, fmt_pure) "k :", k
 
       write (file_unit, *) "===================="
       write(file_unit, *), "Mixing Rules: "
@@ -272,12 +272,12 @@ contains
 
       write(file_unit, fmt_names) names
       do i = 1, nc
-         write (file_unit, fmt_pure) trim(names(i)), kij(i, :)
+         write (file_unit, fmt_pure) str(i), kij(i, :)
       end do
       write(file_unit, *) "lij: "
       write(file_unit, fmt_names) names
       do i = 1, nc
-         write (file_unit, fmt_pure) trim(names(i)), lij(i, :)
+         write (file_unit, fmt_pure) str(i), lij(i, :)
       end do
    end subroutine
 end module

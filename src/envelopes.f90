@@ -35,20 +35,21 @@ contains
    ! ===========================================================================
    !  Initializators
    ! ---------------------------------------------------------------------------
-   subroutine k_wilson_bubble(z, t, p, k)
+   subroutine k_wilson_bubble(z, t_0, p_end, t, p, k)
       !! Find the Wilson Kfactors at ~10 bar to initialize a bubble point
-      ! use system, only: pc, tc, w
       use legacy_ar_models, only: pc, tc, w
       real(pr), intent(in) :: z(:)
+      real(pr), intent(in) :: t_0
+      real(pr), intent(in) :: p_end
       real(pr), intent(in out) :: p
       real(pr), intent(in out) :: t
 
       real(pr), intent(out) :: k(size(z))
 
       P = 100.0
-      T = 200.0
+      T = t_0
 
-      do while (P > 10)
+      do while (P > p_end)
          T = T - 5._pr
          P = 1.0_pr/sum(z * pc*exp(5.373_pr*(1 + w)*(1 - tc/T)))
       end do
@@ -123,7 +124,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
-      delS = delS*3
+      delS = 5*delS
 
       S = S + delS
    end subroutine
@@ -162,7 +163,7 @@ contains
    end function
 
    subroutine F2(incipient, z, y, X, S, ns, F, dF)
-      character(len=:), allocatable, intent(in) :: incipient
+      character(len=*), intent(in) :: incipient
       real(pr), intent(in) :: z(:)
       real(pr), intent(in) :: X(nc + 2)
       real(pr), intent(in) :: y(nc)
@@ -198,6 +199,9 @@ contains
       case ("2ndliquid")
          ix = 1
          iy = 1
+      case default
+         ix = 0
+         iy = 0
       end select
 
       call TERMO(n, iy, 4, T, P, y, Vy, lnfug_y, dlnphi_dp_y, dlnphi_dt_y, dlnphi_dn_y)
@@ -258,21 +262,23 @@ contains
       real(pr), intent(in) :: p
       real(pr), intent(out) :: k(nc)
 
-      integer :: i
+      integer :: i, ncomp
       real(pr) :: diff
       real(pr) :: v
       real(pr) :: x(nc), y(nc), lnfug_z(nc), lnfug_y(nc)
 
       diff = -1
 
+      ncomp = nc
+
       y = 0
-      y(nc) = 1
+      y(ncomp) = 1
 
       do while(diff < 0)
          t = t - 1.0_pr
          call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
          call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
-         diff = (log(z(nc)) + lnfug_z(nc)) - (log(y(nc)) + lnfug_y(nc))
+         diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
       end do
 
       k = exp(lnfug_y - lnfug_z)
@@ -598,36 +604,38 @@ contains
 
                ! the step given by the most changing logK to fall into 
                ! the black hole
-               passingcri = .true.
-               if (stepX > 0.07) then
-                  !  half step back
-                  S = S - delS/2
-                  X = X - dXdS*delS/2   
-               else
-                  ! one more step to jump over the critical point
-                  S = S + delS
-                  X = X + dXdS*delS   
-               end if
+               S = S + delS
+               X = X + dXdS*delS
+               ! passingcri = .true.
+               ! if (stepX > 0.07) then
+               !    !  half step back
+               !    S = S - delS/2
+               !    X = X - dXdS*delS/2   
+               ! else
+               !    ! one more step to jump over the critical point
+               !    S = S + delS
+               !    X = X + dXdS*delS   
+               ! end if
             end do
             end block critical_region
 
             T = exp(X(n + 1))
 
-            if (.not. passingcri .and. abs(T - Told) > 7) then 
+            do while (.not. passingcri .and. abs(T - Told) > 15)
                ! Delta T estimations > 7K are not allowed
                delS = delS/2
                S = S - delS
                X = Xold + dXdS*delS
                T = exp(X(n + 1))
-            end if
+            end do
 
             P = exp(X(n + 2))
             KFACT = exp(X(:n))
             y = z*KFACT
 
             ! Finish conditions
-            if ((dXdS(n + 1)*delS < 0 .and. P < 0.1 .and. T < 120.0) &  ! dew line stops when P<0.1 bar or T<150K
-                .or. (P > 1.0 .and. T < 50.0) &   ! bubble line stops when T<150K
+            if ((dXdS(n + 1)*delS < 0 .and. P < 0.05 .and. T < 50.0) &  ! dew line stops when P<0.1 bar or T<50K
+                .or. (P > 1.0 .and. T < 50.0) &   ! bubble line stops when T<50K
                 .or. (P > 5000) &
                 .or. (abs(dels) < 1.d-10)) then
                 run = .false.
@@ -919,7 +927,7 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, tc, dS_c, dXdS_in(size(X0))
             integer :: max_changing, i
-            fact = 3.0_pr
+            fact = 4.0_pr
 
             loop: do i = 0, 1
                Xnew = X + fact*dXdS*del_S
@@ -940,8 +948,7 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(tc, pc, 0.0_pr)]
 
-                  del_S = dS_c + sign(0.04_pr, dS_c) ! dS_c + 2*del_S ! * fact
-                  ! del_S = del_S * fact
+                  del_S = dS_c + sign(0.04_pr, dS_c)
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -950,7 +957,6 @@ contains
             end do loop
          end block detect_critical
 
-         if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) exit enveloop
 
          X = X + dXdS*del_S
          S = X(ns)
@@ -988,15 +994,17 @@ contains
       real(pr) :: S !! Value of specification
 
       integer :: n
-      real(pr) :: p, t
+      real(pr) :: p, t, beta
       logical, allocatable :: break_conditions_three_phases(:)
 
       n = (size(X) - 3)/2
       p = exp(X(2*n + 1))
+      beta = x(2*n+3)
       t = X(2*n + 2)
-
-      break_conditions_three_phases = [ .false.&
-                                      ! p < 1 .or. p > 5000 &
+         
+      break_conditions_three_phases = [ &
+                                          beta < 0 &
+                                          .or. 1 < beta &
                                       ]
    end function
    ! ===========================================================================
@@ -1029,12 +1037,15 @@ contains
       else if (size(inter_hpl_bub) == 1 .and. size(inter_dew_bub) == 1) then
          this_case = "2_HPL_BUB_DEW_BUB"
          intersections = [inter_hpl_bub, inter_dew_bub]
-      else if (size(inter_hpl_bub) == 1) then
-         this_case = "1_HPL_BUB"
-         intersections = inter_hpl_bub
+      else if (size(inter_hpl_bub) == 2) then
+         this_case = "2_HPL_BUB"
+         intersections = [inter_hpl_bub(1), inter_hpl_bub(2)]
       else if (size(inter_hpl_dew) == 1) then
          this_case = "1_HPL_DEW"
          intersections = inter_hpl_dew
+      else if (size(inter_hpl_bub) == 1) then
+         this_case = "1_HPL_BUB"
+         intersections = inter_hpl_bub
       else
          this_case = "0"
          allocate(intersections(0))
@@ -1095,7 +1106,7 @@ contains
          X = [lnKx, lnKy, log(p), log(t), beta]
          call pt_envelope_three_phase(X, ns, del_S0, pt_x_3(i_inter))
          ! ==================================================================
-         
+
          ! ==================================================================
          !  Line with incipient phase liquid
          ! ------------------------------------------------------------------

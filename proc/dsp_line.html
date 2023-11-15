@@ -8,7 +8,7 @@
     <meta name="author" content="Federico Benelli" >
     <link rel="icon" href="../favicon.png">
 
-    <title>injection_envelope &ndash; fenvelopes</title>
+    <title>dsp_line &ndash; fenvelopes</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -79,7 +79,7 @@
 
     <div class="container">
   <div class="row">
-    <h1>injection_envelope
+    <h1>dsp_line
       <small>Subroutine</small>
     </h1>
     <div class="row">
@@ -90,14 +90,14 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.7% of total for procedures.">93 statements</a>
+    title=" 2.8% of total for procedures.">70 statements</a>
      </li> 
-    <li><i class="fa fa-code"></i><a href="../src/mod_inj_envelopes.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/mod_dsp_lines.f90"> Source File</a></li>
   </ul>
   <ol class="breadcrumb in-well text-right">
-     <li><a href='../sourcefile/mod_inj_envelopes.f90.html'>mod_inj_envelopes.f90</a></li>
-     <li><a href='../module/inj_envelopes.html'>inj_envelopes</a></li>
-     <li class="active">injection_envelope</li>
+     <li><a href='../sourcefile/mod_dsp_lines.f90.html'>mod_dsp_lines.f90</a></li>
+     <li><a href='../module/dsp_lines.html'>dsp_lines</a></li>
+     <li class="active">dsp_line</li>
   </ol>
 </div>
 </div>
@@ -119,22 +119,21 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-f~11">F</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-s~18">S</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-x~21">X</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-xs~3">XS</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-cps~3">cps</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-df~5">dF</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-dxds~7">dXdS</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-del_s~12">del_S</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-fname_env~4">fname_env</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-funit_output~4">funit_output</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-i~27">i</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-iters~5">iters</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-n~25">n</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-ns~24">ns</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-point~4">point</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-z~18">z</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-f~7">F</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-s~10">S</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-x~12">X</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-xs~2">XS</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-cps~2">cps</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-df~4">dF</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-dxds~4">dXdS</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-del_s~4">del_S</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-fname_env~3">fname_env</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-funit_output~3">funit_output</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-i~20">i</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-iters~3">iters</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-n~17">n</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-ns~12">ns</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-point~3">point</a>
     </div>
   </div>
 </div>
@@ -144,7 +143,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public subroutine injection_envelope(X0, spec_number, del_S0, envels)</h2>
+    <h2>public subroutine dsp_line(X0, spec_number, del_S0, envels)</h2>
         <div class="panel panel-default">
       <div class="panel-heading">
   <h3 class="panel-title">Uses</h3>
@@ -162,56 +161,56 @@
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~injection_envelope~~UsesGraph Pages: 1 -->
-<svg id="procinjection_envelopeUsesGraph" width="351pt" height="74pt"
- viewBox="0.00 0.00 351.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~injection_envelope~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
-<title>proc~~injection_envelope~~UsesGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 347,-70 347,4 -4,4"/>
-<!-- proc~injection_envelope -->
-<g id="proc~~injection_envelope~~UsesGraph_node1" class="node">
-<title>proc~injection_envelope</title>
-<polygon fill="none" stroke="black" points="343,-45 230,-45 230,-21 343,-21 343,-45"/>
-<text text-anchor="middle" x="286.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">injection_envelope</text>
+<!-- Title: proc~~dsp_line~~UsesGraph Pages: 1 -->
+<svg id="procdsp_lineUsesGraph" width="294pt" height="74pt"
+ viewBox="0.00 0.00 294.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~dsp_line~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>proc~~dsp_line~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 290,-70 290,4 -4,4"/>
+<!-- proc~dsp_line -->
+<g id="proc~~dsp_line~~UsesGraph_node1" class="node">
+<title>proc~dsp_line</title>
+<polygon fill="none" stroke="black" points="286,-45 230,-45 230,-21 286,-21 286,-45"/>
+<text text-anchor="middle" x="258" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line</text>
 </g>
 <!-- module~constants -->
-<g id="proc~~injection_envelope~~UsesGraph_node2" class="node">
+<g id="proc~~dsp_line~~UsesGraph_node2" class="node">
 <title>module~constants</title>
-<g id="a_proc~~injection_envelope~~UsesGraph_node2"><a xlink:href=".././module/constants.html" xlink:title="constants">
+<g id="a_proc~~dsp_line~~UsesGraph_node2"><a xlink:href=".././module/constants.html" xlink:title="constants">
 <polygon fill="#337ab7" stroke="#337ab7" points="194,-66 130,-66 130,-42 194,-42 194,-66"/>
 <text text-anchor="middle" x="162" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">constants</text>
 </a>
 </g>
 </g>
-<!-- proc~injection_envelope&#45;&gt;module~constants -->
-<g id="proc~~injection_envelope~~UsesGraph_edge1" class="edge">
-<title>proc~injection_envelope&#45;&gt;module~constants</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.98,-42.52C221.35,-44 212.56,-45.5 204.31,-46.92"/>
-<polygon fill="#000000" stroke="#000000" points="203.47,-43.51 194.21,-48.65 204.66,-50.41 203.47,-43.51"/>
+<!-- proc~dsp_line&#45;&gt;module~constants -->
+<g id="proc~~dsp_line~~UsesGraph_edge1" class="edge">
+<title>proc~dsp_line&#45;&gt;module~constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.81,-39.07C221.78,-40.87 212.81,-42.87 204.11,-44.82"/>
+<polygon fill="#000000" stroke="#000000" points="203.1,-41.46 194.1,-47.05 204.62,-48.29 203.1,-41.46"/>
 </g>
 <!-- io -->
-<g id="proc~~injection_envelope~~UsesGraph_node3" class="node">
+<g id="proc~~dsp_line~~UsesGraph_node3" class="node">
 <title>io</title>
 <polygon fill="#337ab7" stroke="#337ab7" points="189,-24 135,-24 135,0 189,0 189,-24"/>
 <text text-anchor="middle" x="162" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">io</text>
 </g>
-<!-- proc~injection_envelope&#45;&gt;io -->
-<g id="proc~~injection_envelope~~UsesGraph_edge2" class="edge">
-<title>proc~injection_envelope&#45;&gt;io</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.98,-23.48C219.57,-21.7 208.93,-19.87 199.29,-18.22"/>
-<polygon fill="#000000" stroke="#000000" points="199.73,-14.75 189.28,-16.51 198.54,-21.64 199.73,-14.75"/>
+<!-- proc~dsp_line&#45;&gt;io -->
+<g id="proc~~dsp_line~~UsesGraph_edge2" class="edge">
+<title>proc~dsp_line&#45;&gt;io</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.81,-26.93C220.21,-24.78 209.27,-22.34 199.05,-20.05"/>
+<polygon fill="#000000" stroke="#000000" points="199.68,-16.61 189.16,-17.84 198.15,-23.44 199.68,-16.61"/>
 </g>
 <!-- iso_fortran_env -->
-<g id="proc~~injection_envelope~~UsesGraph_node4" class="node">
+<g id="proc~~dsp_line~~UsesGraph_node4" class="node">
 <title>iso_fortran_env</title>
-<g id="a_proc~~injection_envelope~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<g id="a_proc~~dsp_line~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
 <polygon fill="#337ab7" stroke="#337ab7" points="94,-66 0,-66 0,-42 94,-42 94,-66"/>
 <text text-anchor="middle" x="47" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
 </a>
 </g>
 </g>
 <!-- module~constants&#45;&gt;iso_fortran_env -->
-<g id="proc~~injection_envelope~~UsesGraph_edge3" class="edge">
+<g id="proc~~dsp_line~~UsesGraph_edge3" class="edge">
 <title>module~constants&#45;&gt;iso_fortran_env</title>
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M129.82,-54C121.93,-54 113.22,-54 104.5,-54"/>
 <polygon fill="#000000" stroke="#000000" points="104.31,-50.5 94.31,-54 104.31,-57.5 104.31,-50.5"/>
@@ -281,26 +280,27 @@
     </div>
 
 
-    <p>Subroutine to calculate Px phase envelopes via continuation method</p>
+    <p>Subroutine to calculate Px phase envelopes via continuation method.
+Three phases version.</p>
 
     <h3>Arguments</h3>
       <table class="table table-striped varlist">
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x0~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x0~2"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>X0</strong>(:)</td><td><p>Vector of variables</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-spec_number~3"></span>integer,</td>
+  <td><span class="anchor" id="variable-spec_number~2"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>spec_number</strong></td><td><p>Number of specification</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s0~9"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s0~4"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>del_S0</strong></td><td><p>
@@ -308,7 +308,7 @@
 </p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-envels~5"></span>type(<a href='../type/injelope.html'>injelope</a>),</td>
+  <td><span class="anchor" id="variable-envels~2"></span>type(<a href='../type/injelope.html'>injelope</a>),</td>
 <td>intent(out)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>envels</strong></td><td><p>Calculated envelopes</p></td>
@@ -327,173 +327,134 @@
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~injection_envelope~~CallsGraph Pages: 1 -->
-<svg id="procinjection_envelopeCallsGraph" width="486pt" height="368pt"
- viewBox="0.00 0.00 486.00 368.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~injection_envelope~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 364)">
-<title>proc~~injection_envelope~~CallsGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-364 482,-364 482,4 -4,4"/>
-<!-- proc~injection_envelope -->
-<g id="proc~~injection_envelope~~CallsGraph_node1" class="node">
-<title>proc~injection_envelope</title>
-<polygon fill="none" stroke="black" points="113,-192 0,-192 0,-168 113,-168 113,-192"/>
-<text text-anchor="middle" x="56.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50">injection_envelope</text>
-</g>
-<!-- proc~get_z -->
-<g id="proc~~injection_envelope~~CallsGraph_node2" class="node">
-<title>proc~get_z</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node2"><a xlink:href=".././proc/get_z.html" xlink:title="get_z">
-<polygon fill="#d9534f" stroke="#d9534f" points="236,-360 182,-360 182,-336 236,-336 236,-360"/>
-<text text-anchor="middle" x="209" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">get_z</text>
-</a>
-</g>
-</g>
-<!-- proc~injection_envelope&#45;&gt;proc~get_z -->
-<g id="proc~~injection_envelope~~CallsGraph_edge1" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~get_z</title>
-<path fill="none" stroke="#000000" d="M61.84,-192.19C72.37,-220.09 101.94,-289.1 149,-327 155.68,-332.38 163.85,-336.44 171.96,-339.48"/>
-<polygon fill="#000000" stroke="#000000" points="171.11,-342.89 181.7,-342.71 173.31,-336.24 171.11,-342.89"/>
-</g>
-<!-- progress_bar -->
-<g id="proc~~injection_envelope~~CallsGraph_node3" class="node">
-<title>progress_bar</title>
-<polygon fill="#777777" stroke="#777777" points="249.5,-318 168.5,-318 168.5,-294 249.5,-294 249.5,-318"/>
-<text text-anchor="middle" x="209" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;progress_bar -->
-<g id="proc~~injection_envelope~~CallsGraph_edge2" class="edge">
-<title>proc~injection_envelope&#45;&gt;progress_bar</title>
-<path fill="none" stroke="#000000" d="M65.04,-192.18C79.02,-213.83 111.03,-259.14 149,-285 152.1,-287.11 155.44,-289.04 158.9,-290.79"/>
-<polygon fill="#000000" stroke="#000000" points="157.68,-294.08 168.23,-295.02 160.57,-287.7 157.68,-294.08"/>
+<!-- Title: proc~~dsp_line~~CallsGraph Pages: 1 -->
+<svg id="procdsp_lineCallsGraph" width="460pt" height="242pt"
+ viewBox="0.00 0.00 460.00 242.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~dsp_line~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 238)">
+<title>proc~~dsp_line~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 456,-238 456,4 -4,4"/>
+<!-- proc~dsp_line -->
+<g id="proc~~dsp_line~~CallsGraph_node1" class="node">
+<title>proc~dsp_line</title>
+<polygon fill="none" stroke="black" points="56,-129 0,-129 0,-105 56,-105 56,-129"/>
+<text text-anchor="middle" x="28" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line</text>
 </g>
 <!-- str -->
-<g id="proc~~injection_envelope~~CallsGraph_node4" class="node">
+<g id="proc~~dsp_line~~CallsGraph_node2" class="node">
 <title>str</title>
-<polygon fill="#777777" stroke="#777777" points="236,-276 182,-276 182,-252 236,-252 236,-276"/>
-<text text-anchor="middle" x="209" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
+<polygon fill="#777777" stroke="#777777" points="194.5,-234 140.5,-234 140.5,-210 194.5,-210 194.5,-234"/>
+<text text-anchor="middle" x="167.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
 </g>
-<!-- proc~injection_envelope&#45;&gt;str -->
-<g id="proc~~injection_envelope~~CallsGraph_edge3" class="edge">
-<title>proc~injection_envelope&#45;&gt;str</title>
-<path fill="none" stroke="#000000" d="M72.59,-192.23C90.12,-206 120.32,-228.34 149,-243 156.28,-246.72 164.38,-250.07 172.19,-252.94"/>
-<polygon fill="#000000" stroke="#000000" points="171.24,-256.32 181.83,-256.32 173.55,-249.71 171.24,-256.32"/>
+<!-- proc~dsp_line&#45;&gt;str -->
+<g id="proc~~dsp_line~~CallsGraph_edge1" class="edge">
+<title>proc~dsp_line&#45;&gt;str</title>
+<path fill="none" stroke="#000000" d="M34.89,-129.3C44.34,-147.7 64.64,-182.24 92,-201 103.28,-208.73 117.37,-213.64 130.25,-216.74"/>
+<polygon fill="#000000" stroke="#000000" points="129.73,-220.21 140.24,-218.86 131.19,-213.36 129.73,-220.21"/>
 </g>
-<!-- proc~fix_step_two_phases -->
-<g id="proc~~injection_envelope~~CallsGraph_node5" class="node">
-<title>proc~fix_step_two_phases</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node5"><a xlink:href=".././proc/fix_step_two_phases.html" xlink:title="fix_step_two_phases">
-<polygon fill="#d9534f" stroke="#d9534f" points="269,-234 149,-234 149,-210 269,-210 269,-234"/>
-<text text-anchor="middle" x="209" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step_two_phases</text>
+<!-- progress_bar -->
+<g id="proc~~dsp_line~~CallsGraph_node3" class="node">
+<title>progress_bar</title>
+<polygon fill="#777777" stroke="#777777" points="208,-192 127,-192 127,-168 208,-168 208,-192"/>
+<text text-anchor="middle" x="167.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
+</g>
+<!-- proc~dsp_line&#45;&gt;progress_bar -->
+<g id="proc~~dsp_line~~CallsGraph_edge2" class="edge">
+<title>proc~dsp_line&#45;&gt;progress_bar</title>
+<path fill="none" stroke="#000000" d="M44.24,-129.15C56.53,-138.44 74.57,-150.98 92,-159 99.81,-162.59 108.37,-165.7 116.81,-168.35"/>
+<polygon fill="#000000" stroke="#000000" points="116.04,-171.77 126.62,-171.23 118.02,-165.05 116.04,-171.77"/>
+</g>
+<!-- proc~break_conditions_dsp_line -->
+<g id="proc~~dsp_line~~CallsGraph_node4" class="node">
+<title>proc~break_conditions_dsp_line</title>
+<g id="a_proc~~dsp_line~~CallsGraph_node4"><a xlink:href=".././proc/break_conditions_dsp_line.html" xlink:title="break_conditions_dsp_line">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="243,-150 92,-150 92,-126 243,-126 243,-150"/>
+<text text-anchor="middle" x="167.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions_dsp_line</text>
 </a>
 </g>
 </g>
-<!-- proc~injection_envelope&#45;&gt;proc~fix_step_two_phases -->
-<g id="proc~~injection_envelope~~CallsGraph_edge4" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~fix_step_two_phases</title>
-<path fill="none" stroke="#000000" d="M100.63,-192.04C117.63,-196.78 137.33,-202.28 155.17,-207.26"/>
-<polygon fill="#000000" stroke="#000000" points="154.29,-210.65 164.87,-209.96 156.18,-203.9 154.29,-210.65"/>
-</g>
-<!-- knew -->
-<g id="proc~~injection_envelope~~CallsGraph_node6" class="node">
-<title>knew</title>
-<polygon fill="#777777" stroke="#777777" points="236,-192 182,-192 182,-168 236,-168 236,-192"/>
-<text text-anchor="middle" x="209" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">knew</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;knew -->
-<g id="proc~~injection_envelope~~CallsGraph_edge5" class="edge">
-<title>proc~injection_envelope&#45;&gt;knew</title>
-<path fill="none" stroke="#000000" d="M113.11,-180C132.53,-180 153.82,-180 171.31,-180"/>
-<polygon fill="#000000" stroke="#000000" points="171.65,-183.5 181.65,-180 171.65,-176.5 171.65,-183.5"/>
+<!-- proc~dsp_line&#45;&gt;proc~break_conditions_dsp_line -->
+<g id="proc~~dsp_line~~CallsGraph_edge3" class="edge">
+<title>proc~dsp_line&#45;&gt;proc~break_conditions_dsp_line</title>
+<path fill="none" stroke="#000000" d="M56.17,-121.15C63.81,-122.32 72.55,-123.65 81.7,-125.05"/>
+<polygon fill="#000000" stroke="#000000" points="81.33,-128.53 91.74,-126.58 82.39,-121.61 81.33,-128.53"/>
 </g>
 <!-- proc~full_newton -->
-<g id="proc~~injection_envelope~~CallsGraph_node7" class="node">
+<g id="proc~~dsp_line~~CallsGraph_node5" class="node">
 <title>proc~full_newton</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node7"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
-<polygon fill="#d9534f" stroke="#d9534f" points="245.5,-150 172.5,-150 172.5,-126 245.5,-126 245.5,-150"/>
-<text text-anchor="middle" x="209" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
+<g id="a_proc~~dsp_line~~CallsGraph_node5"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
+<polygon fill="#d9534f" stroke="#d9534f" points="204,-108 131,-108 131,-84 204,-84 204,-108"/>
+<text text-anchor="middle" x="167.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
 </a>
 </g>
 </g>
-<!-- proc~injection_envelope&#45;&gt;proc~full_newton -->
-<g id="proc~~injection_envelope~~CallsGraph_edge6" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~full_newton</title>
-<path fill="none" stroke="#000000" d="M100.63,-167.96C120.1,-162.53 143.1,-156.11 162.8,-150.61"/>
-<polygon fill="#000000" stroke="#000000" points="163.79,-153.97 172.48,-147.91 161.91,-147.23 163.79,-153.97"/>
+<!-- proc~dsp_line&#45;&gt;proc~full_newton -->
+<g id="proc~~dsp_line~~CallsGraph_edge5" class="edge">
+<title>proc~dsp_line&#45;&gt;proc~full_newton</title>
+<path fill="none" stroke="#000000" d="M56.17,-112.85C74.61,-110.03 99.45,-106.24 120.89,-102.97"/>
+<polygon fill="#000000" stroke="#000000" points="121.43,-106.42 130.79,-101.45 120.37,-99.5 121.43,-106.42"/>
+</g>
+<!-- proc~fix_step -->
+<g id="proc~~dsp_line~~CallsGraph_node6" class="node">
+<title>proc~fix_step</title>
+<g id="a_proc~~dsp_line~~CallsGraph_node6"><a xlink:href=".././proc/fix_step.html" xlink:title="fix_step">
+<polygon fill="#d9534f" stroke="#d9534f" points="194.5,-66 140.5,-66 140.5,-42 194.5,-42 194.5,-66"/>
+<text text-anchor="middle" x="167.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step</text>
+</a>
+</g>
+</g>
+<!-- proc~dsp_line&#45;&gt;proc~fix_step -->
+<g id="proc~~dsp_line~~CallsGraph_edge4" class="edge">
+<title>proc~dsp_line&#45;&gt;proc~fix_step</title>
+<path fill="none" stroke="#000000" d="M44.24,-104.85C56.53,-95.56 74.57,-83.02 92,-75 104.02,-69.47 117.81,-65.09 130.23,-61.79"/>
+<polygon fill="#000000" stroke="#000000" points="131.43,-65.1 140.28,-59.27 129.73,-58.31 131.43,-65.1"/>
 </g>
 <!-- proc~update_spec -->
-<g id="proc~~injection_envelope~~CallsGraph_node8" class="node">
+<g id="proc~~dsp_line~~CallsGraph_node7" class="node">
 <title>proc~update_spec</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node8"><a xlink:href=".././proc/update_spec.html" xlink:title="update_spec">
-<polygon fill="#d9534f" stroke="#d9534f" points="249,-108 169,-108 169,-84 249,-84 249,-108"/>
-<text text-anchor="middle" x="209" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">update_spec</text>
+<g id="a_proc~~dsp_line~~CallsGraph_node7"><a xlink:href=".././proc/update_spec.html" xlink:title="update_spec">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-24 127.5,-24 127.5,0 207.5,0 207.5,-24"/>
+<text text-anchor="middle" x="167.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">update_spec</text>
 </a>
 </g>
 </g>
-<!-- proc~injection_envelope&#45;&gt;proc~update_spec -->
-<g id="proc~~injection_envelope~~CallsGraph_edge7" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~update_spec</title>
-<path fill="none" stroke="#000000" d="M72.59,-167.77C90.12,-154 120.32,-131.66 149,-117 152.55,-115.19 156.29,-113.46 160.09,-111.84"/>
-<polygon fill="#000000" stroke="#000000" points="161.64,-114.99 169.62,-108.02 159.03,-108.49 161.64,-114.99"/>
-</g>
-<!-- xnew -->
-<g id="proc~~injection_envelope~~CallsGraph_node9" class="node">
-<title>xnew</title>
-<polygon fill="#777777" stroke="#777777" points="236,-66 182,-66 182,-42 236,-42 236,-66"/>
-<text text-anchor="middle" x="209" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">xnew</text>
-</g>
-<!-- proc~injection_envelope&#45;&gt;xnew -->
-<g id="proc~~injection_envelope~~CallsGraph_edge8" class="edge">
-<title>proc~injection_envelope&#45;&gt;xnew</title>
-<path fill="none" stroke="#000000" d="M65.04,-167.82C79.02,-146.17 111.03,-100.86 149,-75 156.03,-70.21 164.27,-66.39 172.32,-63.39"/>
-<polygon fill="#000000" stroke="#000000" points="173.61,-66.65 181.96,-60.13 171.37,-60.02 173.61,-66.65"/>
-</g>
-<!-- proc~break_conditions -->
-<g id="proc~~injection_envelope~~CallsGraph_node10" class="node">
-<title>proc~break_conditions</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node10"><a xlink:href=".././proc/break_conditions.html" xlink:title="break_conditions">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="260.5,-24 157.5,-24 157.5,0 260.5,0 260.5,-24"/>
-<text text-anchor="middle" x="209" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions</text>
-</a>
-</g>
-</g>
-<!-- proc~injection_envelope&#45;&gt;proc~break_conditions -->
-<g id="proc~~injection_envelope~~CallsGraph_edge9" class="edge">
-<title>proc~injection_envelope&#45;&gt;proc~break_conditions</title>
-<path fill="none" stroke="#000000" d="M61.84,-167.81C72.37,-139.91 101.94,-70.9 149,-33 150.75,-31.59 152.61,-30.27 154.54,-29.03"/>
-<polygon fill="#000000" stroke="#000000" points="156.34,-32.04 163.4,-24.14 152.95,-25.91 156.34,-32.04"/>
+<!-- proc~dsp_line&#45;&gt;proc~update_spec -->
+<g id="proc~~dsp_line~~CallsGraph_edge6" class="edge">
+<title>proc~dsp_line&#45;&gt;proc~update_spec</title>
+<path fill="none" stroke="#000000" d="M34.89,-104.7C44.34,-86.3 64.64,-51.76 92,-33 99.65,-27.75 108.59,-23.81 117.57,-20.85"/>
+<polygon fill="#000000" stroke="#000000" points="118.66,-24.18 127.27,-18 116.69,-17.46 118.66,-24.18"/>
 </g>
 <!-- proc~solve_system -->
-<g id="proc~~injection_envelope~~CallsGraph_node11" class="node">
+<g id="proc~~dsp_line~~CallsGraph_node8" class="node">
 <title>proc~solve_system</title>
-<g id="a_proc~~injection_envelope~~CallsGraph_node11"><a xlink:href=".././proc/solve_system.html" xlink:title="solve_system">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="388,-129 305,-129 305,-105 388,-105 388,-129"/>
-<text text-anchor="middle" x="346.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
+<g id="a_proc~~dsp_line~~CallsGraph_node8"><a xlink:href=".././proc/solve_system.html" xlink:title="solve_system">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="362,-66 279,-66 279,-42 362,-42 362,-66"/>
+<text text-anchor="middle" x="320.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
 </a>
 </g>
 </g>
 <!-- proc~full_newton&#45;&gt;proc~solve_system -->
-<g id="proc~~injection_envelope~~CallsGraph_edge10" class="edge">
+<g id="proc~~dsp_line~~CallsGraph_edge7" class="edge">
 <title>proc~full_newton&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M245.6,-132.48C260.67,-130.15 278.49,-127.39 294.88,-124.84"/>
-<polygon fill="#000000" stroke="#000000" points="295.52,-128.29 304.87,-123.3 294.45,-121.37 295.52,-128.29"/>
+<path fill="none" stroke="#000000" d="M204.28,-86.05C223.63,-80.66 247.85,-73.93 269.08,-68.02"/>
+<polygon fill="#000000" stroke="#000000" points="270.21,-71.34 278.91,-65.29 268.34,-64.6 270.21,-71.34"/>
 </g>
 <!-- proc~update_spec&#45;&gt;proc~solve_system -->
-<g id="proc~~injection_envelope~~CallsGraph_edge11" class="edge">
+<g id="proc~~dsp_line~~CallsGraph_edge8" class="edge">
 <title>proc~update_spec&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M249.19,-102.07C263.42,-104.28 279.7,-106.8 294.78,-109.14"/>
-<polygon fill="#000000" stroke="#000000" points="294.57,-112.65 304.98,-110.72 295.64,-105.73 294.57,-112.65"/>
+<path fill="none" stroke="#000000" d="M207.78,-22.93C226.47,-28.12 249.04,-34.4 268.98,-39.95"/>
+<polygon fill="#000000" stroke="#000000" points="268.27,-43.38 278.84,-42.69 270.14,-36.64 268.27,-43.38"/>
 </g>
 <!-- none~dgesv -->
-<g id="proc~~injection_envelope~~CallsGraph_node12" class="node">
+<g id="proc~~dsp_line~~CallsGraph_node9" class="node">
 <title>none~dgesv</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="478,-129 424,-129 424,-105 478,-105 478,-129"/>
-<text text-anchor="middle" x="451" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
+<polygon fill="#a7506f" stroke="#a7506f" points="452,-66 398,-66 398,-42 452,-42 452,-66"/>
+<text text-anchor="middle" x="425" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
 </g>
 <!-- proc~solve_system&#45;&gt;none~dgesv -->
-<g id="proc~~injection_envelope~~CallsGraph_edge12" class="edge">
+<g id="proc~~dsp_line~~CallsGraph_edge9" class="edge">
 <title>proc~solve_system&#45;&gt;none~dgesv</title>
-<path fill="none" stroke="#000000" d="M388.01,-117C396.51,-117 405.42,-117 413.75,-117"/>
-<polygon fill="#000000" stroke="#000000" points="413.92,-120.5 423.92,-117 413.92,-113.5 413.92,-120.5"/>
+<path fill="none" stroke="#000000" d="M362.01,-54C370.51,-54 379.42,-54 387.75,-54"/>
+<polygon fill="#000000" stroke="#000000" points="387.92,-57.5 397.92,-54 387.92,-50.5 387.92,-57.5"/>
 </g>
 </g>
 </svg>
@@ -568,83 +529,62 @@
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~injection_envelope~~CalledByGraph Pages: 1 -->
-<svg id="procinjection_envelopeCalledByGraph" width="501pt" height="74pt"
- viewBox="0.00 0.00 501.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~injection_envelope~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
-<title>proc~~injection_envelope~~CalledByGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 497,-70 497,4 -4,4"/>
-<!-- proc~injection_envelope -->
-<g id="proc~~injection_envelope~~CalledByGraph_node1" class="node">
-<title>proc~injection_envelope</title>
-<polygon fill="none" stroke="black" points="493,-45 380,-45 380,-21 493,-21 493,-45"/>
-<text text-anchor="middle" x="436.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">injection_envelope</text>
+<!-- Title: proc~~dsp_line~~CalledByGraph Pages: 1 -->
+<svg id="procdsp_lineCalledByGraph" width="419pt" height="32pt"
+ viewBox="0.00 0.00 419.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~dsp_line~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~dsp_line~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 415,-28 415,4 -4,4"/>
+<!-- proc~dsp_line -->
+<g id="proc~~dsp_line~~CalledByGraph_node1" class="node">
+<title>proc~dsp_line</title>
+<polygon fill="none" stroke="black" points="411,-24 355,-24 355,0 411,0 411,-24"/>
+<text text-anchor="middle" x="383" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line</text>
 </g>
-<!-- proc~px_hpl_line -->
-<g id="proc~~injection_envelope~~CalledByGraph_node2" class="node">
-<title>proc~px_hpl_line</title>
-<g id="a_proc~~injection_envelope~~CalledByGraph_node2"><a xlink:href=".././proc/px_hpl_line.html" xlink:title="px_hpl_line">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="313.5,-66 241.5,-66 241.5,-42 313.5,-42 313.5,-66"/>
-<text text-anchor="middle" x="277.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">px_hpl_line</text>
+<!-- proc~dsp_line_from_dsp -->
+<g id="proc~~dsp_line~~CalledByGraph_node2" class="node">
+<title>proc~dsp_line_from_dsp</title>
+<g id="a_proc~~dsp_line~~CalledByGraph_node2"><a xlink:href=".././proc/dsp_line_from_dsp.html" xlink:title="dsp_line_from_dsp">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="319,-24 209,-24 209,0 319,0 319,-24"/>
+<text text-anchor="middle" x="264" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dsp_line_from_dsp</text>
 </a>
 </g>
 </g>
-<!-- proc~px_hpl_line&#45;&gt;proc~injection_envelope -->
-<g id="proc~~injection_envelope~~CalledByGraph_edge1" class="edge">
-<title>proc~px_hpl_line&#45;&gt;proc~injection_envelope</title>
-<path fill="none" stroke="#000000" d="M313.73,-49.29C330.29,-47.07 350.57,-44.36 369.8,-41.79"/>
-<polygon fill="#000000" stroke="#000000" points="370.29,-45.25 379.74,-40.46 369.36,-38.32 370.29,-45.25"/>
+<!-- proc~dsp_line_from_dsp&#45;&gt;proc~dsp_line -->
+<g id="proc~~dsp_line~~CalledByGraph_edge1" class="edge">
+<title>proc~dsp_line_from_dsp&#45;&gt;proc~dsp_line</title>
+<path fill="none" stroke="#000000" d="M319.05,-12C327.8,-12 336.7,-12 344.93,-12"/>
+<polygon fill="#000000" stroke="#000000" points="344.95,-15.5 354.95,-12 344.95,-8.5 344.95,-15.5"/>
 </g>
-<!-- proc~px_two_phase_from_pt -->
-<g id="proc~~injection_envelope~~CalledByGraph_node3" class="node">
-<title>proc~px_two_phase_from_pt</title>
-<g id="a_proc~~injection_envelope~~CalledByGraph_node3"><a xlink:href=".././proc/px_two_phase_from_pt.html" xlink:title="px_two_phase_from_pt">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="344,-24 211,-24 211,0 344,0 344,-24"/>
-<text text-anchor="middle" x="277.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">px_two_phase_from_pt</text>
+<!-- proc~pt_envelopes -->
+<g id="proc~~dsp_line~~CalledByGraph_node3" class="node">
+<title>proc~pt_envelopes</title>
+<g id="a_proc~~dsp_line~~CalledByGraph_node3"><a xlink:href=".././proc/pt_envelopes.html" xlink:title="pt_envelopes">
+<polygon fill="#d9534f" stroke="#d9534f" points="173,-24 90,-24 90,0 173,0 173,-24"/>
+<text text-anchor="middle" x="131.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pt_envelopes</text>
 </a>
 </g>
 </g>
-<!-- proc~px_two_phase_from_pt&#45;&gt;proc~injection_envelope -->
-<g id="proc~~injection_envelope~~CalledByGraph_edge2" class="edge">
-<title>proc~px_two_phase_from_pt&#45;&gt;proc~injection_envelope</title>
-<path fill="none" stroke="#000000" d="M344.17,-20.78C352.54,-21.9 361.1,-23.05 369.47,-24.17"/>
-<polygon fill="#000000" stroke="#000000" points="369.18,-27.66 379.55,-25.52 370.11,-20.72 369.18,-27.66"/>
-</g>
-<!-- proc~px_envelopes -->
-<g id="proc~~injection_envelope~~CalledByGraph_node4" class="node">
-<title>proc~px_envelopes</title>
-<g id="a_proc~~injection_envelope~~CalledByGraph_node4"><a xlink:href=".././proc/px_envelopes.html" xlink:title="px_envelopes">
-<polygon fill="#d9534f" stroke="#d9534f" points="175,-45 90,-45 90,-21 175,-21 175,-45"/>
-<text text-anchor="middle" x="132.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">px_envelopes</text>
-</a>
-</g>
-</g>
-<!-- proc~px_envelopes&#45;&gt;proc~px_hpl_line -->
-<g id="proc~~injection_envelope~~CalledByGraph_edge3" class="edge">
-<title>proc~px_envelopes&#45;&gt;proc~px_hpl_line</title>
-<path fill="none" stroke="#000000" d="M175.25,-39.13C192.83,-41.71 213.34,-44.72 231.28,-47.36"/>
-<polygon fill="#000000" stroke="#000000" points="230.83,-50.83 241.23,-48.82 231.85,-43.9 230.83,-50.83"/>
-</g>
-<!-- proc~px_envelopes&#45;&gt;proc~px_two_phase_from_pt -->
-<g id="proc~~injection_envelope~~CalledByGraph_edge4" class="edge">
-<title>proc~px_envelopes&#45;&gt;proc~px_two_phase_from_pt</title>
-<path fill="none" stroke="#000000" d="M175.25,-26.87C183.33,-25.68 192.04,-24.4 200.82,-23.11"/>
-<polygon fill="#000000" stroke="#000000" points="201.37,-26.57 210.75,-21.65 200.35,-19.65 201.37,-26.57"/>
+<!-- proc~pt_envelopes&#45;&gt;proc~dsp_line_from_dsp -->
+<g id="proc~~dsp_line~~CalledByGraph_edge2" class="edge">
+<title>proc~pt_envelopes&#45;&gt;proc~dsp_line_from_dsp</title>
+<path fill="none" stroke="#000000" d="M173.08,-12C181.14,-12 189.8,-12 198.44,-12"/>
+<polygon fill="#000000" stroke="#000000" points="198.54,-15.5 208.54,-12 198.54,-8.5 198.54,-15.5"/>
 </g>
 <!-- program~main -->
-<g id="proc~~injection_envelope~~CalledByGraph_node5" class="node">
+<g id="proc~~dsp_line~~CalledByGraph_node4" class="node">
 <title>program~main</title>
-<g id="a_proc~~injection_envelope~~CalledByGraph_node5"><a xlink:href=".././program/main.html" xlink:title="main">
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="54,-45 0,-45 0,-21 54,-21 54,-45"/>
-<text text-anchor="middle" x="27" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">main</text>
+<g id="a_proc~~dsp_line~~CalledByGraph_node4"><a xlink:href=".././program/main.html" xlink:title="main">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">main</text>
 </a>
 </g>
 </g>
-<!-- program~main&#45;&gt;proc~px_envelopes -->
-<g id="proc~~injection_envelope~~CalledByGraph_edge5" class="edge">
-<title>program~main&#45;&gt;proc~px_envelopes</title>
-<path fill="none" stroke="#000000" d="M54.12,-33C61.87,-33 70.64,-33 79.42,-33"/>
-<polygon fill="#000000" stroke="#000000" points="79.68,-36.5 89.68,-33 79.68,-29.5 79.68,-36.5"/>
+<!-- program~main&#45;&gt;proc~pt_envelopes -->
+<g id="proc~~dsp_line~~CalledByGraph_edge3" class="edge">
+<title>program~main&#45;&gt;proc~pt_envelopes</title>
+<path fill="none" stroke="#000000" d="M54.13,-12C61.89,-12 70.67,-12 79.44,-12"/>
+<polygon fill="#000000" stroke="#000000" points="79.67,-15.5 89.67,-12 79.67,-8.5 79.67,-15.5"/>
 </g>
 </g>
 </svg>
@@ -718,22 +658,21 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-f~11">F</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-s~18">S</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-x~21">X</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-xs~3">XS</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-cps~3">cps</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-df~5">dF</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-dxds~7">dXdS</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-del_s~12">del_S</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-fname_env~4">fname_env</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-funit_output~4">funit_output</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-i~27">i</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-iters~5">iters</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-n~25">n</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-ns~24">ns</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-point~4">point</a>
-      <a class="list-group-item" href="../proc/injection_envelope.html#variable-z~18">z</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-f~7">F</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-s~10">S</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-x~12">X</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-xs~2">XS</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-cps~2">cps</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-df~4">dF</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-dxds~4">dXdS</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-del_s~4">del_S</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-fname_env~3">fname_env</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-funit_output~3">funit_output</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-i~20">i</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-iters~3">iters</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-n~17">n</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-ns~12">ns</a>
+      <a class="list-group-item" href="../proc/dsp_line.html#variable-point~3">point</a>
     </div>
   </div>
 </div>
@@ -748,84 +687,79 @@
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-f~11"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-f~7"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>F</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-s~18"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-s~10"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-x~21"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~12"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>X</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-xs~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-xs~2"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>XS</strong>(max_points,size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-cps~3"></span>type(<a href='../type/critical_point.html'>critical_point</a>),</td>
+  <td><span class="anchor" id="variable-cps~2"></span>type(<a href='../type/critical_point.html'>critical_point</a>),</td>
 <td>public,</td>  <td>allocatable</td><td>::</td>
   <td><strong>cps</strong>(:)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-df~5"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-df~4"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dF</strong>(size(X0),size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dxds~7"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dxds~4"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dXdS</strong>(size(X0))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s~12"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s~4"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>del_S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-fname_env~4"></span>character(len=254),</td>
+  <td><span class="anchor" id="variable-fname_env~3"></span>character(len=254),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>fname_env</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-funit_output~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-funit_output~3"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>funit_output</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-i~27"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~20"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-iters~5"></span>integer,</td>
+  <td><span class="anchor" id="variable-iters~3"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>iters</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-n~25"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~17"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>n</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~24"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~12"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-point~4"></span>integer,</td>
+  <td><span class="anchor" id="variable-point~3"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>point</strong></td><td></td><td></td><td></td>
-</tr>
-<tr>
-  <td><span class="anchor" id="variable-z~18"></span>real(kind=pr),</td>
-<td>public</td>  <td></td><td>::</td>
-  <td><strong>z</strong>(size(X0)-2)</td><td></td><td></td><td></td>
 </tr>
 </tbody>
 </table>

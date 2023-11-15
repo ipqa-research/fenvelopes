@@ -104,7 +104,7 @@ contains
 
       allocate (intersections(0))
       line1: do i = 2, size(lx) - 1
-         line2: do j = i + 15, size(lx)
+         line2: do j = i + 2, size(lx)
             associate ( &
                x1 => lx(i - 1), x2 => lx(i), &
                x3 => lx(j), x4 => lx(j - 1), &
@@ -185,6 +185,7 @@ contains
       !!
       !! Procedure that solves a point with the Newton-Raphson method.
       use constants, only: ouput_path
+      use minpack_module, only: dpmpar, hybrj1
       interface
          subroutine fun(X, ns, S, F, dF)
             !! Function to solve
@@ -207,28 +208,59 @@ contains
       !&>
 
       real(pr) :: b(size(X)), A(size(X), size(X))
-      real(pr) :: dX(size(X)), tol = 1e-2
-      integer :: funit_log_newton
+      real(pr) :: dX(size(X)), tol = 1e-6
 
-      integer :: n
+      integer :: n, ldfjac, info, lwa, funit
+      real(pr) :: fvec(size(x)), fjac(size(x),size(x))
+      real(pr), allocatable :: wa(:)
 
       n = size(X)
+      ! ldfjac = n
+      ! lwa = (n*(n+13))/2
+      ! allocate(wa(lwa))
+      ! call hybrj1(fcn, n, x, Fvec, Fjac, Ldfjac, Tol, Info, Wa, Lwa)
+
+      ! f = fvec
+      ! df = fjac
+      ! iters = 3
+      ! if (info == 4) iters = max_iters+1
+
       dX = 20
 
+      ! open(newunit=funit, file="fenvelopes_output/newton")
+      ! write(funit, *) n
+      b = 500
+
       newton: do iters = 1, max_iters
-         if (maxval(abs(dx/x)) < tol) exit newton
+         if (maxval(abs(dx/x)) < tol .or. maxval(abs(b)) < tol) exit newton
          call fun(X, ns, S, b, a)
          b = -b
+
+         if (any(isnan(b))) dx = dx/maxval(abs(dx))
          dX = solve_system(A, b)
 
-         do while (maxval(abs(dx)) > 0.5*maxval(abs(x)))
-            dX = dX/2
+         do while(maxval(abs(dx)) > 0.5)
+            dX = dX/10
          end do
+
+         ! write(funit, *) x, dx, -b
 
          X = X + dX
       end do newton
 
       F = -b
       dF = A
+      ! close(funit)
+
+      contains
+         subroutine fcn(n, x, fvec, fjac, ldfjac, iflag)
+            integer, intent(in) :: N
+            real(pr), intent(in) :: x(n)
+            real(pr), intent(inout) :: fvec(n)
+            real(pr), intent(inout) :: fjac(ldfjac, n)
+            integer, intent(in) :: ldfjac
+            integer, intent(inout) :: iflag
+            call fun(X, ns, S, fvec, fjac)
+         end subroutine
    end subroutine
 end module linalg
