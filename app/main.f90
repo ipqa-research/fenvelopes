@@ -131,19 +131,6 @@ contains
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
          pt_dew &
          )
-
-      ! Remove the low pressure parts.
-      ! n = 1
-      ! do i = 2, size(pt_dew%t)
-      !    n = n + 1
-      !    if (pt_dew%t(i) - pt_dew%t(i - 1) < 0) exit
-      ! end do
-
-      ! if (n /= size(pt_dew%t)) then
-      !    pt_dew%t = pt_dew%t(i:)
-      !    pt_dew%p = pt_dew%p(i:)
-      !    pt_dew%logk = pt_dew%logk(i:, :)
-      ! end if
       ! ========================================================================
 
       ! ========================================================================
