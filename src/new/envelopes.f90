@@ -124,7 +124,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
-      delS = delS*3
+      delS = 5*delS
 
       S = S + delS
    end subroutine
