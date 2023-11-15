@@ -996,15 +996,17 @@ contains
       real(pr) :: S !! Value of specification
 
       integer :: n
-      real(pr) :: p, t
+      real(pr) :: p, t, beta
       logical, allocatable :: break_conditions_three_phases(:)
 
       n = (size(X) - 3)/2
       p = exp(X(2*n + 1))
+      beta = x(2*n+3)
       t = X(2*n + 2)
-
-      break_conditions_three_phases = [ .false.&
-                                      ! p < 1 .or. p > 5000 &
+         
+      break_conditions_three_phases = [ &
+                                          beta < 0 &
+                                          .or. 1 < beta &
                                       ]
    end function
    ! ===========================================================================
@@ -1106,7 +1108,7 @@ contains
          X = [lnKx, lnKy, log(p), log(t), beta]
          call pt_envelope_three_phase(X, ns, del_S0, pt_x_3(i_inter))
          ! ==================================================================
-         
+
          ! ==================================================================
          !  Line with incipient phase liquid
          ! ------------------------------------------------------------------
