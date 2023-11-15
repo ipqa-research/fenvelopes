@@ -268,7 +268,7 @@ contains
       px_bub = px_two_phase_from_pt(t_inj, pt_bub, t_tol=5.0_pr)
 
       print *, blue // "Running Dew" // style_reset
-      px_dew = px_two_phase_from_pt(t_inj, pt_dew, t_tol=15.0_pr)
+      px_dew = px_two_phase_from_pt(t_inj, pt_dew, t_tol=5.0_pr)
 
       print *, blue // "Running HPLL" // style_reset
       px_hpl = px_hpl_line(0.99_pr, maxval(px_bub%p))
