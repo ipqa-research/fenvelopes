@@ -308,9 +308,9 @@ contains
       real(pr) :: dP, dalpha
       real(pr) :: dP_tol, dalpha_tol
       integer :: n
-      
+
       n = size(X) - 2
-      
+
       del_S = sign(del_S_multiplier, del_S)*minval([ &
                                          max(sqrt(abs(X(ns)))/10, 0.1), &
                                          abs(del_S)*3/solve_its &
@@ -486,10 +486,12 @@ contains
                           )
          df(i + n, 2*n + 2) = sum(Ky*dlnphi_dn_y(i, :)*dwda &
                                   - dlnphi_dn_w(i, :)*dwda)
+         ! Derivatives wrt beta
          df(i, 2*n + 3) = sum(Kx*dlnphi_dn_x(i, :)*dwdb &
                               - dlnphi_dn_w(i, :)*dwdb)
          df(i + n, 2*n + 3) = sum(Ky*dlnphi_dn_y(i, :)*dwdb &
                                   - dlnphi_dn_w(i, :)*dwdb)
+         
          df(2*n + 1, i) = Kx(i)*dwdKx(i)
          df(2*n + 1, i + n) = Ky(i)*dwdKy(i)
 
@@ -526,13 +528,20 @@ contains
 
       type(critical_point), allocatable :: cps(:)
 
-      real(pr) :: X(size(X0))
+      real(pr), target :: X(size(X0))
       integer :: ns
       real(pr) :: S
       real(pr) :: XS(max_points, size(X0))
       real(pr) :: del_S
 
       real(pr) :: F(size(X0)), dF(size(X0), size(X0)), dXdS(size(X0))
+
+      real(pr), pointer :: lnP
+      real(pr), pointer :: alpha
+      real(pr), pointer :: beta
+      real(pr), pointer :: lnKx(:)
+      real(pr), pointer :: lnKy(:)
+      real(pr) :: z(size(z_0))
 
       integer :: point, iters, n
       integer :: i
@@ -546,6 +555,13 @@ contains
       S = X(ns)
       del_S = del_S0
 
+      lnKx => X(:n)
+      lnKy => X(n+1:2*n)
+      lnP => X(2*n+1)
+      alpha => X(2*n+2)
+      beta => X(2*n+3)
+      call get_z(alpha, z)
+
       ! ======================================================================
       !  Output file
       ! ----------------------------------------------------------------------
@@ -558,7 +574,7 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
       write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
-         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n), (" z" //str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), &
          X(2*n + 3), X(:2*n)
       ! ======================================================================
@@ -572,8 +588,9 @@ contains
             exit enveloop
          end if
 
-         write (funit_output, *) "SOL", iters, ns, X(2*n + 2), &
-            exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
+         call get_z(alpha, z)
+         write (funit_output, *) "SOL", iters, ns, alpha, &
+            exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z
          XS(point, :) = X
 
          call update_spec(X, ns, del_S, dF, dXdS)
