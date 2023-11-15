@@ -1,20 +1,26 @@
-# fenvelopes
-Fortran program to calculate phase envelopes.
+# fenvelopes: Phase diagrams with Equations of State.
 
-This is an ongoing project that intends te be a fully fledged generator of phase
-equilibria diagrams using Equations of State.
+![Phase diagram PTA](figs/pta.png)
+
+This is an ongoing project that intends te be a fully fledged generator of
+phase equilibria diagrams from multicomponent systems, using Equations of
+State.
 
 ## Capabilities
 Right now `fenvelopes` calculates three kinds of phase-envelopes.
 
 - [x] Two-phase PT envelopes
-- [o] Three-phase PT envelopes
+- [ ] Three-phase PT envelopes
     - [x] PT envelopes based on double saturation points.
     - [ ] Isolated PT envelopes
+- [ ] DSP lines:
+    - [x] DSP lines from a PT DSP
 - [x] Two-phase Px envelopes
 - [ ] Three-phase Px envelopes
     - [x] Px envelopes based on double saturation points.
-    - [ ] Isolated Px envelopes.
+    - [ ] Isolated Px envelopes:
+        - [x] Isolated Px from PT
+        - [ ] Isolated Px from search
 - [ ] Python wrappers to ease up scripting and plotting.
 
 ## Usage
@@ -130,3 +136,4 @@ with `fpm`
 ```bash
 fpm run --profile release -- --infile <infile.nml PATH>
 ```
+
