@@ -238,7 +238,7 @@ contains
    end subroutine
 
    subroutine px_envelopes
-      !! Calculation of Px envelopes at selected temperature.
+      !! Calculation of P\(\alpha\) envelopes at selected temperature.
       use inj_envelopes, only: full_newton, z_injection, &
                                T_inj => T, injection_envelope, z_0, &
                                injelope, injection_envelope_three_phase, get_z, &
@@ -248,14 +248,9 @@ contains
                                px_hpl_line
       use envelopes, only: envelope, k_wilson, p_wilson
       use linalg, only: interpol, point, intersection
+      type(point), allocatable :: inter_dew_bub(:), self_inter_dew(:), self_inter_bub(:)
 
-      type(point), allocatable :: inter(:), self_inter(:)
-
-      real(pr) :: del_S0
-      integer :: ns, i
-      real(pr) :: p
       real(pr) :: t_tol = 2
-      real(pr) :: dzda(nc)
 
       print *, style_underline // "----------" // style_reset
       print *, style_underline // "Px Regions" // style_reset
@@ -271,16 +266,7 @@ contains
       px_dew = px_two_phase_from_pt(t_inj, pt_dew, t_tol=5.0_pr)
 
       print *, blue // "Running HPLL" // style_reset
-      px_hpl = px_hpl_line(0.99_pr, maxval(px_bub%p))
-      ! ========================================================================
-
-      ! ========================================================================
-      !  Look for crossings
-      ! ------------------------------------------------------------------------
-      inter = intersection(px_dew%alpha, px_dew%p, px_bub%alpha, px_bub%p)
-      self_inter = intersection(px_bub%alpha, px_bub%p)
-      print *, style_bold // "Px Intersections:      " // style_reset, size(inter)
-      print *, style_bold // "Px Self-Intersections: " // style_reset, size(self_inter)
+      px_hpl = px_hpl_line(0.99_pr, 1000.0_pr)
       ! ========================================================================
 
       ! ========================================================================
