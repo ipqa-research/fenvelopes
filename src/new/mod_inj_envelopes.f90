@@ -17,19 +17,19 @@ module inj_envelopes
    !  Parameters
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 50 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 100 !! Maximum number of iterations for a newton step
+   real(pr) :: solve_tol =1e-5 !! Newton solver tolerance
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    real(pr), allocatable :: z_0(:) !! Original fluid composition
    real(pr), allocatable :: z_injection(:) !! Injection fluid composition
    real(pr) :: T !! Temperature of injection
    character(len=10) :: injection_case !! Kind of injection displace|dilute
-   character(len=255) :: FE_LOG
 
    ! Two-phase settings
-   real(pr) :: del_S_multiplier = 2.0_pr
-   real(pr) :: max_dp=50.0_pr
-   real(pr) :: max_dalpha=0.01_pr
-   real(pr) :: critical_multiplier = 2.0_pr
+   real(pr) :: del_S_multiplier = 1.5_pr
+   real(pr) :: max_dp=100.0_pr
+   real(pr) :: max_dalpha=0.05_pr
+   real(pr) :: critical_multiplier = 1.5_pr
    
    ! Three phase parameters
    real(pr) :: del_S_multiplier_three_phase = 1.7_pr
@@ -41,7 +41,10 @@ contains
       character(len=*), intent(in) :: filepath
       integer :: funit
 
-      namelist /nml_px/ T, z_0, z_injection, injection_case
+      namelist /nml_px/ T, z_0, z_injection, injection_case, &
+                        del_S_multiplier, max_dp, max_dalpha, critical_multiplier,&
+                        del_S_multiplier_three_phase, critical_fact, &
+                        max_iters, solve_tol
 
       allocate (z_0(nc), z_injection(nc))
 
@@ -191,7 +194,9 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(f_injection, iters, X, ns, S, max_iters, F, dF)
+         call full_newton(&
+            f_injection, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
+         )
 
          if (iters >= max_iters) then
             call progress_bar(point, max_points, advance=.true.)
@@ -583,7 +588,9 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(F_injection_three_phases, iters, X, ns, S, max_iters, F, dF)
+         call full_newton(&
+            F_injection_three_phases, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
+         )
          if (iters >= max_iters) then
             call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
@@ -602,7 +609,7 @@ contains
             real(pr) :: dP, dalpha
 
             del_S = sign(del_S_multiplier_three_phase, del_S)*minval([ &
-                                               max(abs(X(ns)/10), 0.1_pr), &
+                                               max(abs(sqrt(X(ns))/10), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
                                                )
@@ -626,8 +633,12 @@ contains
             real(pr) :: K((size(X0) - 3)/2), Knew((size(X0) - 3)/2), &
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
+            real(pr) :: bu_solve_tol
             integer :: max_changing, i
+            logical :: found_critical
+
             fact = critical_fact
+            found_critical = .false.
 
             loop: do i = 0, 1
                Xnew = X + fact*dXdS*del_S
@@ -638,9 +649,14 @@ contains
                max_changing = maxloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
+
+                  print *, ""
+                  print *, "CP ENV", env_number
+                  print *, ""
+
                   dS_c = ( &
-                         -k(max_changing)*(Xnew(ns) - X(ns)) &
-                         /(Knew(max_changing) - K(max_changing)) &
+                         -k(max_changing) * (Xnew(ns) - X(ns)) &
+                          /(Knew(max_changing) - K(max_changing)) &
                          )
 
                   Xnew = X + dXdS*dS_c
@@ -648,9 +664,7 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(t, pc, alpha_c)]
 
-                  ! del_S = dS_c + del_S ! * fact
-                  ! del_S = del_S * fact
-                  del_S = dS_c - sign(1.7_pr, dS_c)*dS_c
+                  del_S = dS_c + 1.7_pr * dS_c
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -673,8 +687,6 @@ contains
             exit enveloop
          end if
       end do enveloop
-
-      ! point = point - 1
 
       write (funit_output, *) ""
       write (funit_output, *) ""
@@ -770,7 +782,8 @@ contains
    ! ===========================================================================
    ! Initialization procedures
    ! ---------------------------------------------------------------------------
-   function px_two_phase_from_pt(t_inj, pt_env_2, t_tol, del_S0) result(envel)
+   function px_two_phase_from_pt(&
+      t_inj, pt_env_2, t_tol, del_S0) result(px_envels)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -785,7 +798,7 @@ contains
       type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
-      type(injelope) :: envel !! Output Px envelope
+      type(injelope), allocatable :: px_envels(:) !! Output Px envelope
       
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
       real(pr), allocatable :: k(:) !! K values
@@ -797,6 +810,9 @@ contains
       integer :: i, idx, ns
       real(pr) :: del_S
 
+      type(injelope) :: px_envel
+
+      allocate(px_envels(0))
       del_S = optval(del_S0, 0.1_pr)
       pold = 1e9
 
@@ -820,7 +836,8 @@ contains
          X = [log(K), log(P), alpha]
          ns = size(X)
 
-         call injection_envelope(X, ns, del_S, envel)
+         call injection_envelope(X, ns, del_S, px_envel)
+         px_envels = [px_envels, px_envel]
       end do
    end function
 
@@ -914,8 +931,8 @@ contains
       real(pr) :: z(nc), dzda(nc)
       integer :: ns
 
-      del_S = optval(del_S0, -0.05_pr)
-      beta = optval(beta0, 0.99_pr)
+      del_S = optval(del_S0, -0.01_pr)
+      beta = optval(beta0, 1.0_pr)
 
       i = inter%i
       j = inter%j
@@ -992,11 +1009,9 @@ contains
 
          diff = foo([alpha_in, p_in, y])
          return 
-         ! print *, ncomp, diff
          do while (abs(diff) > 0.001 .and. p_in < 5000)
             p_in = p_in + 10.0_pr
             diff = foo([alpha_in, p_in, y])
-            ! print *, diff
          end do
 
          if (p_in >= 5000) then
@@ -1006,12 +1021,9 @@ contains
             end do
          end if
 
-         p_in = 600
-         alpha_in = 0.9
-
          if (.true.) then!(alpha_in > 0 .or. p_in < 5000) then
-            ! call optim
-            ! print *, alpha_in, p_in
+            call optim
+            print *, alpha_in, p_in
             k = 1/exp(lnfug_y - lnfug_z)
 
             X = [log(K), log(P_in), alpha_in]
