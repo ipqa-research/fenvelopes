@@ -6,7 +6,7 @@ maintainer = "federico.benelli@mi.unc.edu.ar"
 copyright = "Copyright 2023, Federico E. Benelli"
 
 [build]
-link = ["lapack"]
+link = ["blas"]
 auto-executables = true
 auto-tests = true
 auto-examples = true
@@ -16,7 +16,7 @@ library = false
 
 [dependencies]
 stdlib = "*"
-minpack= "*"
+# minpack= "*"
 ftools = { git = "https://github.com/fedebenelli/ftools" }
 yaeos  = { git = "https://github.com/fedebenelli/yaeos"  }
 FLAP   = { git = "https://github.com/szaghi/FLAP", tag="v1.2.5" }

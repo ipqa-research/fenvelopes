@@ -124,7 +124,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
-      delS = 5*delS
+      delS = 3*delS
 
       S = S + delS
    end subroutine
@@ -281,7 +281,11 @@ contains
          diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
       end do
 
-      k = exp(lnfug_y - lnfug_z)
+      k = 1/exp(lnfug_y - lnfug_z)
+      k = 1e-3
+      k(ncomp) = 1000
+      ! print *, k
+      ! print *, 1/k
    end subroutine
 
    subroutine envelope2(ichoice, n, z, T, P, KFACT, & ! This will probably always exist
@@ -563,18 +567,19 @@ contains
                   its = 0
                   delta = delS
 
-                  exit extrapolation
-
                   ! Variation of lnK based on deltaS
                   ! m = 37.0_pr * (X - Xold2)/(delta)
                   ! lnK_extrapolated = (delta) * m(:n) + X(:n)
-                  lnK_extrapolated = X(:n) + 4 * delS * dXdS
+                  lnK_extrapolated = X(:n) + 7 * delS * dXdS(:n)
+                  ! print *, X(:n)
+                  ! print *, lnK_extrapolated
 
                   if (all((X(:n) * lnK_extrapolated < 0), dim=1)) then
+                     print *, "Extrapol CP"
                      ! All lnK changed sign, so a CP is inminent
                      ! aproach it enough to force the jumping algorithm
                      do while( &
-                           maxval(abs(X(:n))) >= 0.03 &
+                           maxval(abs(X(:n))) >= 0.02 &
                            .and. all(X(:n)*lnK_extrapolated > 0, dim=1)&
                         )
                         print *, its, "Getting to critical", &
@@ -864,7 +869,7 @@ contains
 
       enveloop: do point = 1, max_points
          call progress_bar(point, max_points, advance=.false.)
-         call full_newton(pt_F_three_phases, iters, X, ns, S, max_iters, F, dF)
+         call full_newton(pt_F_three_phases, iters, X, ns, S, max_iters, F, dF, solvetol=1e-7_pr)
          if (iters >= max_iters) then
             print *, "Breaking: Above max iterations"
             exit enveloop
@@ -903,23 +908,23 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dT
 
-            del_S = sign(2.5_pr, del_S)*minval([ &
-                                               max(abs(X(ns)/5), 0.1_pr), &
+            del_S = sign(1.0_pr, del_S) * minval([ &
+                                               max(abs(sqrt(X(ns))/10), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
                                                )
 
-            Xnew = X + dXdS*del_S
-            dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-            dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
+            ! Xnew = X + dXdS*del_S
+            ! dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+            ! dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
 
-            do while (abs(dP) > 2 .or. abs(dT) > 5)
-               dXdS = dXdS/2.0_pr
+            ! do while (abs(dP) > 50 .or. abs(dT) > 7)
+            !    dXdS = dXdS/2.0_pr
 
-               Xnew = X + dXdS*del_S
-               dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-               dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
-            end do
+            !    Xnew = X + dXdS*del_S
+            !    dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
+            !    dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
+            ! end do
          end block fix_step
 
          detect_critical: block
@@ -934,10 +939,11 @@ contains
 
                K = X(i*n + 1:(i + 1)*n)
                Knew = Xnew(i*n + 1:(i + 1)*n)
+              
+               max_changing = maxloc(abs(Knew - K), dim=1)
 
-               max_changing = minloc(abs(Knew - K), dim=1)
-
-               if (all(K*Knew < 0)) then
+               if (all(K*Knew < 0) .or. maxval(abs(K)) < 0.1) then
+                  print *, "CP"
                   dS_c = ( &
                          -k(max_changing)*(Xnew(ns) - X(ns)) &
                          /(Knew(max_changing) - K(max_changing)) &
@@ -948,7 +954,7 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(tc, pc, 0.0_pr)]
 
-                  del_S = dS_c + sign(0.04_pr, dS_c)
+                  del_S = dS_c + 2.5_pr * dS_c
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -956,7 +962,6 @@ contains
                end if
             end do loop
          end block detect_critical
-
 
          X = X + dXdS*del_S
          S = X(ns)
@@ -1026,10 +1031,20 @@ contains
       type(point), allocatable :: inter_dew_bub(:)
       type(point), allocatable :: inter_hpl_bub(:)
       type(point), allocatable :: inter_hpl_dew(:)
+      
+      type(point), allocatable :: self_inter_dew(:)
 
       inter_dew_bub = intersection(dew%t, dew%p, bub%t, bub%p)
       inter_hpl_bub = intersection(hpl%t, hpl%p, bub%t, bub%p)
       inter_hpl_dew = intersection(hpl%t, hpl%p, dew%t, dew%p)
+
+      self_inter_dew = intersection(dew%t, dew%p)
+
+      print *, "======INTERSERCTIONS========="
+      print *, "DEW_BUB", inter_dew_bub
+      print *, "HPL_BUB", inter_hpl_bub
+      print *, "HPL_DEW", inter_hpl_dew
+      print *, "============================="
 
       if (size(inter_dew_bub) == 2) then
          this_case = "2_DEW_BUB"
@@ -1037,15 +1052,22 @@ contains
       else if (size(inter_hpl_bub) == 1 .and. size(inter_dew_bub) == 1) then
          this_case = "2_HPL_BUB_DEW_BUB"
          intersections = [inter_hpl_bub, inter_dew_bub]
+      else if (size(inter_hpl_bub) == 1 .and. size(inter_hpl_dew) == 1) then
+         this_case = "2_HPL_BUB_HPL_DEW"
+         intersections = [inter_hpl_bub, inter_hpl_dew]
       else if (size(inter_hpl_bub) == 2) then
          this_case = "2_HPL_BUB"
          intersections = [inter_hpl_bub(1), inter_hpl_bub(2)]
-      else if (size(inter_hpl_dew) == 1) then
-         this_case = "1_HPL_DEW"
-         intersections = inter_hpl_dew
       else if (size(inter_hpl_bub) == 1) then
          this_case = "1_HPL_BUB"
          intersections = inter_hpl_bub
+      else if (size(inter_hpl_dew) == 1) then
+         this_case = "1_HPL_DEW"
+         intersections = inter_hpl_dew
+      else if (size(self_inter_dew) == 1) then
+         this_case = "1_DEW"
+         allocate(intersections(0))
+         self_intersections = self_inter_dew
       else
          this_case = "0"
          allocate(intersections(0))
@@ -1092,7 +1114,7 @@ contains
          ! Dew line composition
          phase_x = exp(lnKx)*z
 
-         del_S0 = -0.01_pr
+         del_S0 = -0.1_pr
          beta = 1
 
          ns = 2*nc + 3

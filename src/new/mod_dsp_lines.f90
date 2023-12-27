@@ -12,21 +12,21 @@ module dsp_lines
    !  Parameters
    ! ---------------------------------------------------------------------------
    integer :: env_number = 0 !! Number of calculated envelope
-   integer :: max_iters = 1000 !! Maximum number of iterations for a newton step
+   integer :: max_iters = 10 !! Maximum number of iterations for a newton step
    integer, parameter :: max_points = 1000 !! Maximum number of points for each envelope
    character(len=255) :: FE_LOG
 
    real(pr) :: del_S_multiplier = 1.0_pr
    real(pr) :: max_da=0.1_pr
-   real(pr) :: max_dp=20.0_pr
-   real(pr) :: max_dT=10.0_pr
+   real(pr) :: max_dp=1000.0_pr
+   real(pr) :: max_dT=100.0_pr
    ! ===========================================================================
 contains
    ! ===========================================================================
    ! Three-phases
    ! ---------------------------------------------------------------------------
    subroutine dsp_line_F(Xvars, ns, S, F, dF)
-      !! Function to solve at each point of a three phase envelope.
+      !! Function to solve at each point of a DSP line.
       !!
       !! The vector of variables X corresponds to:
       !! \( X = [lnKx_i, lnKy_i lnP, \alpha, T] \)
@@ -34,10 +34,10 @@ contains
       !! While the equations are:
       !!
       !! \( F = [
-      !!        lnKx_i - ln \phi_i(x, P, T) + ln \phi_i(w, P, T),
-      !!        lnKy_i - ln \phi_i(y, P, T) + ln \phi_i(w, P, T),
-      !!        \sum_{i=1}^N (w_i) - 1,
-      !!        \sum_{i=1}^N (x_i - y_i),
+      !!        lnKx_i - ln \phi_i(z, P, T) + ln \phi_i(x, P, T),
+      !!        lnKy_i - ln \phi_i(z, P, T) + ln \phi_i(y, P, T),
+      !!        \sum_{i=1}^N (x_i - z_i),
+      !!        \sum_{i=1}^N (y_i - z_i),
       !!        X_{ns} - S
       !! ] \)
       use legacy_ar_models, only: TERMO
@@ -89,7 +89,7 @@ contains
       T = exp(Xvars(2*n + 3))
 
       call get_z(alpha, z, dzda)
-      ! if (any(z < 0)) return
+      if (any(z < 0)) return
 
       x = Kx * z
       y = Ky * z
@@ -207,11 +207,13 @@ contains
 
          X = X + dXdS*del_S
          S = X(ns)
+
          if (any(break_conditions_dsp_line(X, ns, S, del_S)) .and. point > 10) then
             call progress_bar(point, max_points, .true.)
             print *, "Breaking: ", break_conditions_dsp_line(X, ns, S, del_S)
             exit enveloop
          end if
+
       end do enveloop
 
       write (funit_output, *) ""
@@ -228,9 +230,9 @@ contains
       close (funit_output)
       envels%z = z_0
       envels%z_inj = z_injection
-      envels%logk = XS(:point, :n)
-      envels%alpha = XS(:point, n + 2)
-      envels%p = exp(XS(:point, n + 1))
+      envels%logk = XS(:point-1, :n)
+      envels%alpha = XS(:point-1, n + 2)
+      envels%p = exp(XS(:point-1, n + 1))
       envels%critical_points = cps
    end subroutine
 
@@ -248,7 +250,7 @@ contains
          n = (size(X) - 3)/2
 
          del_S = sign(del_S_multiplier, del_S)*minval([ &
-                                            max(abs(X(ns)/10), 0.1_pr), &
+                                            max(abs(sqrt(X(ns))/10), 0.1_pr), &
                                             abs(del_S)*3/iters &
                                             ] &
                                             )
@@ -284,10 +286,7 @@ contains
       p = exp(X(2*n + 1))
       alpha = X(2*n + 2)
 
-      break_conditions_dsp_line = [ .false.&
-                                       ! p < 0.001_pr .or. p > 5000, &
-                                       ! abs(del_S) < 1e-5 &
-                                      ]
+      break_conditions_dsp_line = [ .false. ]
    end function
    ! ===========================================================================
    
@@ -295,16 +294,20 @@ contains
    ! Initialization procedures
    ! ---------------------------------------------------------------------------
    function dsp_line_from_dsp(&
-         inter, pt_1, pt_2, del_S0, alpha0 &
+         dsp, pt_1, pt_2, del_S0, alpha0 &
       ) result(envels)
+      !! Calculate a DSP line from an already found double saturation point
+      !! (`dsp`) between two PT lines (`pt_1`and `pt_2`).
+      !! 
       use legacy_ar_models, only: nc
       use stdlib_optval, only: optval
       use linalg, only: point, interpol
-      type(point), intent(in) :: inter
-      type(envelope), intent(in) :: pt_1, pt_2
-      type(injelope) :: envels(2)
-      real(pr), optional :: del_S0
-      real(pr), optional :: alpha0
+      type(point), intent(in) :: dsp !! DSP point
+      type(envelope), intent(in) :: pt_1 !! PT envelope
+      type(envelope), intent(in) :: pt_2 !! PT envelope
+      type(injelope) :: envels(2) !! Output envelopes
+      real(pr), optional :: del_S0 !! Initial step size, defaults to 0.01
+      real(pr), optional :: alpha0 !! Initial \(\alpha)\, defaults to 0
 
       integer :: i, j
 
@@ -316,11 +319,11 @@ contains
       del_S = optval(del_S0, 0.01_pr)
       alpha = optval(alpha0, 0._pr)
 
-      i = inter%i
-      j = inter%j
+      i = dsp%i
+      j = dsp%j
 
-      t = inter%x
-      p = inter%y
+      t = dsp%x
+      p = dsp%y
 
       lnKx = interpol( &
                pt_1%t(i),   pt_1%t(i + 1), &
@@ -337,6 +340,65 @@ contains
       call get_z(alpha, z, dzda)
 
       ns = 2*nc + 2
+
+      X = [lnKx, lnKy, log(p), alpha, log(t)]
+      call dsp_line(X, ns, del_S, envels(1))
+      
+      X = [lnKx, lnKy, log(p), alpha, log(t)]
+      call dsp_line(X, ns, -del_S, envels(2))
+      ! ==================================================================
+   end function
+   
+   function dsp_line_from_dsp_px(&
+         dsp, px_1, px_2, del_S0, alpha0 &
+      ) result(envels)
+      !! Calculate a DSP line from an already found double saturation point
+      !! (`dsp`) between two P\(\alpha\) lines (`px_1`and `px_2`).
+      !! 
+      use legacy_ar_models, only: nc
+      use stdlib_optval, only: optval
+      use linalg, only: point, interpol
+      use inj_envelopes, only: t_inj => T
+      type(point), intent(in) :: dsp !! Double Saturation Point
+      type(injelope), intent(in) :: px_1 !! P\(\alpha\) line
+      type(injelope), intent(in) :: px_2 !! P\(\alpha\) line
+      type(injelope) :: envels(2) !! DSP lines
+      real(pr), optional :: del_S0 !! Initial step size, defaults to 0.01
+      real(pr), optional :: alpha0 !! Initial \(\alpha\), defaults to 0
+
+      integer :: i, j
+
+      real(pr) :: lnKx(nc), lnKy(nc), t, p, X(2*nc+3), alpha
+      real(pr) :: del_S
+      real(pr) :: z(nc), dzda(nc)
+      integer :: ns
+
+      del_S = optval(del_S0, 0.01_pr)
+      alpha = optval(alpha0, 0._pr)
+
+      i = dsp%i
+      j = dsp%j
+
+      alpha = dsp%x
+      p = dsp%y
+      t = t_inj
+
+      lnKx = interpol( &
+               px_1%alpha(i),   px_1%alpha(i + 1), &
+               px_1%logk(i, :), px_1%logk(i + 1, :), &
+               alpha &
+            )
+
+      lnKy = interpol( &
+               px_2%alpha(j), px_2%alpha(j + 1), &
+               px_2%logk(j, :), px_2%logk(j + 1, :), &
+               alpha &
+            )
+
+      call get_z(alpha, z, dzda)
+
+      ns = 2*nc + 3
+      print *, "DSP Line", alpha, t, p
 
       X = [lnKx, lnKy, log(p), alpha, log(t)]
       call dsp_line(X, ns, del_S, envels(1))
