@@ -287,30 +287,71 @@ contains
       !  Three phase regions
       ! ------------------------------------------------------------------------
       three_phase: block
-         integer :: i
+         use dsp_lines, only: injelope, dsp_line_from_dsp_px
+         integer :: i, j, k
          type(injelope) :: px_bub_3, px_dew_3, px_branch_3(2)
+         type(injelope):: dsps(2)
 
-         if (size(inter) == 0) then
-            print *, "Isolated Bub"
-            px_bub_3 = px_three_phase_from_pt(t_inj, pt_bub_3, t_tol)
-            print *, "Isolated Dew"
-            px_dew_3 = px_three_phase_from_pt(t_inj, pt_dew_3, t_tol)
-         else
-            do i=1,size(inter)
-               print *, "Intersection: ", inter(i)
-               px_branch_3 = px_three_phase_from_inter(inter(i), px_dew, px_bub)
-            end do
-         end if
-
-         if (size(self_inter) > 0) then
-            do i=1,size(self_inter)
-               !TODO: Add a check if one of the previous lines already
-               !      in this DSP
-               px_branch_3 = px_three_phase_from_inter(&
-                  self_inter(i), px_bub, px_bub &
+         ! =====================================================================
+         ! Intersections between lines
+         ! ---------------------------------------------------------------------
+         do i=1,size(px_dew)
+            do j=1,size(px_bub)
+               ! Go through each possible pair of envelopes to find DSPs
+               inter_dew_bub  = intersection(&
+                  px_dew(i)%alpha, px_dew(i)%p, &
+                  px_bub(j)%alpha, px_bub(j)%p  &
                )
+               do k=1,size(inter_dew_bub)
+                  ! For each DSP found, calculate the two possible DSP lines
+                  ! and the two three-phase branchs.
+                  print *, "Intersection: ", inter_dew_bub(k)
+                  dsps = dsp_line_from_dsp_px(&
+                     inter_dew_bub(k), px_dew(i), px_bub(j) &
+                  )
+                  px_branch_3 = px_three_phase_from_inter(&
+                     inter_dew_bub(k), px_dew(i), px_bub(j) &
+                  )
+               end do
             end do
-         end if
+         end do
+         ! =====================================================================
+
+         ! =====================================================================
+         ! Self intersections loops
+         ! ---------------------------------------------------------------------
+         do i=1,size(px_bub)
+            print *, "Checking Bub slef-intersections: ", i
+            self_inter_bub = intersection(px_bub(i)%alpha, px_bub(i)%p)
+            if (size(self_inter_bub) > 0) then
+               do j=1,size(self_inter_bub)
+                  dsps = dsp_line_from_dsp_px(self_inter_bub(j), px_bub(i), px_bub(i))
+                  px_branch_3 = px_three_phase_from_inter(&
+                     self_inter_bub(j), px_bub(i), px_bub(i) &
+                  )
+               end do
+            end if
+         end do
+         
+         do i=1,size(px_dew)
+            print *, "Checking Dew self-intersections: ", i
+            self_inter_dew = intersection(px_dew(i)%alpha, px_dew(i)%p)
+            if (size(self_inter_dew) > 0) then
+               do j=1,size(self_inter_dew)
+                  dsps = dsp_line_from_dsp_px(self_inter_dew(j), px_dew(i), px_dew(i))
+                  px_branch_3 = px_three_phase_from_inter(&
+                     self_inter_dew(j), px_dew(i), px_dew(i) &
+                  )
+               end do
+            end if
+         end do
+         ! =====================================================================
+         
+         ! Isolated lines coming from PT lines
+         print *, "Isolated Bub"
+         px_bub_3 = px_three_phase_from_pt(t_inj, pt_bub_3, t_tol)
+         print *, "Isolated Dew"
+         px_dew_3 = px_three_phase_from_pt(t_inj, pt_dew_3, t_tol)
       end block three_phase
       ! ========================================================================
    end subroutine
