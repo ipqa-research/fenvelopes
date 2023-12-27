@@ -34,6 +34,8 @@ program main
    call pt_envelopes
    call cpu_time(et)
    print *, "PT: ", (et - st)*1000, "cpu ms"
+      
+   call exit
 
    ! PX Envelopes
    call cpu_time(st)
@@ -52,6 +54,12 @@ contains
          help="Input file", &
          error=cli_error, &
          required=.true.)
+      call cli%add( &
+         switch="--injection", &
+         switch_ab="-px", &
+         help="Trace Px lines", &
+         error=cli_error, &
+         required=.false.)
       call cli%parse(error=cli_error)
 
       if (cli_error /= 0) stop
