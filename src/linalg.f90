@@ -100,7 +100,10 @@ contains
       real(pr) :: s, t
       integer :: i, j
 
-      real(pr) :: x, y, xold = 9999, yold = 9999
+      real(pr) :: x, y, xold, yold
+
+      xold = 9999
+      yold = 9999
 
       allocate (intersections(0))
       line1: do i = 2, size(lx) - 1
@@ -180,12 +183,13 @@ contains
       y = (y2 - y1)/(x2 - x1)*(x_obj - x1) + y1
    end function
 
-   subroutine full_newton(fun, iters, X, ns, S, max_iters, F, dF)
+   subroutine full_newton(fun, iters, X, ns, S, max_iters, F, dF, solvetol)
       !! Subroutine to solve a point in the envelope.
       !!
       !! Procedure that solves a point with the Newton-Raphson method.
+      use stdlib_optval, only: optval
       use constants, only: ouput_path
-      use minpack_module, only: dpmpar, hybrj1
+      ! use minpack_module, only: dpmpar, hybrj1
       interface
          subroutine fun(X, ns, S, F, dF)
             !! Function to solve
@@ -205,16 +209,19 @@ contains
       integer, intent(in)      :: max_iters !! Maximum iterations
       real(pr), intent(out)    :: F(size(X)) !! Function values at solved point
       real(pr), intent(out)    :: df(size(X), size(X)) !! Jacobian values
+      real(pr), optional, intent(in) :: solvetol
       !&>
 
       real(pr) :: b(size(X)), A(size(X), size(X))
-      real(pr) :: dX(size(X)), tol = 1e-6
+      real(pr) :: dX(size(X)), tol
 
       integer :: n, ldfjac, info, lwa, funit
       real(pr) :: fvec(size(x)), fjac(size(x),size(x))
       real(pr), allocatable :: wa(:)
 
       n = size(X)
+
+      tol = optval(solvetol, 1.e-5_pr)
       ! ldfjac = n
       ! lwa = (n*(n+13))/2
       ! allocate(wa(lwa))
@@ -226,9 +233,6 @@ contains
       ! if (info == 4) iters = max_iters+1
 
       dX = 20
-
-      ! open(newunit=funit, file="fenvelopes_output/newton")
-      ! write(funit, *) n
       b = 500
 
       newton: do iters = 1, max_iters
@@ -239,18 +243,15 @@ contains
          if (any(isnan(b))) dx = dx/maxval(abs(dx))
          dX = solve_system(A, b)
 
-         do while(maxval(abs(dx)) > 0.5)
-            dX = dX/10
+         do while(maxval(abs(dx/x)) > 1)
+            dX = dX/2
          end do
-
-         ! write(funit, *) x, dx, -b
 
          X = X + dX
       end do newton
 
       F = -b
       dF = A
-      ! close(funit)
 
       contains
          subroutine fcn(n, x, fvec, fjac, ldfjac, iflag)

@@ -90,7 +90,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.2% of total for procedures.">29 statements</a>
+    title=" 1.2% of total for procedures.">30 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/mod_dsp_lines.f90"> Source File</a></li>
   </ul>
@@ -119,18 +119,18 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-x~11">X</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-alpha~4">alpha</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-del_s~3">del_S</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-dzda">dzda</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-i~19">i</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-j~12">j</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnkx~3">lnKx</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnky~3">lnKy</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-ns~11">ns</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-p~13">p</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-x~21">X</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-alpha~13">alpha</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-del_s~12">del_S</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-dzda~5">dzda</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-i~23">i</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-j~15">j</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnkx~5">lnKx</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnky~5">lnKy</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-ns~23">ns</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-p~19">p</a>
       <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-t~14">t</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-z~11">z</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-z~18">z</a>
     </div>
   </div>
 </div>
@@ -140,7 +140,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public function dsp_line_from_dsp(inter, pt_1, pt_2, del_S0, alpha0) result(envels)</h2>
+    <h2>public function dsp_line_from_dsp(dsp, pt_1, pt_2, del_S0, alpha0) result(envels)</h2>
         <div class="panel panel-default">
       <div class="panel-heading">
   <h3 class="panel-title">Uses</h3>
@@ -149,8 +149,8 @@
       <li class="list-group-item">
   <ul class="list-inline">
     <li><a href='../module/linalg.html'>linalg</a></li>
-    <li>legacy_ar_models</li>
     <li>stdlib_optval</li>
+    <li>legacy_ar_models</li>
   </ul>
       </li>
       <li class="list-group-item">
@@ -186,29 +186,29 @@
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M387.88,-66.04C366.91,-72.17 341.64,-79.57 321.45,-85.48"/>
 <polygon fill="#000000" stroke="#000000" points="320.31,-82.16 311.7,-88.33 322.28,-88.88 320.31,-82.16"/>
 </g>
-<!-- stdlib_optval -->
-<g id="proc~~dsp_line_from_dsp~~UsesGraph_node3" class="node">
-<title>stdlib_optval</title>
-<polygon fill="#337ab7" stroke="#337ab7" points="324,-66 245,-66 245,-42 324,-42 324,-66"/>
-<text text-anchor="middle" x="284.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">stdlib_optval</text>
-</g>
-<!-- proc~dsp_line_from_dsp&#45;&gt;stdlib_optval -->
-<g id="proc~~dsp_line_from_dsp~~UsesGraph_edge2" class="edge">
-<title>proc~dsp_line_from_dsp&#45;&gt;stdlib_optval</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M374.75,-54C361.47,-54 347.34,-54 334.34,-54"/>
-<polygon fill="#000000" stroke="#000000" points="334.19,-50.5 324.19,-54 334.19,-57.5 334.19,-50.5"/>
-</g>
 <!-- legacy_ar_models -->
-<g id="proc~~dsp_line_from_dsp~~UsesGraph_node4" class="node">
+<g id="proc~~dsp_line_from_dsp~~UsesGraph_node3" class="node">
 <title>legacy_ar_models</title>
-<polygon fill="#337ab7" stroke="#337ab7" points="339,-24 230,-24 230,0 339,0 339,-24"/>
-<text text-anchor="middle" x="284.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">legacy_ar_models</text>
+<polygon fill="#337ab7" stroke="#337ab7" points="339,-66 230,-66 230,-42 339,-42 339,-66"/>
+<text text-anchor="middle" x="284.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">legacy_ar_models</text>
 </g>
 <!-- proc~dsp_line_from_dsp&#45;&gt;legacy_ar_models -->
-<g id="proc~~dsp_line_from_dsp~~UsesGraph_edge3" class="edge">
+<g id="proc~~dsp_line_from_dsp~~UsesGraph_edge2" class="edge">
 <title>proc~dsp_line_from_dsp&#45;&gt;legacy_ar_models</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M387.88,-41.96C371.82,-37.26 353.23,-31.82 336.34,-26.88"/>
-<polygon fill="#000000" stroke="#000000" points="337.21,-23.49 326.63,-24.04 335.24,-30.21 337.21,-23.49"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M374.75,-54C366.51,-54 357.94,-54 349.52,-54"/>
+<polygon fill="#000000" stroke="#000000" points="349.35,-50.5 339.35,-54 349.35,-57.5 349.35,-50.5"/>
+</g>
+<!-- stdlib_optval -->
+<g id="proc~~dsp_line_from_dsp~~UsesGraph_node4" class="node">
+<title>stdlib_optval</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="324,-24 245,-24 245,0 324,0 324,-24"/>
+<text text-anchor="middle" x="284.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">stdlib_optval</text>
+</g>
+<!-- proc~dsp_line_from_dsp&#45;&gt;stdlib_optval -->
+<g id="proc~~dsp_line_from_dsp~~UsesGraph_edge3" class="edge">
+<title>proc~dsp_line_from_dsp&#45;&gt;stdlib_optval</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M387.88,-41.96C371.12,-37.06 351.63,-31.35 334.17,-26.24"/>
+<polygon fill="#000000" stroke="#000000" points="334.74,-22.77 324.16,-23.32 332.78,-29.48 334.74,-22.77"/>
 </g>
 <!-- module~constants -->
 <g id="proc~~dsp_line_from_dsp~~UsesGraph_node5" class="node">
@@ -305,46 +305,48 @@
     </div>
 
 
+    <p>Calculate a DSP line from an already found double saturation point
+(<code>dsp</code>) between two PT lines (<code>pt_1</code>and <code>pt_2</code>).</p>
 
     <h3>Arguments</h3>
       <table class="table table-striped varlist">
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-inter"></span>type(<a href='../type/point.html'>point</a>),</td>
+  <td><span class="anchor" id="variable-dsp"></span>type(<a href='../type/point.html'>point</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>inter</strong></td><td></td>
+  <td><strong>dsp</strong></td><td><p>DSP point</p></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-pt_1"></span>type(<a href='../type/envelope.html'>envelope</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>pt_1</strong></td><td></td>
+  <td><strong>pt_1</strong></td><td><p>PT envelope</p></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-pt_2"></span>type(<a href='../type/envelope.html'>envelope</a>),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
-  <td><strong>pt_2</strong></td><td></td>
+  <td><strong>pt_2</strong></td><td><p>PT envelope</p></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s0~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s0~9"></span>real(kind=pr),</td>
 <td></td>
   <td>optional</td>  <td></td><td>::</td>
-  <td><strong>del_S0</strong></td><td></td>
+  <td><strong>del_S0</strong></td><td><p>Initial step size, defaults to 0.01</p></td>
 </tr>
 <tr>
   <td><span class="anchor" id="variable-alpha0"></span>real(kind=pr),</td>
 <td></td>
   <td>optional</td>  <td></td><td>::</td>
-  <td><strong>alpha0</strong></td><td></td>
+  <td><strong>alpha0</strong></td><td><p>Initial (\alpha)\, defaults to 0</p></td>
 </tr>
 </tbody>
 </table>
 
-   <h3>Return Value <small><span class="anchor" id="variable-envels"></span>type(<a href='../type/injelope.html'>injelope</a>)(2)</small></h3>
-    
+   <h3>Return Value <small><span class="anchor" id="variable-envels~5"></span>type(<a href='../type/injelope.html'>injelope</a>)(2)</small></h3>
+    <p>Output envelopes</p>
     <br>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -357,93 +359,108 @@
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: proc~~dsp_line_from_dsp~~CallsGraph Pages: 1 -->
-<svg id="procdsp_line_from_dspCallsGraph" width="606pt" height="263pt"
- viewBox="0.00 0.00 606.00 263.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~dsp_line_from_dsp~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 259)">
+<svg id="procdsp_line_from_dspCallsGraph" width="606pt" height="268pt"
+ viewBox="0.00 0.00 606.00 267.88" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 263.88)">
 <title>proc~~dsp_line_from_dsp~~CallsGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-259 602,-259 602,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-263.88 602,-263.88 602,4 -4,4"/>
 <!-- proc~dsp_line_from_dsp -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node1" class="node">
 <title>proc~dsp_line_from_dsp</title>
-<polygon fill="none" stroke="black" points="110,-192 0,-192 0,-168 110,-168 110,-192"/>
-<text text-anchor="middle" x="55" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line_from_dsp</text>
+<polygon fill="none" stroke="black" points="110,-213 0,-213 0,-189 110,-189 110,-213"/>
+<text text-anchor="middle" x="55" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line_from_dsp</text>
 </g>
 <!-- optval -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node2" class="node">
 <title>optval</title>
-<polygon fill="#777777" stroke="#777777" points="201,-255 147,-255 147,-231 201,-231 201,-255"/>
-<text text-anchor="middle" x="174" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">optval</text>
+<polygon fill="#777777" stroke="#777777" points="493.5,-223 439.5,-223 439.5,-199 493.5,-199 493.5,-223"/>
+<text text-anchor="middle" x="466.5" y="-208.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">optval</text>
 </g>
 <!-- proc~dsp_line_from_dsp&#45;&gt;optval -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge1" class="edge">
 <title>proc~dsp_line_from_dsp&#45;&gt;optval</title>
-<path fill="none" stroke="#000000" d="M78.56,-192.15C96.44,-201.78 121.65,-215.35 141.52,-226.05"/>
-<polygon fill="#000000" stroke="#000000" points="140.05,-229.23 150.51,-230.89 143.37,-223.07 140.05,-229.23"/>
+<path fill="none" stroke="#000000" d="M75.48,-213.15C93.13,-223.4 120.24,-237.29 146,-243 251.44,-266.39 283.11,-264.25 389,-243 404.33,-239.92 420.43,-233.69 433.88,-227.54"/>
+<polygon fill="#000000" stroke="#000000" points="435.63,-230.59 443.16,-223.13 432.62,-224.27 435.63,-230.59"/>
 </g>
 <!-- proc~interpol -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node3" class="node">
 <title>proc~interpol</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node3"><a xlink:href=".././proc/interpol.html" xlink:title="interpol">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="201,-213 147,-213 147,-189 201,-189 201,-213"/>
-<text text-anchor="middle" x="174" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpol</text>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="201,-234 147,-234 147,-210 201,-210 201,-234"/>
+<text text-anchor="middle" x="174" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpol</text>
 </a>
 </g>
 </g>
 <!-- proc~dsp_line_from_dsp&#45;&gt;proc~interpol -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge2" class="edge">
 <title>proc~dsp_line_from_dsp&#45;&gt;proc~interpol</title>
-<path fill="none" stroke="#000000" d="M110.05,-189.7C119.16,-191.34 128.41,-193 136.92,-194.52"/>
-<polygon fill="#000000" stroke="#000000" points="136.41,-197.99 146.87,-196.31 137.64,-191.1 136.41,-197.99"/>
+<path fill="none" stroke="#000000" d="M110.05,-210.7C119.16,-212.34 128.41,-214 136.92,-215.52"/>
+<polygon fill="#000000" stroke="#000000" points="136.41,-218.99 146.87,-217.31 137.64,-212.1 136.41,-218.99"/>
 </g>
 <!-- proc~get_z -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node4" class="node">
 <title>proc~get_z</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node4"><a xlink:href=".././proc/get_z.html" xlink:title="get_z">
-<polygon fill="#d9534f" stroke="#d9534f" points="201,-171 147,-171 147,-147 201,-147 201,-171"/>
-<text text-anchor="middle" x="174" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">get_z</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="201,-192 147,-192 147,-168 201,-168 201,-192"/>
+<text text-anchor="middle" x="174" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">get_z</text>
 </a>
 </g>
 </g>
 <!-- proc~dsp_line_from_dsp&#45;&gt;proc~get_z -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge3" class="edge">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge4" class="edge">
 <title>proc~dsp_line_from_dsp&#45;&gt;proc~get_z</title>
-<path fill="none" stroke="#000000" d="M110.05,-170.3C119.16,-168.66 128.41,-167 136.92,-165.48"/>
-<polygon fill="#000000" stroke="#000000" points="137.64,-168.9 146.87,-163.69 136.41,-162.01 137.64,-168.9"/>
+<path fill="none" stroke="#000000" d="M110.05,-191.3C119.16,-189.66 128.41,-188 136.92,-186.48"/>
+<polygon fill="#000000" stroke="#000000" points="137.64,-189.9 146.87,-184.69 136.41,-183.01 137.64,-189.9"/>
 </g>
 <!-- proc~dsp_line -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node5" class="node">
 <title>proc~dsp_line</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node5"><a xlink:href=".././proc/dsp_line.html" xlink:title="dsp_line">
-<polygon fill="#d9534f" stroke="#d9534f" points="202,-129 146,-129 146,-105 202,-105 202,-129"/>
-<text text-anchor="middle" x="174" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dsp_line</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="202,-150 146,-150 146,-126 202,-126 202,-150"/>
+<text text-anchor="middle" x="174" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dsp_line</text>
 </a>
 </g>
 </g>
 <!-- proc~dsp_line_from_dsp&#45;&gt;proc~dsp_line -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge4" class="edge">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge3" class="edge">
 <title>proc~dsp_line_from_dsp&#45;&gt;proc~dsp_line</title>
-<path fill="none" stroke="#000000" d="M78.56,-167.85C96.44,-158.22 121.65,-144.65 141.52,-133.95"/>
-<polygon fill="#000000" stroke="#000000" points="143.37,-136.93 150.51,-129.11 140.05,-130.77 143.37,-136.93"/>
+<path fill="none" stroke="#000000" d="M78.56,-188.85C96.44,-179.22 121.65,-165.65 141.52,-154.95"/>
+<polygon fill="#000000" stroke="#000000" points="143.37,-157.93 150.51,-150.11 140.05,-151.77 143.37,-157.93"/>
 </g>
 <!-- proc~update_spec -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node6" class="node">
 <title>proc~update_spec</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node6"><a xlink:href=".././proc/update_spec.html" xlink:title="update_spec">
-<polygon fill="#d9534f" stroke="#d9534f" points="353.5,-234 273.5,-234 273.5,-210 353.5,-210 353.5,-234"/>
-<text text-anchor="middle" x="313.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">update_spec</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="353.5,-108 273.5,-108 273.5,-84 353.5,-84 353.5,-108"/>
+<text text-anchor="middle" x="313.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">update_spec</text>
 </a>
 </g>
 </g>
 <!-- proc~dsp_line&#45;&gt;proc~update_spec -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge5" class="edge">
 <title>proc~dsp_line&#45;&gt;proc~update_spec</title>
-<path fill="none" stroke="#000000" d="M192.73,-129.17C196.02,-131.87 199.28,-134.86 202,-138 223.13,-162.36 212.59,-181.15 238,-201 245.47,-206.83 254.47,-211.05 263.6,-214.09"/>
-<polygon fill="#000000" stroke="#000000" points="262.91,-217.53 273.49,-216.95 264.85,-210.81 262.91,-217.53"/>
+<path fill="none" stroke="#000000" d="M202.2,-128.62C213.27,-124.89 226.21,-120.62 238,-117 246.22,-114.47 254.98,-111.9 263.5,-109.46"/>
+<polygon fill="#000000" stroke="#000000" points="264.68,-112.76 273.35,-106.66 262.77,-106.03 264.68,-112.76"/>
+</g>
+<!-- proc~fix_step -->
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_node7" class="node">
+<title>proc~fix_step</title>
+<g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node7"><a xlink:href=".././proc/fix_step.html" xlink:title="fix_step">
+<polygon fill="#d9534f" stroke="#d9534f" points="340.5,-150 286.5,-150 286.5,-126 340.5,-126 340.5,-150"/>
+<text text-anchor="middle" x="313.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step</text>
+</a>
+</g>
+</g>
+<!-- proc~dsp_line&#45;&gt;proc~fix_step -->
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge8" class="edge">
+<title>proc~dsp_line&#45;&gt;proc~fix_step</title>
+<path fill="none" stroke="#000000" d="M202.17,-138C223.34,-138 252.95,-138 276.16,-138"/>
+<polygon fill="#000000" stroke="#000000" points="276.32,-141.5 286.32,-138 276.32,-134.5 276.32,-141.5"/>
 </g>
 <!-- proc~full_newton -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_node7" class="node">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_node8" class="node">
 <title>proc~full_newton</title>
-<g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node7"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
+<g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node8"><a xlink:href=".././proc/full_newton.html" xlink:title="full_newton">
 <polygon fill="#d9534f" stroke="#d9534f" points="350,-192 277,-192 277,-168 350,-168 350,-192"/>
 <text text-anchor="middle" x="313.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">full_newton</text>
 </a>
@@ -452,210 +469,86 @@
 <!-- proc~dsp_line&#45;&gt;proc~full_newton -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge7" class="edge">
 <title>proc~dsp_line&#45;&gt;proc~full_newton</title>
-<path fill="none" stroke="#000000" d="M190.24,-129.15C202.53,-138.44 220.57,-150.98 238,-159 247.16,-163.21 257.34,-166.76 267.17,-169.67"/>
-<polygon fill="#000000" stroke="#000000" points="266.25,-173.05 276.82,-172.37 268.13,-166.31 266.25,-173.05"/>
-</g>
-<!-- proc~fix_step -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_node8" class="node">
-<title>proc~fix_step</title>
-<g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node8"><a xlink:href=".././proc/fix_step.html" xlink:title="fix_step">
-<polygon fill="#d9534f" stroke="#d9534f" points="340.5,-150 286.5,-150 286.5,-126 340.5,-126 340.5,-150"/>
-<text text-anchor="middle" x="313.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fix_step</text>
-</a>
-</g>
-</g>
-<!-- proc~dsp_line&#45;&gt;proc~fix_step -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge9" class="edge">
-<title>proc~dsp_line&#45;&gt;proc~fix_step</title>
-<path fill="none" stroke="#000000" d="M202.17,-121.15C223.34,-124.38 252.95,-128.9 276.16,-132.45"/>
-<polygon fill="#000000" stroke="#000000" points="275.91,-135.95 286.32,-134 276.97,-129.03 275.91,-135.95"/>
+<path fill="none" stroke="#000000" d="M202.2,-147.38C213.27,-151.11 226.21,-155.38 238,-159 247.34,-161.87 257.39,-164.81 266.99,-167.54"/>
+<polygon fill="#000000" stroke="#000000" points="266.2,-170.95 276.78,-170.3 268.1,-164.22 266.2,-170.95"/>
 </g>
 <!-- progress_bar -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node9" class="node">
 <title>progress_bar</title>
-<polygon fill="#777777" stroke="#777777" points="354,-108 273,-108 273,-84 354,-84 354,-108"/>
-<text text-anchor="middle" x="313.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
+<polygon fill="#777777" stroke="#777777" points="354,-66 273,-66 273,-42 354,-42 354,-66"/>
+<text text-anchor="middle" x="313.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">progress_bar</text>
 </g>
 <!-- proc~dsp_line&#45;&gt;progress_bar -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge8" class="edge">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge9" class="edge">
 <title>proc~dsp_line&#45;&gt;progress_bar</title>
-<path fill="none" stroke="#000000" d="M202.17,-112.85C219.44,-110.21 242.32,-106.72 262.77,-103.59"/>
-<polygon fill="#000000" stroke="#000000" points="263.53,-107.02 272.89,-102.05 262.47,-100.1 263.53,-107.02"/>
+<path fill="none" stroke="#000000" d="M183.87,-125.95C194.98,-111.71 215.31,-88.29 238,-75 245.67,-70.51 254.34,-66.94 262.99,-64.11"/>
+<polygon fill="#000000" stroke="#000000" points="264.11,-67.43 272.7,-61.22 262.11,-60.72 264.11,-67.43"/>
 </g>
 <!-- str -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node10" class="node">
 <title>str</title>
-<polygon fill="#777777" stroke="#777777" points="340.5,-66 286.5,-66 286.5,-42 340.5,-42 340.5,-66"/>
-<text text-anchor="middle" x="313.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
+<polygon fill="#777777" stroke="#777777" points="340.5,-24 286.5,-24 286.5,0 340.5,0 340.5,-24"/>
+<text text-anchor="middle" x="313.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">str</text>
 </g>
 <!-- proc~dsp_line&#45;&gt;str -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge6" class="edge">
 <title>proc~dsp_line&#45;&gt;str</title>
-<path fill="none" stroke="#000000" d="M190.24,-104.85C202.53,-95.56 220.57,-83.02 238,-75 250.02,-69.47 263.81,-65.09 276.23,-61.79"/>
-<polygon fill="#000000" stroke="#000000" points="277.43,-65.1 286.28,-59.27 275.73,-58.31 277.43,-65.1"/>
+<path fill="none" stroke="#000000" d="M178.88,-125.9C186.55,-103.97 205.74,-57.66 238,-33 248.95,-24.63 263.09,-19.6 276.1,-16.57"/>
+<polygon fill="#000000" stroke="#000000" points="277.09,-19.94 286.21,-14.54 275.72,-13.08 277.09,-19.94"/>
 </g>
 <!-- proc~break_conditions_dsp_line -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node11" class="node">
 <title>proc~break_conditions_dsp_line</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node11"><a xlink:href=".././proc/break_conditions_dsp_line.html" xlink:title="break_conditions_dsp_line">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="389,-24 238,-24 238,0 389,0 389,-24"/>
-<text text-anchor="middle" x="313.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions_dsp_line</text>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="389,-234 238,-234 238,-210 389,-210 389,-234"/>
+<text text-anchor="middle" x="313.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">break_conditions_dsp_line</text>
 </a>
 </g>
 </g>
 <!-- proc~dsp_line&#45;&gt;proc~break_conditions_dsp_line -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge10" class="edge">
 <title>proc~dsp_line&#45;&gt;proc~break_conditions_dsp_line</title>
-<path fill="none" stroke="#000000" d="M180.89,-104.7C190.34,-86.3 210.64,-51.76 238,-33 240.39,-31.36 242.91,-29.85 245.51,-28.46"/>
-<polygon fill="#000000" stroke="#000000" points="247.09,-31.58 254.64,-24.15 244.11,-25.25 247.09,-31.58"/>
+<path fill="none" stroke="#000000" d="M191.71,-150.15C195.22,-152.93 198.82,-155.97 202,-159 219.79,-175.97 217.28,-187.76 238,-201 240.77,-202.77 243.7,-204.4 246.72,-205.89"/>
+<polygon fill="#000000" stroke="#000000" points="245.46,-209.16 256.03,-209.97 248.27,-202.75 245.46,-209.16"/>
 </g>
 <!-- proc~solve_system -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node12" class="node">
 <title>proc~solve_system</title>
 <g id="a_proc~~dsp_line_from_dsp~~CallsGraph_node12"><a xlink:href=".././proc/solve_system.html" xlink:title="solve_system">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="508,-213 425,-213 425,-189 508,-189 508,-213"/>
-<text text-anchor="middle" x="466.5" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="508,-160 425,-160 425,-136 508,-136 508,-160"/>
+<text text-anchor="middle" x="466.5" y="-145.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">solve_system</text>
 </a>
 </g>
 </g>
 <!-- proc~update_spec&#45;&gt;proc~solve_system -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_edge11" class="edge">
 <title>proc~update_spec&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M353.78,-216.54C372.38,-213.95 394.83,-210.83 414.71,-208.06"/>
-<polygon fill="#000000" stroke="#000000" points="415.42,-211.5 424.84,-206.66 414.45,-204.57 415.42,-211.5"/>
+<path fill="none" stroke="#000000" d="M353.8,-106.2C365.23,-109.41 377.68,-113.13 389,-117 401.94,-121.43 415.87,-126.87 428.25,-131.95"/>
+<polygon fill="#000000" stroke="#000000" points="427.22,-135.31 437.8,-135.92 429.91,-128.85 427.22,-135.31"/>
+</g>
+<!-- proc~full_newton&#45;&gt;optval -->
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge12" class="edge">
+<title>proc~full_newton&#45;&gt;optval</title>
+<path fill="none" stroke="#000000" d="M350.28,-187.35C374.14,-192.24 405.39,-198.66 429.32,-203.57"/>
+<polygon fill="#000000" stroke="#000000" points="428.92,-207.06 439.42,-205.65 430.33,-200.21 428.92,-207.06"/>
 </g>
 <!-- proc~full_newton&#45;&gt;proc~solve_system -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge12" class="edge">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge13" class="edge">
 <title>proc~full_newton&#45;&gt;proc~solve_system</title>
-<path fill="none" stroke="#000000" d="M350.28,-184.98C369.55,-187.66 393.63,-191 414.79,-193.95"/>
-<polygon fill="#000000" stroke="#000000" points="414.52,-197.44 424.91,-195.35 415.49,-190.51 414.52,-197.44"/>
+<path fill="none" stroke="#000000" d="M350.28,-172.42C369.63,-168.32 393.85,-163.18 415.08,-158.69"/>
+<polygon fill="#000000" stroke="#000000" points="415.85,-162.1 424.91,-156.6 414.4,-155.25 415.85,-162.1"/>
 </g>
 <!-- none~dgesv -->
 <g id="proc~~dsp_line_from_dsp~~CallsGraph_node13" class="node">
 <title>none~dgesv</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="598,-213 544,-213 544,-189 598,-189 598,-213"/>
-<text text-anchor="middle" x="571" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
+<polygon fill="#a7506f" stroke="#a7506f" points="598,-160 544,-160 544,-136 598,-136 598,-160"/>
+<text text-anchor="middle" x="571" y="-145.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dgesv</text>
 </g>
 <!-- proc~solve_system&#45;&gt;none~dgesv -->
-<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge13" class="edge">
+<g id="proc~~dsp_line_from_dsp~~CallsGraph_edge14" class="edge">
 <title>proc~solve_system&#45;&gt;none~dgesv</title>
-<path fill="none" stroke="#000000" d="M508.01,-201C516.51,-201 525.42,-201 533.75,-201"/>
-<polygon fill="#000000" stroke="#000000" points="533.92,-204.5 543.92,-201 533.92,-197.5 533.92,-204.5"/>
-</g>
-</g>
-</svg>
-</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.43.0 (0)
- -->
-<!-- Title: Graph Key Pages: 1 -->
-<svg width="597pt" height="32pt"
- viewBox="0.00 0.00 596.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
-<title>Graph Key</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 592.5,-28 592.5,4 -4,4"/>
-<!-- Subroutine -->
-<g id="node1" class="node">
-<title>Subroutine</title>
-<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
-<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
-</g>
-<!-- Function -->
-<g id="node2" class="node">
-<title>Function</title>
-<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
-<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
-</g>
-<!-- Interface -->
-<g id="node3" class="node">
-<title>Interface</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
-<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
-</g>
-<!-- Unknown Procedure Type -->
-<g id="node4" class="node">
-<title>Unknown Procedure Type</title>
-<polygon fill="#777777" stroke="#777777" points="388.5,-24 243.5,-24 243.5,0 388.5,0 388.5,-24"/>
-<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
-</g>
-<!-- Program -->
-<g id="node5" class="node">
-<title>Program</title>
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="465,-24 407,-24 407,0 465,0 465,-24"/>
-<text text-anchor="middle" x="436" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
-</g>
-<!-- This Page&#39;s Entity -->
-<g id="node6" class="node">
-<title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="black" points="588.5,-24 483.5,-24 483.5,0 588.5,0 588.5,-24"/>
-<text text-anchor="middle" x="536" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
-</g>
-</g>
-</svg>
-
-    
-    <p>Solid arrows point from a procedure to one which it calls. Dashed 
-    arrows point from an interface to procedures which implement that interface.
-    This could include the module procedures in a generic interface or the
-    implementation in a submodule of an interface in a parent module.
-    </p>
-    </div></div></div></div>
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Called by</h3>
-      </div>
-      <div class="panel-body">
-  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.43.0 (0)
- -->
-<!-- Title: proc~~dsp_line_from_dsp~~CalledByGraph Pages: 1 -->
-<svg id="procdsp_line_from_dspCalledByGraph" width="327pt" height="32pt"
- viewBox="0.00 0.00 327.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
-<title>proc~~dsp_line_from_dsp~~CalledByGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 323,-28 323,4 -4,4"/>
-<!-- proc~dsp_line_from_dsp -->
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph_node1" class="node">
-<title>proc~dsp_line_from_dsp</title>
-<polygon fill="none" stroke="black" points="319,-24 209,-24 209,0 319,0 319,-24"/>
-<text text-anchor="middle" x="264" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">dsp_line_from_dsp</text>
-</g>
-<!-- proc~pt_envelopes -->
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph_node2" class="node">
-<title>proc~pt_envelopes</title>
-<g id="a_proc~~dsp_line_from_dsp~~CalledByGraph_node2"><a xlink:href=".././proc/pt_envelopes.html" xlink:title="pt_envelopes">
-<polygon fill="#d9534f" stroke="#d9534f" points="173,-24 90,-24 90,0 173,0 173,-24"/>
-<text text-anchor="middle" x="131.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pt_envelopes</text>
-</a>
-</g>
-</g>
-<!-- proc~pt_envelopes&#45;&gt;proc~dsp_line_from_dsp -->
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph_edge1" class="edge">
-<title>proc~pt_envelopes&#45;&gt;proc~dsp_line_from_dsp</title>
-<path fill="none" stroke="#000000" d="M173.08,-12C181.14,-12 189.8,-12 198.44,-12"/>
-<polygon fill="#000000" stroke="#000000" points="198.54,-15.5 208.54,-12 198.54,-8.5 198.54,-15.5"/>
-</g>
-<!-- program~main -->
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph_node3" class="node">
-<title>program~main</title>
-<g id="a_proc~~dsp_line_from_dsp~~CalledByGraph_node3"><a xlink:href=".././program/main.html" xlink:title="main">
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="54,-24 0,-24 0,0 54,0 54,-24"/>
-<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">main</text>
-</a>
-</g>
-</g>
-<!-- program~main&#45;&gt;proc~pt_envelopes -->
-<g id="proc~~dsp_line_from_dsp~~CalledByGraph_edge2" class="edge">
-<title>program~main&#45;&gt;proc~pt_envelopes</title>
-<path fill="none" stroke="#000000" d="M54.13,-12C61.89,-12 70.67,-12 79.44,-12"/>
-<polygon fill="#000000" stroke="#000000" points="79.67,-15.5 89.67,-12 79.67,-8.5 79.67,-15.5"/>
+<path fill="none" stroke="#000000" d="M508.01,-148C516.51,-148 525.42,-148 533.75,-148"/>
+<polygon fill="#000000" stroke="#000000" points="533.92,-151.5 543.92,-148 533.92,-144.5 533.92,-151.5"/>
 </g>
 </g>
 </svg>
@@ -729,18 +622,18 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-x~11">X</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-alpha~4">alpha</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-del_s~3">del_S</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-dzda">dzda</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-i~19">i</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-j~12">j</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnkx~3">lnKx</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnky~3">lnKy</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-ns~11">ns</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-p~13">p</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-x~21">X</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-alpha~13">alpha</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-del_s~12">del_S</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-dzda~5">dzda</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-i~23">i</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-j~15">j</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnkx~5">lnKx</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-lnky~5">lnKy</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-ns~23">ns</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-p~19">p</a>
       <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-t~14">t</a>
-      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-z~11">z</a>
+      <a class="list-group-item" href="../proc/dsp_line_from_dsp.html#variable-z~18">z</a>
     </div>
   </div>
 </div>
@@ -755,52 +648,52 @@
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x~11"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~21"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>X</strong>(2*nc+3)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-alpha~4"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-alpha~13"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>alpha</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s~12"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>del_S</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dzda"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dzda~5"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dzda</strong>(nc)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-i~19"></span>integer,</td>
+  <td><span class="anchor" id="variable-i~23"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>i</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-j~12"></span>integer,</td>
+  <td><span class="anchor" id="variable-j~15"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>j</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-lnkx~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-lnkx~5"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>lnKx</strong>(nc)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-lnky~3"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-lnky~5"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>lnKy</strong>(nc)</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~11"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~23"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-p~13"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-p~19"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>p</strong></td><td></td><td></td><td></td>
 </tr>
@@ -810,7 +703,7 @@
   <td><strong>t</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-z~11"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-z~18"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>z</strong>(nc)</td><td></td><td></td><td></td>
 </tr>
@@ -843,7 +736,7 @@
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-11-15 13:48            </p>
+ on 2023-12-27 18:47            </p>
         </div>
       </div>
       <br>
