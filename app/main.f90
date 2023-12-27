@@ -18,9 +18,12 @@ program main
 
    type(envelope) :: pt_bub, pt_dew, pt_hpl !! Shared 2ph-PT envelopes
    type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:) !! Shared 3ph-PT envelopes
-   type(injelope) :: px_bub, px_dew, px_hpl !! Shared 2ph-Px envelopes
+   type(injelope), allocatable :: px_bub(:), px_dew(:), px_hpl !! Shared 2ph-Px envelopes
 
+   ! real(pr) :: alpha=0.95
    real(pr) :: alpha=0.0
+   real(pr) :: pt_bub_t0 = 180
+   real(pr) :: pt_dew_t0 = 180
 
    ! Setup everything
    call setup
@@ -109,7 +112,7 @@ contains
       ! ========================================================================
       !  Bubble envel
       ! ------------------------------------------------------------------------
-      call k_wilson_bubble(z, t_0=230.0_pr, p_end=0.5_pr, t=t, p=p, k=k)
+      call k_wilson_bubble(z, t_0=pt_bub_t0, p_end=0.5_pr, t=t, p=p, k=k)
       call envelope2( &
          1, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
@@ -120,7 +123,7 @@ contains
       ! ========================================================================
       !  Dew/AOP envelopes
       ! ------------------------------------------------------------------------
-      t = 300
+      t = pt_dew_t0
       p = p_wilson(z, t)
       do while (p > 0.1)
          t = t - 5
@@ -139,19 +142,18 @@ contains
       ! ========================================================================
       !  HPLL Envelope
       ! ------------------------------------------------------------------------
-      t = 700.0_pr
-      t = pt_bub%t(maxloc(pt_bub%p, dim=1))
-      p = maxval([pt_bub%p, pt_dew%p])*1.5_pr
+      ! t = 700.0_pr
+      ! p = maxval([pt_bub%p, pt_dew%p])*1.5_pr
 
-      p = 400
+      p = 900.0_pr
+      t = pt_dew%t(maxloc(pt_dew%p, dim=1))
 
       call find_hpl(t, p, k)
-      k = 1/k
       call envelope2( &
          3, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
          pt_hpl &
-         )
+      )
       ! ========================================================================
 
       ! ========================================================================
