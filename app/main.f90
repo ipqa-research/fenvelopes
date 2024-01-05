@@ -4,17 +4,16 @@ program main
    use inj_envelopes, only: injelope, get_z
    use constants, only: pr, ouput_path
    use legacy_ar_models, only: nc, z
-   use flap, only: command_line_interface
    use stdlib_ansi, only: blue => fg_color_blue, red => fg_color_red, &
                           operator(//), operator(+), &
                           style_reset, style_blink_fast, style_bold, style_underline
+   use flap, only: command_line_interface
+   use fenvelopes_cli, only: setup_cli => setup_cli_envelopes
 
    implicit none
    real(pr) :: et, st
 
    type(command_line_interface) :: cli
-   integer :: cli_error
-   character(len=99) :: cli_string
 
    type(envelope) :: pt_bub, pt_dew, pt_hpl !! Shared 2ph-PT envelopes
    type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:) !! Shared 3ph-PT envelopes
@@ -43,28 +42,6 @@ program main
    call cpu_time(et)
    print *, "PX: ", (et - st)*1000, "cpu ms"
 contains
-   subroutine setup_cli
-      !! Setup CLI subroutine
-      !!
-      !! Setup the Command-Line-Interface processor
-      call cli%init(progname="envelopes", description="Phase Envelopes")
-      call cli%add( &
-         switch="--infile", &
-         switch_ab="-i", &
-         help="Input file", &
-         error=cli_error, &
-         required=.true.)
-      call cli%add( &
-         switch="--injection", &
-         switch_ab="-px", &
-         help="Trace Px lines", &
-         error=cli_error, &
-         required=.false.)
-      call cli%parse(error=cli_error)
-
-      if (cli_error /= 0) stop
-   end subroutine
-
    subroutine setup
       !! Setup system
       !!
@@ -72,13 +49,13 @@ contains
       !! existing one. Then read input files to setup needed parameters.
       use io_nml, only: read_system, write_system
       use inj_envelopes, only: setup_inj => from_nml
-      integer :: funit_system
+      integer :: funit_system, cli_error
       character(len=500) :: infile
 
       call system("mkdir -p "//trim(ouput_path))
       call system("rm "//trim(ouput_path)//"*")
 
-      call setup_cli
+      call setup_cli(cli)
       call cli%get(val=infile, switch="--infile", error=cli_error)
 
       call read_system(trim(infile))
@@ -94,6 +71,7 @@ contains
       use envelopes, only: envelope2, max_points, k_wilson_bubble, &
                            max_points, p_wilson, k_wilson, find_hpl, get_case
       use linalg, only: point
+      use saturation_points, only: bubble_temperature, dew_temperature, hpl_temperature, EquilibriaState
       !! Calculation of PT envelopes of the main system.
       real(pr), allocatable :: tv(:) ! Temperatures [K]
       real(pr), allocatable :: pv(:) ! Pressures [bar]
@@ -111,6 +89,7 @@ contains
       character(len=:), allocatable :: pt_case
 
       integer :: n
+      type(EquilibriaState) :: bubble, dew
 
       allocate (tv(max_points), pv(max_points), dv(max_points))
       allocate (k(size(z)))
@@ -120,7 +99,12 @@ contains
       ! ========================================================================
       !  Bubble envel
       ! ------------------------------------------------------------------------
-      call k_wilson_bubble(z, t_0=pt_bub_t0, p_end=0.5_pr, t=t, p=p, k=k)
+      ! call k_wilson_bubble(z, t_0=pt_bub_t0, p_end=0.5_pr, t=t, p=p, k=k)
+      bubble = bubble_temperature(z, p=1.0_pr, t0=300.0_pr)
+      k = bubble%y/z
+      t = bubble%t
+      p = bubble%p
+
       call envelope2( &
          1, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
@@ -139,12 +123,17 @@ contains
       end do
 
       k = 1/k_wilson(t, p)
+      
+      dew = dew_temperature(z, p=0.1_pr, t0=300.0_pr)
+      k = dew%y/z
+      t = dew%t
+      p = dew%p
 
       call envelope2( &
          2, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
          pt_dew &
-         )
+      )
       ! ========================================================================
 
       ! ========================================================================
@@ -152,11 +141,17 @@ contains
       ! ------------------------------------------------------------------------
       ! t = 700.0_pr
       ! p = maxval([pt_bub%p, pt_dew%p])*1.5_pr
+      p = 300
+      t = 550 ! pt_dew%t(minloc(pt_dew%p, dim=1))+50
 
-      p = 900.0_pr
-      t = pt_dew%t(maxloc(pt_dew%p, dim=1))
+      dew = hpl_temperature(z, p=p, t0=t)
+      k = dew%y/z
+      t = dew%t
+      p = dew%p
 
-      call find_hpl(t, p, k)
+      print *, dew%iters, t, p
+
+      ! call find_hpl(t, p, k)
       call envelope2( &
          3, nc, z, T, P, k, &
          n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
