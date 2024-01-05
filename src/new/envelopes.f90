@@ -898,7 +898,7 @@ contains
 
             if (ns_new /= ns) then
                ! translation of delS to the  new specification variable
-               del_S = dXdS(ns_new)*del_S  
+               del_S = dXdS(ns_new)*del_S
                dXdS = dXdS/dXdS(ns_new)
                ns = ns_new
             end if
@@ -913,18 +913,6 @@ contains
                                                abs(del_S)*3/iters &
                                                ] &
                                                )
-
-            ! Xnew = X + dXdS*del_S
-            ! dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-            ! dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
-
-            ! do while (abs(dP) > 50 .or. abs(dT) > 7)
-            !    dXdS = dXdS/2.0_pr
-
-            !    Xnew = X + dXdS*del_S
-            !    dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
-            !    dT = exp(Xnew(2*n + 2)) - exp(X(2*n + 2))
-            ! end do
          end block fix_step
 
          detect_critical: block
