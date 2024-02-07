@@ -57,7 +57,9 @@ contains
       real(pr) :: s, t
       integer :: i, j
 
-      real(pr) :: x, y, xold = 9999, yold = 9999
+      real(pr) :: x, y, xold, yold
+      xold = 9999
+      yold = 9999
 
       allocate (intersections(0))
 
@@ -115,6 +117,11 @@ contains
                y3 => ly(j), y4 => ly(j - 1))
 
                call intersects(x1, x2, x3, x4, y1, y2, y3, y4, s, t)
+               ! print *, "===", i, j,"==="
+               ! print *, x1, y1, x2, y2
+               ! print *, x3, y3, x4, y4
+               ! print *, s, t
+               ! print *, "---------------"
                if (0 <= s .and. s <= 1 .and. 0 <= t .and. t <= 1) then
                   x = s*(x2 - x1) + x1
                   y = s*(y2 - y1) + y1
@@ -265,3 +272,169 @@ contains
          end subroutine
    end subroutine
 end module linalg
+
+
+! module polyfit_mod
+! 
+!   implicit none
+!       interface 
+!     subroutine sgelss (m, n, nrhs, a, lda, b, ldb, s, rcond, rank, work, lwork, info)
+!       integer :: m
+! 		integer :: n
+! 		integer :: nrhs
+! 		real, dimension( lda, * ) :: a
+! 		integer :: lda
+! 		real, dimension( ldb, * ) :: b
+! 		integer :: ldb
+! 		real, dimension( * ) :: s
+! 		real :: rcond
+! 		integer :: rank
+! 		real, dimension( * ) :: work
+! 		integer :: lwork
+! 		integer :: info 
+!     end subroutine
+!    end interface
+! 
+! contains
+! 
+!   function vander(x,N,increasing) result(v)
+!     real, intent(in) :: x(:)
+!     integer, intent(in) :: N
+!     logical, intent(in), optional :: increasing
+!     real :: v(size(x),N)
+!     
+!     integer :: i
+!     logical :: increasing_
+! 
+!     increasing_ = .false.
+!     if (present(increasing)) increasing_ = increasing    
+! 
+!     if (increasing_) then
+!       if (N > 0) v(:,1) = 1
+!       if (N > 1) then
+!         v(:,2:) = spread(x,dim=2,ncopies=N-1)
+!         do i = 2, N-1
+!           v(:,i+1) = v(:,i)*v(:,i+1)
+!         end do
+!       end if
+!     else
+!       if (N > 0) v(:,N) = 1
+!       if (N > 1) then
+!         v(:,1:N-1) = spread(x,dim=2,ncopies=N-1)
+!         do i = N-1,2,-1
+!           v(:,i-1) = v(:,i)*v(:,i-1)
+!         end do
+!       end if
+!     end if
+!   end function
+! 
+!   function polyfit(x,y,deg,rcond,rank,singular_values) result(p)
+!     real, intent(in) :: x(:), y(:)
+!     integer, intent(in) :: deg
+!     real, intent(in), optional :: rcond
+!     integer, intent(out), optional :: rank
+!     real, intent(out), allocatable, optional :: singular_values(:)
+!     real :: p(deg + 1)
+! 
+!     integer :: order
+!     real :: rcond_
+!     real, allocatable :: lhs(:,:), rhs(:), scl(:),s(:), work(:)
+!     integer :: m, n, rank_, info, lwork
+! 
+!     order = deg + 1
+! 
+!     ! check parameters
+!     if (deg < 0) error stop "expected deg >= 0"
+!     if (size(x) == 0) error stop "expected non-empty vector for x"
+!     if (size(x) /= size(y)) error stop "expected x and y to have same length"
+! 
+!     ! set rcond
+!     rcond_ = size(x)*epsilon(x)
+!     if (present(rcond)) rcond_ = rcond
+! 
+!     m = size(x)
+!     n = order
+!     allocate(lhs(m,n),scl(m))
+! 
+!     ! set up least squares equation for powers of x  
+!     lhs = vander(x,order)
+! 
+!     call print_mat(lhs)
+!     ! scale lhs to improve the condition number
+!     scl = sqrt(sum(lhs*lhs,dim=1))
+!     print *, "scl = "
+!     call print_mat(spread(scl,dim=1,ncopies=m))
+!     lhs = lhs/spread(scl,dim=1,ncopies=m)
+!     write(*,*)
+!     call print_mat(lhs)
+! 
+!     allocate(rhs,source=y)
+! 
+!     !
+!     ! solve lstsq problem
+!     !
+!     allocate(s(min(m,n)))
+! 
+!     ! perform workspace query
+!     lwork = -1
+!     allocate(work(1))
+!     call sgelss(m,n,1,lhs,m,rhs,m,s,rcond_,rank_,work,lwork,info)
+!     print *, "info = ", info
+! 
+!     ! resize workspace
+!     lwork = int(work(1))
+!     print *, "lwork = ", lwork, work(1)
+!     deallocate(work)
+!     allocate(work(lwork))
+! 
+!     print *, rhs
+!     ! compute minimum norm solutiong using SVD
+!     call sgelss(m,n,1,lhs,m,rhs,m,s,rcond_,rank_,work,lwork,info)
+!     if (info /= 0) then
+!       if (info < 0) write(*,*) 'sgelss: the ',abs(info),'-th argument had an illegal value'
+!       if (info > 0) write(*,*) 'sgelss: the algorithm for computing the SVD failed to converge'
+!       error stop
+!     end if
+!     call print_mat(lhs)
+!     print *, rhs
+! 
+!     if (rank_ /= order) then
+!       write(*,*) "polyfit may be poorly conditioned"
+!     end if
+! 
+!     ! broadcast scale coefficients
+!     p = rhs/scl
+! 
+!     if (present(rank)) rank = rank_
+!     if (present(singular_values)) then
+!       if (allocated(singular_values)) deallocate(singular_values)
+!       allocate(singular_values,source=s)
+!     end if
+!   end function
+! 
+!   subroutine print_mat(v)
+!     real, intent(in) :: v(:,:)
+!     integer :: i, j
+!     do i = 1, size(v,1)
+!       print *, (v(i,j),j=1,size(v,2))
+!     end do
+!   end subroutine
+! 
+! end module
+! 
+! program main
+! 
+!   use polyfit_mod
+!   implicit none
+! 
+!   real :: x(4), y(4)
+!   real :: p(3)
+! 
+!   x = [1.,2.,3.,4.]
+!   y = x**2 + 2*x - 4
+! 
+!   p = polyfit(x,y,2)
+!   print *, p
+! 
+! end program
+! 

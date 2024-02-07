@@ -102,7 +102,7 @@ contains
       ! Selection of (the most changing) variable to be specified for the next point
       nsold = ns
 
-      ns = maxloc(abs(dXdS), dim=1)
+      ns = maxloc(abs(dXdS(:nc)), dim=1)
 
       if (maxval(abs(X(:nc))) < 0.2) then
          ns = maxloc(abs(dXdS(:nc)), dim=1)  ! T and P not allowed to be chosen close to a critical point
@@ -369,6 +369,8 @@ contains
       integer :: funit_output
       character(len=254) :: fname_env
 
+      real(pr) :: specifications(max_points, 3)
+
       ! ========================================================================
       !  OUTPUT file
       ! ------------------------------------------------------------------------
@@ -447,8 +449,12 @@ contains
 
       i=0
 
+      open(69, file="specs" // str(env_number) // ".dat")
       do while (run)
          i = i + 1
+         specifications(i, 1) = ns
+         specifications(i, 2) = S
+         specifications(i, 3) = delS
          if (i > max_points - 50) then
             exit
          end if
@@ -556,42 +562,22 @@ contains
                ! to find a possible critical point (check if all lnK values
                ! change sign).
                extrapolation: block
+                  ! use polyfit_mod, only: polyfit
                   integer :: loc
                   integer :: its
                   real(pr) :: delta
-                  real(pr) :: m(size(X))
+                  real(pr) :: m
                   real(pr) :: max_lnK, max_lnK2, delta_lnK
                   real(pr) :: delta_X(size(x))
                   real(pr) :: Xin(size(X))
 
                   its = 0
                   delta = delS
-
                   ! Variation of lnK based on deltaS
-                  ! m = 37.0_pr * (X - Xold2)/(delta)
-                  ! lnK_extrapolated = (delta) * m(:n) + X(:n)
-                  lnK_extrapolated = X(:n) + 7 * delS * dXdS(:n)
-                  ! print *, X(:n)
-                  ! print *, lnK_extrapolated
-
-                  if (all((X(:n) * lnK_extrapolated < 0), dim=1)) then
-                     print *, "Extrapol CP"
-                     ! All lnK changed sign, so a CP is inminent
-                     ! aproach it enough to force the jumping algorithm
-                     do while( &
-                           maxval(abs(X(:n))) >= 0.02 &
-                           .and. all(X(:n)*lnK_extrapolated > 0, dim=1)&
-                        )
-                        print *, its, "Getting to critical", &
-                           exp(X(n+1)), exp(X(n+2)), maxval(abs(X(:n))), &
-                           all(X(:n)*lnK_extrapolated > 0, dim=1)
-                        its = its + 1
-                        delta_x = delta * m
-                        X = delta_x + X
-                        S = X(ns)
-                        if (its > 10) exit
-                     end do
-                     passingcri = .true.
+                  m = 2
+                  lnK_extrapolated = X(:n) + m * delS * dXdS(:n)
+                  if (all(X(:n)*lnK_extrapolated < 0)) then
+                     delS = 1.5 * m * delS
                   end if
                end block extrapolation
             end if
@@ -648,6 +634,10 @@ contains
          end if
       end do
       !-----------------------------------------------------------
+      write(69, *) specifications(:, 1)
+      write(69, *) specifications(:, 2)
+      write(69, *) specifications(:, 3)
+      close(69)
 
       n_points = i
 
@@ -908,7 +898,7 @@ contains
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dT
 
-            del_S = sign(1.0_pr, del_S) * minval([ &
+            del_S = sign(1.5_pr, del_S) * minval([ &
                                                max(abs(sqrt(X(ns))/10), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &

@@ -22,8 +22,26 @@ contains
          switch_ab="-px", &
          help="Trace Px lines", &
          error=cli_error, &
-         required=.false.)
+         required=.false., &
+         def=".false.")
+      
+      call cli%add( &
+         switch="--three_phases", &
+         switch_ab="-3ph", &
+         help="Trace three phase lines", &
+         error=cli_error, &
+         required=.false., &
+         def=".false.")
+
+      call cli%add( &
+         switch="--alpha0", &
+         switch_ab="-a", &
+         help="Initial alpha0, used for PT envelopes", &
+         error=cli_error, &
+         required=.false., &
+         def="0")
       call cli%parse(error=cli_error)
+      print *, cli_error
 
       if (cli_error /= 0) stop
    end subroutine

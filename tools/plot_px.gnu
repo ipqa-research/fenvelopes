@@ -33,13 +33,18 @@ set style line liq_3ph lc rgb "red"   dt 7 lw 1.5
 pxs_2 = system("ls -d ./fenvelopes_output/env-2ph-PX* | xargs")
 pxs_3 = system("ls -d ./fenvelopes_output/env-2ph-PX* | xargs")
 
-plot "fenvelopes_output/env-2ph-PX_1.dat" u 4:5 w lp ls bub_2ph t "2ph-bub",\
-     "fenvelopes_output/env-2ph-PX_2.dat" u 4:5 w lp ls dew_2ph t "2ph-dew", \
-     "fenvelopes_output/env-2ph-PX_3.dat" u 4:5 w lp ls dew_2ph t "2ph-dew", \
-     "fenvelopes_output/env-2ph-PX_4.dat" u 4:5 w lp ls dew_2ph t "2ph-dew", \
-     "fenvelopes_output/env-3ph-PX_3.dat" u 4:5 w lp ls bub_3ph t "3ph-bub", \
-     "fenvelopes_output/env-3ph-PX_4.dat" u 4:5 w lp ls dew_3ph t "3ph-dew", \
-     "fenvelopes_output/env-3ph-PX_5.dat" u 4:5 w lp ls bub_3ph t "3ph-bub", \
-     "fenvelopes_output/env-3ph-PX_6.dat" u 4:5 w lp ls dew_3ph t "3ph-dew", \
+plot "fenvelopes_output/env-2ph-PX_1.dat" u 4:5 w l ls bub_2ph t "2ph-bub",\
+     "fenvelopes_output/env-2ph-PX_1.dat"  index "critical" u 1:2 w p ls bub_2ph t "",\
+     "fenvelopes_output/env-2ph-PX_2.dat" u 4:5 w l ls dew_2ph t "2ph-dew", \
+     "fenvelopes_output/env-2ph-PX_2.dat"  index "critical" u 1:2 w p ls bub_2ph t "",\
+     "fenvelopes_output/env-2ph-PX_3.dat" u 4:5 w l ls dew_2ph t "2ph-dew", \
+     "fenvelopes_output/env-2ph-PX_4.dat" u 4:5 w l ls dew_2ph t "2ph-dew", \
+     "fenvelopes_output/env-3ph-PX_3.dat" u 4:5 w l ls bub_3ph t "3ph-bub", \
+     "fenvelopes_output/env-3ph-PX_4.dat" u 4:5 w l ls dew_3ph t "3ph-dew", \
+     "fenvelopes_output/env-3ph-PX_5.dat" u 4:5 w l ls bub_3ph t "3ph-bub", \
+     "fenvelopes_output/env-3ph-PX_6.dat" u 4:5 w l ls dew_3ph t "3ph-dew", \
+     "fenvelopes_output/env-3ph-PX_7.dat" u 4:5 w l ls bub_3ph t "3ph-bub", \
+     "fenvelopes_output/env-3ph-PX_8.dat" u 4:5 w l ls dew_3ph t "3ph-dew"
+
 
 pause mouse close

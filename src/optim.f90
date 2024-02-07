@@ -108,9 +108,9 @@ contains
       real(kind=rk), parameter :: ecoeff = 2.0D+00
       real(kind=rk), parameter :: eps = 0.001D+00
       interface
-        function fn(x)
+        function fn(xx)
             import rk
-            real(rk) :: x(:)
+            real(rk) :: xx(:)
             real(rk) :: fn
         end function
       end interface

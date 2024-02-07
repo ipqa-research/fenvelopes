@@ -205,6 +205,9 @@ contains
          end if
 
          XS(point, :) = X
+         call get_z(X(n+2), z)
+         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
+            X(:n), z
 
          call update_spec(X, ns, del_S, dF, dXdS)
          call fix_step_two_phases(X, ns, S, iters, del_S, dXdS)
@@ -216,29 +219,32 @@ contains
             integer :: max_changing
             fact = critical_fact ! 2.5
 
-            Xnew = X + fact*dXdS*del_S
+            if (maxval(abs(X(:n))) < 1e-2) then
+            else
+               Xnew = X + fact*dXdS*del_S
+               K = X(:n)
+               Knew = Xnew(:n)
 
-            K = X(:n)
-            Knew = Xnew(:n)
+               if (all(K*Knew < 0)) then
+                  print *, "CP", env_number
+                  max_changing = maxloc(abs(K - Knew), dim=1)
 
-            if (all(K*Knew < 0)) then
-               max_changing = maxloc(abs(K - Knew), dim=1)
+                  dS_c = ( &
+                        -K(max_changing)*(Xnew(max_changing) - X(max_changing)) &
+                        /(Knew(max_changing) - K(max_changing)) &
+                        )
 
-               dS_c = ( &
-                      -K(max_changing)*(Xnew(max_changing) - X(max_changing)) &
-                      /(Knew(max_changing) - K(max_changing)) &
-                      )
+                  Xnew = X + dXdS * dS_c
+                  alpha_c = Xnew(n + 2)
+                  pc = exp(Xnew(n + 1))
+                  cps = [cps, critical_point(t, pc, alpha_c)]
+                  
+                  del_S = dS_c + critical_multiplier * dS_c
 
-               Xnew = X + dXdS * dS_c
-               alpha_c = Xnew(n + 2)
-               pc = exp(Xnew(n + 1))
-               cps = [cps, critical_point(t, pc, alpha_c)]
-               
-               del_S = dS_c + critical_multiplier * dS_c
-
-               write (funit_output, *) ""
-               write (funit_output, *) ""
-            end if
+                  write (funit_output, *) ""
+                  write (funit_output, *) ""
+               end if
+            endif
          end block detect_critical
 
          X = X + dXdS*del_S
@@ -248,10 +254,6 @@ contains
             print *, "Breaking: ", break_conditions(X, ns, S, del_S)
             exit enveloop
          end if
-
-         call get_z(X(n+2), z)
-         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
-            X(:n), z
       end do enveloop
 
       write (funit_output, *) ""
@@ -268,6 +270,8 @@ contains
       close (funit_output)
 
       point = point - 1
+      allocate(envels%t(point))
+      envels%t = t
       envels%z = z_0
       envels%z_inj = z_injection
       envels%logk = XS(:point, :n)
@@ -362,8 +366,9 @@ contains
       p = exp(X(n + 1))
       alpha = X(n + 2)
 
-      break_conditions = [ .false. &
-                         ! p < 1e-15 .or. p > 5000, &
+      break_conditions = [ &
+                         ! p > 50000, &
+                         all(X(:n) < 1e-10) &
                          ! abs(del_S) < 1e-3 &
                          ]
    end function
@@ -602,14 +607,14 @@ contains
             exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z
          XS(point, :) = X
 
-         call update_spec(X, ns, del_S, dF, dXdS)
+         call update_spec_three_phases(X, ns, del_S, dF, dXdS)
 
          fix_step: block
             real(pr) :: Xnew(size(X0))
             real(pr) :: dP, dalpha
 
             del_S = sign(del_S_multiplier_three_phase, del_S)*minval([ &
-                                               max(abs(sqrt(X(ns))/10), 0.1_pr), &
+                                               max(abs(sqrt(X(ns))/5), 0.1_pr), &
                                                abs(del_S)*3/iters &
                                                ] &
                                                )
@@ -634,26 +639,30 @@ contains
                         Xnew(size(X0)), fact
             real(pr) :: pc, alpha_c, dS_c, dXdS_in(size(X0))
             real(pr) :: bu_solve_tol
-            integer :: max_changing, i
+            integer :: max_changing, i_k
             logical :: found_critical
 
             fact = critical_fact
             found_critical = .false.
 
-            loop: do i = 0, 1
+            Xnew = X + dXdS*del_S
+            do while (maxval(abs(Xnew(:2*n))) < 0.1)
+               print *, "increasing step"
+               del_S = 2*del_S
+               Xnew = X + dXdS*del_S
+               exit detect_critical
+            end do
+
+            loop: do i_k = 0, 1
                Xnew = X + fact*dXdS*del_S
 
-               K = X(i*n + 1:(i + 1)*n)
-               Knew = Xnew(i*n + 1:(i + 1)*n)
+               K = X(i_k*n + 1:(i_k + 1)*n)
+               Knew = Xnew(i_k*n + 1:(i_k + 1)*n)
 
                max_changing = maxloc(abs(Knew - K), dim=1)
 
                if (all(K*Knew < 0)) then
-
-                  print *, ""
-                  print *, "CP ENV", env_number
-                  print *, ""
-
+                  print *, "CRITICAL!"
                   dS_c = ( &
                          -k(max_changing) * (Xnew(ns) - X(ns)) &
                           /(Knew(max_changing) - K(max_changing)) &
@@ -664,7 +673,7 @@ contains
                   pc = exp(Xnew(2*n + 1))
                   cps = [cps, critical_point(t, pc, alpha_c)]
 
-                  del_S = dS_c + 1.7_pr * dS_c
+                  del_S = fact * dS_c
 
                   write (funit_output, *) ""
                   write (funit_output, *) ""
@@ -724,10 +733,43 @@ contains
       alpha = X(2*n + 2)
 
       break_conditions_three_phases = [ &
-                                       ! p < 0.001_pr .or. p > 5000, &
-                                       abs(del_S) < 1e-5 &
+                                       p > 50000 &
+                                       ! abs(del_S) < 1e-5 &
                                       ]
    end function
+
+   subroutine update_spec_three_phases(X, ns, del_S, dF, dXdS)
+      real(pr), intent(in) :: X(:)
+      integer, intent(in out) :: ns
+      real(pr), intent(in out) :: del_S
+      real(pr), intent(in) :: dF(size(X), size(X))
+      real(pr), intent(in out) :: dXdS(size(X))
+
+      real(pr) :: dFdS(size(X))
+      integer  :: ns_new
+      integer :: nc
+
+      dFdS = 0
+      dFdS(size(dFdS)) = 1
+      dXdS = solve_system(dF, dFdS)
+      
+      nc = (size(X) - 3)/2
+
+      ns_new = maxloc(abs(dXdS(:2*nc)), dim=1)
+      ! if (any(abs(X(:2*nc)) < 0.1)) then
+      !    ns_new = maxloc(abs(dXdS(2:nc)), dim=1)
+      ! else
+      !    ns_new = maxloc(abs(dXdS), dim=1)
+      ! endif
+
+      if (ns_new /= ns) then
+         ! translation of delS and dXdS to the  new specification variable
+         del_S = dXdS(ns_new)*del_S
+         dXdS = dXdS/dXdS(ns_new)
+         ns = ns_new
+      end if
+   end subroutine
+
    ! ===========================================================================
    
    subroutine get_z(alpha, z, dzda)
@@ -783,7 +825,7 @@ contains
    ! Initialization procedures
    ! ---------------------------------------------------------------------------
    function px_two_phase_from_pt(&
-      t_inj, pt_env_2, t_tol, del_S0) result(px_envels)
+      t_inj, pt_env_2, t_tol, alpha0, del_S0) result(px_envels)
       !! Calculate two phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -798,6 +840,7 @@ contains
       type(envelope), intent(in) :: pt_env_2 !! Base PT envelope
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
+      real(pr), optional, intent(in) :: alpha0 !! First point \(\alpha\)
       type(injelope), allocatable :: px_envels(:) !! Output Px envelope
       
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
@@ -813,6 +856,7 @@ contains
       type(injelope) :: px_envel
 
       allocate(px_envels(0))
+      alpha = optval(alpha0, 0.0_pr)
       del_S = optval(del_S0, 0.1_pr)
       pold = 1e9
 
@@ -824,7 +868,7 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 2) cycle
+         if (abs(p - pold) < 0.001) cycle
          pold = p
 
          k = exp(interpol( &
@@ -832,7 +876,6 @@ contains
                   pt_env_2%logk(idx, :), pt_env_2%logk(idx + 1, :), &
                   t_inj))
 
-         alpha = 0
          X = [log(K), log(P), alpha]
          ns = size(X)
 
@@ -872,9 +915,8 @@ contains
 
       del_S = optval(del_S0, 0.05_pr)
       pold = 0
-
+      
       do i_envel = 1, size(pt_env_3)
-         print *, i_envel
          associate(pt => pt_env_3(i_envel))
          ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
          do i = 1, size(ts_envel)
@@ -904,7 +946,7 @@ contains
             X = [log(Kx), log(Ky), log(P), alpha, beta]
             ns = size(X) - 1
 
-            print *, "Running isolated PX"
+            print *, "Running isolated PX", alpha, P
             call injection_envelope_three_phase(X, ns, del_S, envel)
          end do
          end associate
@@ -981,13 +1023,16 @@ contains
       call injection_envelope_three_phase(X, ns, del_S, envels(2))
    end function
    
-   function px_hpl_line(alpha_0, p)
-      ! Find a HPLL PX line at a given pressure, starting from a given alpha
+   function px_hpl_line(alpha_0, p, y0)
+      !! Find a HPLL PX line at a given pressure, starting from a given alpha
       use legacy_ar_models, only: nc, termo
       use linalg, only: solve_system
-      real(pr), intent(in) :: alpha_0 !! Staring \(\alpha\) to search
-      real(pr), intent(in) :: p !! Pressure of HPLL
+      use saturation_points, only: EquilibriaState
+      real(pr), intent(in out) :: alpha_0 !! Staring \(\alpha\) to search
+      real(pr), intent(in out) :: p !! Pressure of HPLL
+      real(pr), optional :: y0(:)
       type(injelope) :: px_hpl_line !! Resulting HPLL line
+      type(injelope) :: px_hpl_line_1, px_hpl_line_2 !! intermediary HPLL lines
 
       real(pr) :: diff
       real(pr) :: lnfug_z(nc), lnfug_y(nc), &
@@ -998,71 +1043,159 @@ contains
 
       real(pr), allocatable :: x(:)
       real(pr) :: del_S0
-      integer :: ns, ncomp
+      integer :: ns, ncomp, npoints
 
-      find_hpl: do ncomp = nc, 1, -1
-         alpha_in = alpha_0
-         p_in = p
+      integer :: i
 
-         y = 0
-         y(ncomp) = 1.0
+      type(EquilibriaState) :: hpl_state
 
-         diff = foo([alpha_in, p_in, y])
-         return 
-         do while (abs(diff) > 0.001 .and. p_in < 5000)
-            p_in = p_in + 10.0_pr
-            diff = foo([alpha_in, p_in, y])
-         end do
+      do i=0,int(p),50
+         hpl_state = hpl_alpha_pressure(z, t, p-i, alpha_0, y0)
+         call get_z(alpha_0, z)
+         ! print *, sum(z*hpl_state%y/hpl_state%x)- 1, alpha_0, hpl_state%p
+         print *, hpl_state%x(:5)
+         print *, hpl_state%y(:5)
+         if (maxval(abs(hpl_state%x - hpl_state%y)) > 0.1) exit
+      end do
+      
+      x = hpl_state%x
+      y = hpl_state%y
+      print *, hpl_state%iters
+      print *, x(:5)
+      print *, y(:5)
 
-         if (p_in >= 5000) then
-            do while (abs(diff) > 0.001 .and. alpha_in > 0)
-               alpha_in = alpha_in - 0.01_pr
-               diff = foo([alpha_in, p_in, y])
-            end do
-         end if
+      X = [log(x/y), log(hpl_state%p), alpha_0]
+      del_S0 = 0.5_pr
+      ns = size(X) - 1
+      call injection_envelope(X, ns, del_S0, px_hpl_line_1)
 
-         if (.true.) then!(alpha_in > 0 .or. p_in < 5000) then
-            call optim
-            print *, alpha_in, p_in
-            k = 1/exp(lnfug_y - lnfug_z)
+      ! if (size(px_hpl_line_1%alpha) > 1) then
+      !    ! If the first line give results, calculate the other segment
+      !    ! going to the other direction
+      !    X = [px_hpl_line_1%logk(1, :), log(px_hpl_line_1%p(1)), px_hpl_line_1%alpha(1)]
+      !    del_S0 = -0.5_pr
+      !    call injection_envelope(X, ns, del_S0, px_hpl_line_2)
 
-            X = [log(K), log(P_in), alpha_in]
+      !    px_hpl_line%alpha = [px_hpl_line_2%alpha, px_hpl_line_1%alpha]
+      !    px_hpl_line%t = [px_hpl_line_2%t, px_hpl_line_1%t]
+      !    px_hpl_line%p = [px_hpl_line_2%p, px_hpl_line_1%p]
 
-            del_S0 = 0.1_pr
-            ns = size(X) - 1
-            call injection_envelope(X, ns, del_S0, px_hpl_line)
-            exit find_hpl
-         end if
-      end do find_hpl
+      !    npoints = size(px_hpl_line_1%alpha) + size(px_hpl_line_2%alpha)
+      !    allocate(px_hpl_line%logk(npoints, nc))
+      !    px_hpl_line%logk(:size(px_hpl_line_2%alpha), :) = px_hpl_line_2%logk
+      !    px_hpl_line%logk(size(px_hpl_line_2%alpha)+1:, :) = px_hpl_line_1%logk
+      ! else
+      !    px_hpl_line = px_hpl_line_1
+      ! end if
+   end function
 
-      contains 
-         function foo(x) result(f)
+   type(EquilibriaState) function hpl_alpha_pressure(n, t, p0, a0, y0, max_inner_its)
+      !! HPLL \(\alpha\) and P calculation on a specified T.
+      use saturation_points, only: EquilibriaState
+      use envelopes, only: k_wilson
+      use stdlib_optval, only: optval
+      use legacy_ar_models, only: nc, termo
+      real(pr), intent(in) :: n(:) !! Composition vector [moles / molar fraction]
+      real(pr), intent(in) :: t !! Temperature [K]
+      real(pr), intent(in) :: p0 !! Pressure [bar]
+      real(pr),  intent(in out) :: a0 !! \(\alpha_0\)
+      real(pr), optional, intent(in) :: y0(:) !! Initial composition
+      integer, optional, intent(in) :: max_inner_its(:) !! Inner iterations
+
+      real(pr) :: vy, vz
+
+      real(pr) :: k(size(n)), y(size(n)), z(size(n)), dzda(size(n)), lnk(size(n))
+      real(pr) :: lnfug_y(size(n)), dlnphi_dz(size(n), size(n))
+      real(pr) :: lnfug_z(size(n)), dlnphi_dy(size(n), size(n))
+      real(pr) :: dkda(size(n)), dydz(size(n))
+
+      real(pr) :: x(2), f, df(2), step
+
+      integer :: i, its, inner_its
+      integer :: max_iterations = 100
+      real(pr) :: step_tol=0.1_pr, tol=1.e-5_pr
+      real(pr) :: p
+      ! =======================================================================
+      ! Handle arguments
+      ! -----------------------------------------------------------------------
+      if (size(n) /= nc) call exit(1)
+      z = n/sum(n)
+      inner_its = optval(inner_its, 50)
+
+      ! Initiliaze with K-wilson factors
+      if (present(y0)) then
+         y = y0
+         k = y/z
+      else
+         k = k_wilson(t, p0)
+         y = k * z
+      end if
+      ! =======================================================================
+
+      ! =======================================================================
+      !  Solve point
+      ! -----------------------------------------------------------------------
+      x = [a0, p0]
+      block
+         use optimization, only: nm_opt
+         integer :: stat
+         real(pr) :: step(2)
+         x = [a0, p]
+         step = [0.01_pr, 1._pr]
+         call nm_opt(foo, x, stat, step)
+      end block
+      
+      ! do its=1,max_iterations
+      !    f = foo(x)
+      !    df = dfoo(x)
+      !    x = x - 5*df
+      !    if (maxval(abs(df)) < tol) exit
+      ! end do
+      
+      a0 = x(1)
+      p  = x(2)
+      
+      call get_z(a0, z, dzda)
+      call termo(nc, 1, 4, t, p, y, vy, philog=lnfug_y, fugn=dlnphi_dz)
+      call termo(nc, 1, 4, t, p, z, vz, philog=lnfug_z, fugn=dlnphi_dy)
+      print *, vy, vz
+      hpl_alpha_pressure = EquilibriaState(its, y, z, t, p)
+      ! =======================================================================
+      contains
+         function foo(x)
             real(pr) :: x(:)
-            real(pr) :: f
+            real(pr) :: alpha
+            real(pr) :: pressure
+            real(pr) :: foo
 
-            if (x(1) > 1) x(1) = 0.97_pr
-            ! alpha_in = x(1)
-            p_in = x(2)
-            y = abs(x(3:))
-
-            call get_z(alpha_in, z)
-            call termo(nc, 4, 1, t, p_in, z, v, philog=lnfug_z, dlphip=dlnphi_dp_z, fugn=dlnphi_dz)
-            call termo(nc, 4, 1, t, p_in, y, v, philog=lnfug_y, dlphip=dlnphi_dp_y, fugn=dlnphi_dy)
-            f = abs((log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp)))
+            alpha = x(1)
+            pressure = x(2)
+            call get_z(alpha, z, dzda)
+            call termo(nc, 1, 4, t, pressure, y, vy, philog=lnfug_y, fugn=dlnphi_dz)
+            call termo(nc, 1, 4, t, pressure, z, vz, philog=lnfug_z, fugn=dlnphi_dy)
+            
+            lnk = lnfug_z - lnfug_y
+            k = exp(lnk)
+            foo = (sum(z*k) - 1)**2
          end function
 
-         subroutine optim
-            use optimization, only: nm_opt
-            real(pr) :: x0(size(z) + 2)
-            integer :: stat
-            real(pr) :: step(size(x0))
+         function dfoo(x)
+            real(pr) :: x(2)
+            real(pr) :: dfoo(2)
 
-            x0 = [alpha_in, p_in, y]
-            step = 0.1
-            step(1) = 0.1
-            step(2) = -100
-            call nm_opt(foo, x0, stat, step)
-         end subroutine
+            real(pr) :: dx(2)
+            real(pr) :: fdx
+            real(pr) :: f
+
+            dx = 0
+            dx(1) = 0.001_pr
+            
+            dfoo(1) = (foo(x+dx) - foo(x))/dx(1)
+
+            dx = 0
+            dx(2) = 0.01_pr
+            dfoo(2) = (foo(x+dx) - foo(x))/dx(2)
+         end function
    end function
    ! ===========================================================================
 end module

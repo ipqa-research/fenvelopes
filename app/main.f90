@@ -17,30 +17,40 @@ program main
 
    type(envelope) :: pt_bub, pt_dew, pt_hpl !! Shared 2ph-PT envelopes
    type(PTEnvel3), allocatable :: pt_bub_3(:), pt_dew_3(:) !! Shared 3ph-PT envelopes
-   type(injelope), allocatable :: px_bub(:), px_dew(:), px_hpl !! Shared 2ph-Px envelopes
+   type(injelope), allocatable :: px_bub(:), px_dew(:) !! Shared 2ph-Px envelopes
+   type(injelope) :: px_hpl(1)
 
-   ! real(pr) :: alpha=0.95
+   integer :: cli_error
+   logical :: run_px, run_3ph
+
    real(pr) :: alpha=0.0
    real(pr) :: pt_bub_t0 = 180
    real(pr) :: pt_dew_t0 = 180
 
    ! Setup everything
    call setup
-
+   
+   call cli%get(alpha, switch="--alpha0", error=cli_error)
    call get_z(alpha, z)
+   print *, "ALPHA: ", alpha
+   
+   call cli%get(run_3ph, switch="--three_phases", error=cli_error)
+
    ! PT Envelopes
    call cpu_time(st)
    call pt_envelopes
    call cpu_time(et)
    print *, "PT: ", (et - st)*1000, "cpu ms"
-      
-   call exit
 
+   call cli%get(run_px, switch="--injection", error=cli_error)
+
+   if (run_px) then
    ! PX Envelopes
    call cpu_time(st)
    call px_envelopes
    call cpu_time(et)
    print *, "PX: ", (et - st)*1000, "cpu ms"
+   end if
 contains
    subroutine setup
       !! Setup system
@@ -83,7 +93,7 @@ contains
 
       real(pr) :: t, p               ! Temperature and pressure
       real(pr), allocatable :: k(:)  ! K factors
-      integer :: n_points, icri(4), ncri, i
+      integer :: n_points, icri(4), ncri, i, i_max
 
       type(point), allocatable :: intersections(:), self_intersections(:)
       character(len=:), allocatable :: pt_case
@@ -100,7 +110,8 @@ contains
       !  Bubble envel
       ! ------------------------------------------------------------------------
       ! call k_wilson_bubble(z, t_0=pt_bub_t0, p_end=0.5_pr, t=t, p=p, k=k)
-      bubble = bubble_temperature(z, p=1.0_pr, t0=300.0_pr)
+      print *, "Bubble PT"
+      bubble = bubble_temperature(z, p=1.0_pr, t0=pt_bub_t0)
       k = bubble%y/z
       t = bubble%t
       p = bubble%p
@@ -115,6 +126,7 @@ contains
       ! ========================================================================
       !  Dew/AOP envelopes
       ! ------------------------------------------------------------------------
+      print *, "Dew PT"
       t = pt_dew_t0
       p = p_wilson(z, t)
       do while (p > 0.1)
@@ -124,7 +136,7 @@ contains
 
       k = 1/k_wilson(t, p)
       
-      dew = dew_temperature(z, p=0.1_pr, t0=300.0_pr)
+      dew = dew_temperature(z, p=0.00001_pr, t0=pt_dew_t0)
       k = dew%y/z
       t = dew%t
       p = dew%p
@@ -139,17 +151,15 @@ contains
       ! ========================================================================
       !  HPLL Envelope
       ! ------------------------------------------------------------------------
-      ! t = 700.0_pr
-      ! p = maxval([pt_bub%p, pt_dew%p])*1.5_pr
-      p = 300
-      t = 550 ! pt_dew%t(minloc(pt_dew%p, dim=1))+50
+      i_max = maxloc([pt_dew%p], dim=1)
+      
+      p = pt_dew%p(i_max) + 50
+      t = pt_dew%t(i_max) + 50
 
-      dew = hpl_temperature(z, p=p, t0=t)
+      dew = hpl_temperature(z, p=p, t0=t, y0=exp(pt_dew%logk(i_max, :)) * z)
       k = dew%y/z
       t = dew%t
       p = dew%p
-
-      print *, dew%iters, t, p
 
       ! call find_hpl(t, p, k)
       call envelope2( &
@@ -169,6 +179,7 @@ contains
       print *, style_bold // pt_case // style_reset
       ! ========================================================================
 
+      if (run_3ph) then
       three_phase: block
          use envelopes, only: pt_three_phase_from_intersection
 
@@ -183,13 +194,14 @@ contains
             isolated: block
                use legacy_ar_models, only: nc, termo, z
                use envelopes, only: pt_envelope_three_phase
+               integer :: ncomp=1
                real(pr) :: p, v, t
                real(pr) :: lnphix(nc), lnphiy(nc), &
                            phase_x(nc), phase_y(nc), beta, x(2*nc+3), lnKx(nc), lnKy(nc)
 
-               beta = z(nc)
+               beta = z(ncomp)
                phase_y = 0
-               phase_y(nc) = 1
+               phase_y(ncomp) = 1
                p = pt_bub%p(1)
                t = pt_bub%t(1)
                
@@ -258,6 +270,7 @@ contains
             )
          end select
       end block three_phase
+      end if
    end subroutine
 
    subroutine px_envelopes
@@ -271,9 +284,9 @@ contains
                                px_hpl_line
       use envelopes, only: envelope, k_wilson, p_wilson
       use linalg, only: interpol, point, intersection
-      type(point), allocatable :: inter_dew_bub(:), self_inter_dew(:), self_inter_bub(:)
 
-      real(pr) :: t_tol = 2
+      real(pr) :: t_tol = 2, p_hpl, a_hpl, z_hpl(nc), y_hpl(nc)
+      integer :: max_bub_p
 
       print *, style_underline // "----------" // style_reset
       print *, style_underline // "Px Regions" // style_reset
@@ -283,85 +296,133 @@ contains
       !  Two phase envelopes
       ! ------------------------------------------------------------------------
       print *, red // "Running Bubble" // style_reset
-      px_bub = px_two_phase_from_pt(t_inj, pt_bub, t_tol=5.0_pr)
+      px_bub = px_two_phase_from_pt(t_inj, pt_bub, alpha0=alpha, t_tol=5.0_pr)
 
       print *, blue // "Running Dew" // style_reset
-      px_dew = px_two_phase_from_pt(t_inj, pt_dew, t_tol=5.0_pr)
+      px_dew = px_two_phase_from_pt(t_inj, pt_dew, alpha0=alpha, t_tol=5.0_pr)
 
       print *, blue // "Running HPLL" // style_reset
-      px_hpl = px_hpl_line(0.99_pr, 1000.0_pr)
+      ! TODO: This is a dirty setup that barely works and should be fixed
+
+      ! if (allocated(px_dew)) then
+      ! if (size(px_dew(1)%alpha) > 5) then
+      !    max_bub_p = maxloc(px_dew(1)%p, dim=1)
+      !    a_hpl = px_dew(1)%alpha(max_bub_p)*0.9
+      !    p_hpl = px_dew(1)%p(max_bub_p) * 1.1
+      !    call get_z(a_hpl, z_hpl)
+      !    y_hpl = exp(px_dew(1)%logk(max_bub_p+2, :)) * z
+      !    print *, a_hpl, p_hpl
+      !    px_hpl(1) = px_hpl_line(a_hpl, p_hpl, y0=y_hpl)
+      ! endif
+      ! if (size(px_bub(1)%alpha) > 5) then
+      !    max_bub_p = maxloc(px_bub(1)%p, dim=1)
+      !    a_hpl = px_bub(1)%alpha(max_bub_p)*1.1
+      !    p_hpl = px_bub(1)%p(max_bub_p)
+      !    call get_z(a_hpl, z_hpl)
+      !    y_hpl = exp(px_bub(1)%logk(max_bub_p+2, :)) * z
+      !    px_hpl(1) = px_hpl_line(a_hpl, p_hpl, y0=y_hpl)
+      ! end if
+      ! end if
+
       ! ========================================================================
 
       ! ========================================================================
       !  Three phase regions
       ! ------------------------------------------------------------------------
+      if (run_3ph) then
       three_phase: block
          use dsp_lines, only: injelope, dsp_line_from_dsp_px
-         integer :: i, j, k
          type(injelope) :: px_bub_3, px_dew_3, px_branch_3(2)
-         type(injelope):: dsps(2)
 
          ! =====================================================================
          ! Intersections between lines
          ! ---------------------------------------------------------------------
-         do i=1,size(px_dew)
-            do j=1,size(px_bub)
-               ! Go through each possible pair of envelopes to find DSPs
-               inter_dew_bub  = intersection(&
-                  px_dew(i)%alpha, px_dew(i)%p, &
-                  px_bub(j)%alpha, px_bub(j)%p  &
-               )
-               do k=1,size(inter_dew_bub)
-                  ! For each DSP found, calculate the two possible DSP lines
-                  ! and the two three-phase branchs.
-                  print *, "Intersection: ", inter_dew_bub(k)
-                  dsps = dsp_line_from_dsp_px(&
-                     inter_dew_bub(k), px_dew(i), px_bub(j) &
-                  )
-                  px_branch_3 = px_three_phase_from_inter(&
-                     inter_dew_bub(k), px_dew(i), px_bub(j) &
-                  )
-               end do
-            end do
-         end do
+         call calc_all_dsps(px_dew, px_bub, px_branch_3)
+         call calc_all_dsps(px_bub, px_hpl, px_branch_3)
+         call calc_all_dsps(px_dew, px_hpl, px_branch_3)
+
+         call calc_all_self_dsp(px_dew, px_branch_3)
+         call calc_all_self_dsp(px_bub, px_branch_3)
          ! =====================================================================
 
-         ! =====================================================================
-         ! Self intersections loops
-         ! ---------------------------------------------------------------------
-         do i=1,size(px_bub)
-            print *, "Checking Bub slef-intersections: ", i
-            self_inter_bub = intersection(px_bub(i)%alpha, px_bub(i)%p)
-            if (size(self_inter_bub) > 0) then
-               do j=1,size(self_inter_bub)
-                  dsps = dsp_line_from_dsp_px(self_inter_bub(j), px_bub(i), px_bub(i))
-                  px_branch_3 = px_three_phase_from_inter(&
-                     self_inter_bub(j), px_bub(i), px_bub(i) &
-                  )
-               end do
-            end if
-         end do
-         
-         do i=1,size(px_dew)
-            print *, "Checking Dew self-intersections: ", i
-            self_inter_dew = intersection(px_dew(i)%alpha, px_dew(i)%p)
-            if (size(self_inter_dew) > 0) then
-               do j=1,size(self_inter_dew)
-                  dsps = dsp_line_from_dsp_px(self_inter_dew(j), px_dew(i), px_dew(i))
-                  px_branch_3 = px_three_phase_from_inter(&
-                     self_inter_dew(j), px_dew(i), px_dew(i) &
-                  )
-               end do
-            end if
-         end do
-         ! =====================================================================
-         
          ! Isolated lines coming from PT lines
          print *, "Isolated Bub"
-         px_bub_3 = px_three_phase_from_pt(t_inj, pt_bub_3, t_tol)
-         print *, "Isolated Dew"
-         px_dew_3 = px_three_phase_from_pt(t_inj, pt_dew_3, t_tol)
+         if (allocated(pt_bub_3)) then
+            px_bub_3 = px_three_phase_from_pt(t_inj, pt_bub_3, 2*t_tol)
+         end if
+         
+         ! print *, "Isolated Dew"
+         if (allocated(pt_dew_3)) then
+            px_dew_3 = px_three_phase_from_pt(t_inj, pt_dew_3, t_tol)
+         end if
       end block three_phase
+      end if
       ! ========================================================================
+   end subroutine
+
+   subroutine calc_all_dsps(px_1, px_2, px_out)
+      !! Calculate three-phase lines from DSPs between two lines.
+      !!
+      !! Find all the intersection points between two phase envelopes and
+      !! calculate all the pairs of three phase lines (\(P \alpha\) and DSP
+      !! lines)
+      use inj_envelopes, only: injelope, px_three_phase_from_inter
+      use dsp_lines, only: dsp_line_from_dsp_px
+      use linalg, only: point, intersection
+      type(injelope) :: px_1(:), px_2(:)
+      type(injelope) :: px_out(2)
+      type(injelope) :: dsps(2)
+      type(point), allocatable :: inter_1_2(:)
+      integer :: i, j, k
+      
+      do i=1,size(px_1)
+         do j=1,size(px_2)
+            ! Go through each possible pair of envelopes to find DSPs
+            inter_1_2  = intersection(&
+               px_1(i)%alpha, px_1(i)%p, &
+               px_2(j)%alpha, px_2(j)%p  &
+            )
+            do k=1,size(inter_1_2)
+               ! For each DSP found, calculate the two possible DSP lines
+               ! and the two three-phase branchs.
+               print *, "Intersection: ", inter_1_2(k)
+               dsps = dsp_line_from_dsp_px(&
+                  inter_1_2(k), px_1(i), px_2(j) &
+               )
+               px_out = px_three_phase_from_inter(&
+                  inter_1_2(k), px_1(i), px_2(j) &
+               )
+            end do
+         end do
+      end do
+   end subroutine
+
+   subroutine calc_all_self_dsp(px, px_out)
+      !! Calculate three-phase lines from DSPs on a single line.
+      !!
+      !! From a single envelope find all self-crossing points an calculate
+      !! the corresponding three-phase lines for each one of them. Including
+      !! both Px as well as DSP lines.
+      use inj_envelopes, only: injelope, px_three_phase_from_inter
+      use dsp_lines, only: dsp_line_from_dsp_px
+      use linalg, only: point, intersection
+      type(injelope) :: px(:)
+      
+      type(injelope) :: px_out(2)
+      type(injelope) :: dsps(2)
+      type(point), allocatable :: inter(:)
+      integer :: i, j
+
+      do i=1,size(px)
+         inter = intersection(px(i)%alpha, px(i)%p)
+         if (size(inter) > 0) then
+            do j=1,size(inter)
+               dsps = dsp_line_from_dsp_px(inter(j), px(i), px(i))
+               px_out = px_three_phase_from_inter(&
+                  inter(j), px(i), px(i) &
+               )
+            end do
+         end if
+      end do
    end subroutine
 end program main

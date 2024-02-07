@@ -1,21 +1,36 @@
 module phase_equilibria
    use constants, only: pr
    use legacy_ar_models, only: zTVTERMO, termo, n => nc, omg => w, tc, pc
+   use saturation_points, only: EquilibriaState
    implicit none
 
 contains
 
-   subroutine flash_pt(z, p, t, x, y, beta, its)
+   type(EquilibriaState) function flash_tp(z, t, p)
       real(pr), intent(in) :: z(:) !! Feed phase molar fractions
-      real(pr), intent(in) :: p !! Pressure [bar]
       real(pr), intent(in) :: t !! Temperature [K]
-      real(pr), intent(out) :: x(size(z)) !! Phase X molar fractions
-      real(pr), intent(out) :: y(size(z)) !! Phase Y molar fractions
-      real(pr), intent(out) :: beta !! Molar Y fraction
-      real(pr), optional, intent(out) :: its !! Number of iterations
+      real(pr), intent(in) :: p !! Pressure [bar]
 
-      real(pr) :: rho_x, rho_y
-   end subroutine
+      real(pr), :: x(size(z)) !! Phase X molar fractions
+      real(pr), :: y(size(z)) !! Phase Y molar fractions
+      real(pr), :: beta !! Molar Y fraction
+      real(pr), :: its !! Number of iterations
+      real(pr) :: rho_x, rho_y, v
+
+      call flash("PT", .TRUE. z, t, p, v, x, y, rho_x, rho_y, beta, its)
+
+      flash_tp = EquilibriaState(&
+         iters=its, y=y, x=x, beta=beta, rho_x=rho_x, rho_y=rho_y, t=t, p=p &
+      )
+      if (rho_x < rho_y) then
+         flash_tp%x = y
+         flash_tp%y = x
+         
+         flash_tp%rho_x = rho_y
+         flash_tp%rho_y = rho_x
+      end if
+         
+   end function
 
    subroutine flash(spec, FIRST, z, t, p, v, x, y, rho_x, rho_y, beta, iter)
       ! Flash specification, eos id and  number of compounds in the system

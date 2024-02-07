@@ -23,7 +23,7 @@ contains
       #: if val=="pressure"
          #: set var="p"
          #: set spec="t"
-      #: else
+      #: elif val=="temperature"
          #: set var="t"
          #: set spec="p"
       #: endif
@@ -37,14 +37,16 @@ contains
          #: set ROOTy=1
          #: set ROOTz=1
       #: endif
-   type(EquilibriaState) function ${inci}$_${val}$(n, ${spec}$, ${var}$0, y0)
+   type(EquilibriaState) function ${inci}$_${val}$(n, ${spec}$, ${var}$0, y0, max_inner_its)
       !! ${inci.title()}$ ${val}$ calculation function.
       !!
       !! Calculates the ${inci}$ ${val}$ of a multicomponent mixture.
+      use stdlib_optval, only: optval
       real(pr), intent(in) :: n(:) !! Composition vector [moles / molar fraction]
       real(pr), intent(in) :: ${spec}$ !! Temperature [K]
       real(pr), optional, intent(in) :: ${var}$0 !! Initial pressure [bar]
       real(pr), optional, intent(in) :: y0(:) !! Initial composition
+      integer, optional, intent(in) :: max_inner_its(:) !! Inner iterations
 
       real(pr) :: ${var}$, vy, vz
 
@@ -54,7 +56,7 @@ contains
 
       real(pr) :: f, step
 
-      integer :: its
+      integer :: its, inner_its
 
       ! =======================================================================
       ! Handle arguments
@@ -62,7 +64,8 @@ contains
       z = n/sum(n)
       if (size(n) /= nc) call exit(1)
       if (present (${var}$0)) ${var}$ = ${var}$0
-      
+      inner_its = optval(inner_its, 50)
+
       ! Initiliaze with K-wilson factors
       if (present(y0)) then
          y = y0
@@ -83,11 +86,13 @@ contains
       do its=1,max_iterations
          call termo(nc, ${ROOTy}$, 4, t, p, y, vy, philog=lnfug_y, dlphi${var}$=dlnphi_d${var}$_y)
          call termo(nc, ${ROOTz}$, 4, t, p, z, vz, philog=lnfug_z, dlphi${var}$=dlnphi_d${var}$_z)
+         inner_its = 0
          
          do while (any(isnan(lnfug_y)) .and. t > 0)
+             inner_its = inner_its + 1
             #:if var == "p"
             ${var}$ = ${var}$/2.0_pr
-            #:else
+            #:elif var == "t"
             ${var}$ = ${var}$ - 5.0_pr
             #:endif
             call termo(nc, ${ROOTy}$, 4, t, p, y, vy, philog=lnfug_y, dlphi${var}$=dlnphi_d${var}$_y)
