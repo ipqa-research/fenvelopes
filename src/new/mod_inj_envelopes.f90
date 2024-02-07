@@ -1095,7 +1095,8 @@ contains
       use saturation_points, only: EquilibriaState
       use envelopes, only: k_wilson
       use stdlib_optval, only: optval
-      use legacy_ar_models, only: nc, termo
+      use legacy_ar_models, only: nc
+      use legacy_thermo_properties, only: termo
       real(pr), intent(in) :: n(:) !! Composition vector [moles / molar fraction]
       real(pr), intent(in) :: t !! Temperature [K]
       real(pr), intent(in) :: p0 !! Pressure [bar]

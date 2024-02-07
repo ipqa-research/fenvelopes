@@ -1,6 +1,7 @@
 module saturation_points
    use constants, only: pr
-   use legacy_ar_models, only: termo, nc
+   use legacy_ar_models, only: nc
+   use legacy_thermo_properties, only: termo
    use envelopes, only: k_wilson
    implicit none
 
