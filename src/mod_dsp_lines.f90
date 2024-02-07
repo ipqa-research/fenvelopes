@@ -5,7 +5,7 @@ module dsp_lines
    use inj_envelopes, only: update_spec, injection_case, z_0, z_injection, &
                             get_z, injelope
    use linalg, only: solve_system, interpol, full_newton
-   use progress_bar_module, only: progress_bar
+   ! use progress_bar_module, only: progress_bar
 
    implicit none
    ! ===========================================================================
@@ -40,7 +40,7 @@ contains
       !!        \sum_{i=1}^N (y_i - z_i),
       !!        X_{ns} - S
       !! ] \)
-      use legacy_ar_models, only: TERMO
+      use legacy_thermo_properties, only: TERMO
       use iso_fortran_env, only: error_unit
       real(pr), intent(in)  :: Xvars(:) !! Vector of variables
       integer, intent(in)  :: ns   !! Number of specification
@@ -190,10 +190,10 @@ contains
       ! ======================================================================
 
       enveloop: do point = 1, max_points
-         call progress_bar(point, max_points, advance=.false.)
+         ! call progress_bar(point, max_points, advance=.false.)
          call full_newton(dsp_line_F, iters, X, ns, S, max_iters, F, dF)
          if (iters >= max_iters) then
-            call progress_bar(point, max_points, advance=.true.)
+            ! call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -209,7 +209,7 @@ contains
          S = X(ns)
 
          if (any(break_conditions_dsp_line(X, ns, S, del_S)) .and. point > 10) then
-            call progress_bar(point, max_points, .true.)
+            ! call progress_bar(point, max_points, .true.)
             print *, "Breaking: ", break_conditions_dsp_line(X, ns, S, del_S)
             exit enveloop
          end if

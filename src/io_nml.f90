@@ -53,6 +53,8 @@ module io_nml
    implicit none
    integer :: nunit_input
 
+
+
    character(len=50) :: model, mixrule
    character(len=254) :: path_to_file
    character(len=50) :: spec

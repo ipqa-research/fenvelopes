@@ -90,7 +90,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.2% of total for procedures.">31 statements</a>
+    title=" 1.3% of total for procedures.">31 statements</a>
      </li> 
     <li><i class="fa fa-code"></i><a href="../src/mod_inj_envelopes.f90"> Source File</a></li>
   </ul>
@@ -119,12 +119,12 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-xnew">Xnew</a>
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp">dP</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-xnew~2">Xnew</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp~2">dP</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp_tol">dP_tol</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dalpha">dalpha</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dalpha_tol">dalpha_tol</a>
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-n~18">n</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-n~22">n</a>
     </div>
   </div>
 </div>
@@ -143,19 +143,19 @@
 <thead><tr><th>Type</th><th>Intent</th><th>Optional</th><th>Attributes</th><th></th><th>Name</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-x~16"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-x~21"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>X</strong>(:)</td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-ns~18"></span>integer,</td>
+  <td><span class="anchor" id="variable-ns~24"></span>integer,</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>ns</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-s~13"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-s~17"></span>real(kind=pr),</td>
 <td>intent(in)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>S</strong></td><td></td>
@@ -167,13 +167,13 @@
   <td><strong>solve_its</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-del_s~7"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-del_s~12"></span>real(kind=pr),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>del_S</strong></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dxds~4"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dxds~6"></span>real(kind=pr),</td>
 <td>intent(inout)</td>
   <td></td>  <td></td><td>::</td>
   <td><strong>dXdS</strong>(size(X))</td><td></td>
@@ -357,12 +357,12 @@
   <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-xnew">Xnew</a>
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp">dP</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-xnew~2">Xnew</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp~2">dP</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dp_tol">dP_tol</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dalpha">dalpha</a>
       <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-dalpha_tol">dalpha_tol</a>
-      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-n~18">n</a>
+      <a class="list-group-item" href="../proc/fix_step_two_phases.html#variable-n~22">n</a>
     </div>
   </div>
 </div>
@@ -377,12 +377,12 @@
 <thead><tr><th>Type</th><th>Visibility</th><th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
 <tbody>
 <tr>
-  <td><span class="anchor" id="variable-xnew"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-xnew~2"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>Xnew</strong>(size(X-1))</td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-dp"></span>real(kind=pr),</td>
+  <td><span class="anchor" id="variable-dp~2"></span>real(kind=pr),</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>dP</strong></td><td></td><td></td><td></td>
 </tr>
@@ -402,7 +402,7 @@
   <td><strong>dalpha_tol</strong></td><td></td><td></td><td></td>
 </tr>
 <tr>
-  <td><span class="anchor" id="variable-n~18"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~22"></span>integer,</td>
 <td>public</td>  <td></td><td>::</td>
   <td><strong>n</strong></td><td></td><td></td><td></td>
 </tr>
@@ -428,14 +428,14 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-6"><p>fenvelopes was developed by Federico Benelli<br>&copy; 2023 <a rel="license" href="https://opensource.org/licenses/MIT">MIT</a>
+        <div class="col-xs-6 col-md-6"><p>fenvelopes was developed by Federico Benelli<br>&copy; 2024 <a rel="license" href="https://opensource.org/licenses/MIT">MIT</a>
 </p>
         </div>
         <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2023-12-27 18:47            </p>
+ on 2024-02-07 15:02            </p>
         </div>
       </div>
       <br>
