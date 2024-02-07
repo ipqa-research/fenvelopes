@@ -4,8 +4,9 @@ module envelopes
    use constants, only: pr
    use linalg, only: solve_system, full_newton
    use dtypes, only: AbsEnvel, envelope, critical_point
-   use legacy_ar_models, only: nc, termo
-   use progress_bar_module, only: progress_bar
+   use legacy_ar_models, only: nc
+   use legacy_thermo_properties, only: termo
+   ! use progress_bar_module, only: progress_bar
    implicit none
 
    type, extends(AbsEnvel) :: PTEnvel3
@@ -257,7 +258,8 @@ contains
 
    subroutine find_hpl(t, p, k)
       !! Find a HPLL initial point at a given pressure
-      use legacy_ar_models, only: nc, termo, z
+      use legacy_ar_models, only: nc, z
+      use legacy_thermo_properties, only: termo
       real(pr), intent(in out) :: t
       real(pr), intent(in) :: p
       real(pr), intent(out) :: k(nc)
@@ -683,7 +685,8 @@ contains
       !!        \sum_{i=1}^N (x_i - y_i),
       !!        X_{ns} - S
       !! ] \)
-      use legacy_ar_models, only: TERMO, z
+      use legacy_ar_models, only: z
+      use legacy_thermo_properties, only: termo
       use iso_fortran_env, only: error_unit
       real(pr), intent(in)  :: Xvars(:) !! Vector of variables
       integer, intent(in)  :: ns   !! Number of specification
@@ -858,7 +861,7 @@ contains
       ! ======================================================================
 
       enveloop: do point = 1, max_points
-         call progress_bar(point, max_points, advance=.false.)
+         ! call progress_bar(point, max_points, advance=.false.)
          call full_newton(pt_F_three_phases, iters, X, ns, S, max_iters, F, dF, solvetol=1e-7_pr)
          if (iters >= max_iters) then
             print *, "Breaking: Above max iterations"
@@ -961,7 +964,7 @@ contains
       end if
 
       close (funit_output)
-      call progress_bar(point, max_points, .true.)
+      ! call progress_bar(point, max_points, .true.)
       envel%lnKx = XS(:point, :n)
       envel%lnKy = XS(:point, n+1:2*n)
       envel%P = exp(XS(:point, 2*n + 1))

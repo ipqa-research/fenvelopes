@@ -192,7 +192,8 @@ contains
          select case(pt_case)
          case("0")
             isolated: block
-               use legacy_ar_models, only: nc, termo, z
+               use legacy_ar_models, only: nc, z
+               use legacy_thermo_properties, only: termo
                use envelopes, only: pt_envelope_three_phase
                integer :: ncomp=1
                real(pr) :: p, v, t
