@@ -1023,16 +1023,10 @@ contains
       call injection_envelope_three_phase(X, ns, del_S, envels(2))
    end function
    
-<<<<<<< HEAD
    function px_hpl_line(alpha_0, p, y0)
       !! Find a HPLL PX line at a given pressure, starting from a given alpha
-      use legacy_ar_models, only: nc, termo
-=======
-   function px_hpl_line(alpha_0, p)
-      ! Find a HPLL PX line at a given pressure, starting from a given alpha
       use legacy_ar_models, only: nc
       use legacy_thermo_properties, only: termo
->>>>>>> 0d23e83 (temporal fix)
       use linalg, only: solve_system
       use saturation_points, only: EquilibriaState
       real(pr), intent(in out) :: alpha_0 !! Staring \(\alpha\) to search
