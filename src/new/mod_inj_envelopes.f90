@@ -3,7 +3,7 @@ module inj_envelopes
    use constants, only: pr, R
    use dtypes, only: envelope, critical_point
    use linalg, only: solve_system, interpol, full_newton
-   use progress_bar_module, only: progress_bar
+   !use progress_bar_module, only: progress_bar
 
    implicit none
 
@@ -74,7 +74,7 @@ contains
       !! - Addition:  \( z = \frac{\alpha z_i + (1-\alpha) z_0}{\sum_{i=1}^N \alpha z_i + (1-\alpha) z_0} \)
       !!
       use iso_fortran_env, only: error_unit
-      use legacy_ar_models, only: TERMO
+      use legacy_thermo_properties, only: TERMO
       real(pr), intent(in)  :: X(:) !! Vector of variables
       integer, intent(in)   :: ns !! Number of specification
       real(pr), intent(in)  :: S !! Specification value
@@ -193,13 +193,13 @@ contains
       ! ========================================================================
 
       enveloop: do point = 1, max_points
-         call progress_bar(point, max_points, advance=.false.)
+         ! call progress_bar(point, max_points, advance=.false.)
          call full_newton(&
             f_injection, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
          )
 
          if (iters >= max_iters) then
-            call progress_bar(point, max_points, advance=.true.)
+            ! call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -387,7 +387,7 @@ contains
       !!        \sum_{i=1}^N (x_i - y_i),
       !!        X_{ns} - S
       !! ] \)
-      use legacy_ar_models, only: TERMO
+      use legacy_thermo_properties, only: TERMO
       use iso_fortran_env, only: error_unit
       real(pr), intent(in)  :: Xvars(:) !! Vector of variables
       integer, intent(in)  :: ns   !! Number of specification
@@ -587,12 +587,12 @@ contains
       ! ======================================================================
 
       enveloop: do point = 1, max_points
-         call progress_bar(point, max_points, advance=.false.)
+         ! call progress_bar(point, max_points, advance=.false.)
          call full_newton(&
             F_injection_three_phases, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
          )
          if (iters >= max_iters) then
-            call progress_bar(point, max_points, advance=.true.)
+            ! call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -674,7 +674,7 @@ contains
          end block detect_critical
 
          if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) then
-            call progress_bar(point, max_points, .true.)
+            ! call progress_bar(point, max_points, .true.)
             print *, "Breaking: positive 𝜷"
             exit enveloop
          end if
@@ -682,7 +682,7 @@ contains
          X = X + dXdS*del_S
          S = X(ns)
          if (any(break_conditions_three_phases(X, ns, S, del_S)) .and. point > 10) then
-            call progress_bar(point, max_points, .true.)
+            ! call progress_bar(point, max_points, .true.)
             print *, "Breaking: ", break_conditions_three_phases(X, ns, S, del_S)
             exit enveloop
          end if
@@ -983,7 +983,8 @@ contains
    
    function px_hpl_line(alpha_0, p)
       ! Find a HPLL PX line at a given pressure, starting from a given alpha
-      use legacy_ar_models, only: nc, termo
+      use legacy_ar_models, only: nc
+      use legacy_thermo_properties, only: termo
       use linalg, only: solve_system
       real(pr), intent(in) :: alpha_0 !! Staring \(\alpha\) to search
       real(pr), intent(in) :: p !! Pressure of HPLL

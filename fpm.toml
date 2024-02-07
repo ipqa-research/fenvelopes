@@ -18,11 +18,11 @@ library = false
 stdlib = "*"
 # minpack= "*"
 ftools = { git = "https://github.com/fedebenelli/ftools" }
-yaeos  = { git = "https://github.com/fedebenelli/yaeos"  }
+yaeos  = { git = "https://github.com/ipqa-research/yaeos"  }
 FLAP   = { git = "https://github.com/szaghi/FLAP", tag="v1.2.5" }
 fordiff = {git="https://github.com/gha3mi/fordiff.git"}
 forsolver = { git="https://github.com/gha3mi/forsolver.git" }
-progress-bar = { git="https://github.com/zoziha/progress-bar" }
+# progress-bar = { git="https://github.com/zoziha/progress-bar" }
 
 [fortran]
 implicit-external = false # default: false
