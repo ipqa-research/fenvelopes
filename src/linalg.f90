@@ -242,8 +242,10 @@ contains
       dX = 20
       b = 500
 
+      open(newunit=funit, file="newton")
+
       newton: do iters = 1, max_iters
-         if (maxval(abs(dx/x)) < tol .or. maxval(abs(b)) < tol) exit newton
+         if (maxval(abs(dx)) < tol .or. maxval(abs(b)) < tol) exit newton
          call fun(X, ns, S, b, a)
          b = -b
 
@@ -254,8 +256,11 @@ contains
             dX = dX/2
          end do
 
+         write(funit, *) iters, X, dX
+
          X = X + dX
       end do newton
+      close(funit)
 
       F = -b
       dF = A

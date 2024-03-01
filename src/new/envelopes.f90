@@ -20,7 +20,7 @@ module envelopes
    end type
 
    integer, parameter :: max_points = 2000
-   integer, parameter :: max_iters = 100
+   integer, parameter :: max_iters = 500
    integer :: env_number = 0
 
    interface
@@ -125,7 +125,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
-      delS = 3*delS
+      delS = 2.2*delS
 
       S = S + delS
    end subroutine
@@ -257,37 +257,53 @@ contains
    end subroutine
 
    subroutine find_hpl(t, p, k)
-      !! Find a HPLL initial point at a given pressure
+      !! Find a HPLL initial point at a given pressure.
       use legacy_ar_models, only: nc, z
       use legacy_thermo_properties, only: termo
       real(pr), intent(in out) :: t
       real(pr), intent(in) :: p
       real(pr), intent(out) :: k(nc)
 
+      real(pr) :: t_in
+
       integer :: i, ncomp
       real(pr) :: diff
       real(pr) :: v
       real(pr) :: x(nc), y(nc), lnfug_z(nc), lnfug_y(nc)
+      real(pr) :: ts(nc)
 
-      diff = -1
+      t_in = t
+      do i =1,nc
+         t = t_in
+         diff = -1
+         ncomp = i
+         y = 0
+         y(ncomp) = 1
 
-      ncomp = nc
+         do while(diff < 0)
+            t = t - 1.0_pr
+            call set_fugs
+         end do
+         ts(i) = t
 
-      y = 0
-      y(ncomp) = 1
-
-      do while(diff < 0)
-         t = t - 1.0_pr
-         call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
-         call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
-         diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
       end do
 
-      k = 1/exp(lnfug_y - lnfug_z)
-      k = 1e-3
-      k(ncomp) = 1000
-      ! print *, k
-      ! print *, 1/k
+      ncomp = maxloc(ts, dim=1)
+      t = ts(ncomp)
+      call set_fugs
+
+      k = exp(lnfug_z - lnfug_y)
+      k(ncomp) = k(ncomp) * 10
+      ! k = 1e-1
+      ! k(ncomp) = 100
+      
+      contains
+         subroutine set_fugs
+            call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
+            call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
+            ! (Fugacity in main fluid)/(Pure fugacity)
+            diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
+         end subroutine
    end subroutine
 
    subroutine envelope2(ichoice, n, z, T, P, KFACT, & ! This will probably always exist
@@ -451,7 +467,6 @@ contains
 
       i=0
 
-      open(69, file="specs" // str(env_number) // ".dat")
       do while (run)
          i = i + 1
          specifications(i, 1) = ns
@@ -635,11 +650,7 @@ contains
             end if
          end if
       end do
-      !-----------------------------------------------------------
-      write(69, *) specifications(:, 1)
-      write(69, *) specifications(:, 2)
-      write(69, *) specifications(:, 3)
-      close(69)
+      ! ========================================================================
 
       n_points = i
 
@@ -855,7 +866,8 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#"
       write (funit_output, *) "STAT", " iters", " ns", " T", " P", &
-         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n)
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n), &
+         (" x"//str(i), i=1,n), (" y"//str(i), i=1,n), (" w"//str(i), i=1,n)
       write (funit_output, *) "X0", iters, ns, exp(X(2*n + 2)), exp(X(2*n + 1)), &
          X(2*n + 3), X(:2*n)
       ! ======================================================================
@@ -868,8 +880,23 @@ contains
             exit enveloop
          end if
 
-         write (funit_output, *) "SOL", iters, ns, exp(X(2*n + 2)), &
-            exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
+
+         fileio: block
+         use legacy_ar_models, only: z
+            real(pr) :: w(n), xx(n), y(n), beta
+            real(pr) :: Ky(n), Kx(n)
+
+            Kx = exp(X(:n))
+            Ky = exp(X(n+1:2*n))
+            beta = X(2*n+3)
+
+            w = z/(beta*Ky + (1 - beta)*Kx)
+            xx = w*Kx
+            y = w*Ky
+
+            write (funit_output, *) &
+            "SOL", iters, ns, exp(X(2*n + 2)), exp(X(2*n + 1)), X(2*n + 3), X(:2*n), xx, y, w
+         end block fileio
          XS(point, :) = X
 
          update_spec: block
@@ -903,7 +930,7 @@ contains
 
             del_S = sign(1.5_pr, del_S) * minval([ &
                                                max(abs(sqrt(X(ns))/10), 0.1_pr), &
-                                               abs(del_S)*3/iters &
+                                               abs(del_S)*5/iters &
                                                ] &
                                                )
          end block fix_step
@@ -988,9 +1015,9 @@ contains
       beta = x(2*n+3)
       t = X(2*n + 2)
          
-      break_conditions_three_phases = [ &
-                                          beta < 0 &
-                                          .or. 1 < beta &
+      break_conditions_three_phases = [ .false.&
+                                          ! beta < 0 &
+                                          ! .or. 1 < beta &
                                       ]
    end function
    ! ===========================================================================
@@ -1057,20 +1084,24 @@ contains
 
    subroutine pt_three_phase_from_intersection(&
          pt_x, pt_y, intersections, &
-         pt_x_3, pt_y_3 &
+         pt_x_3, pt_y_3, del_S0 &
       )
+      use stdlib_optval, only: optval
       use legacy_ar_models, only: z
       use linalg, only: point, interpol
       type(envelope), intent(in) :: pt_x, pt_y
       type(point), intent(in) :: intersections(:)
+      real(pr), optional, intent(in) :: del_S0
       type(PTEnvel3), intent(out) :: pt_x_3(:), pt_y_3(:)
       
       real(pr), allocatable :: lnKx(:), lnKy(:)
       real(pr), allocatable :: X(:)
-      real(pr) :: t, p, beta, del_S0
+      real(pr) :: del_S, t, p, beta
       real(pr), allocatable :: phase_y(:), phase_x(:)
       integer :: i, j, i_inter=1
       integer :: ns
+
+      del_S = optval(del_S0, -0.1_pr)
 
       do i_inter=1,size(intersections)
          i = intersections(i_inter)%i
@@ -1095,7 +1126,6 @@ contains
          ! Dew line composition
          phase_x = exp(lnKx)*z
 
-         del_S0 = -0.1_pr
          beta = 1
 
          ns = 2*nc + 3
@@ -1107,7 +1137,7 @@ contains
          lnKx = log(phase_x/phase_y)
          lnKy = log(z/phase_y)
          X = [lnKx, lnKy, log(p), log(t), beta]
-         call pt_envelope_three_phase(X, ns, del_S0, pt_x_3(i_inter))
+         call pt_envelope_three_phase(X, ns, del_S, pt_x_3(i_inter))
          ! ==================================================================
 
          ! ==================================================================
@@ -1117,7 +1147,7 @@ contains
          lnKx = log(phase_y/phase_x)
          lnKy = log(z/phase_x)
          X = [lnKx, lnKy, log(p), log(t), beta]
-         call pt_envelope_three_phase(X, ns, del_S0, pt_y_3(i_inter))
+         call pt_envelope_three_phase(X, ns, del_S, pt_y_3(i_inter))
          ! ==================================================================
       end do
       ! ===========================================================================

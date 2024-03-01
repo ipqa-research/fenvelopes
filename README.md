@@ -1,6 +1,6 @@
 # fenvelopes: Phase diagrams with Equations of State.
 
-![Phase diagram PTA](figs/pta.png)
+![Phase diagram PTA](other/figs/pta.png)
 
 This is an ongoing project that intends te be a fully fledged generator of
 phase equilibria diagrams from multicomponent systems, using Equations of

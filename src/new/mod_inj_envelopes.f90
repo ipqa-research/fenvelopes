@@ -3,7 +3,7 @@ module inj_envelopes
    use constants, only: pr, R
    use dtypes, only: envelope, critical_point
    use linalg, only: solve_system, interpol, full_newton
-   !use progress_bar_module, only: progress_bar
+   use progress_bar_module, only: progress_bar
 
    implicit none
 
@@ -193,13 +193,13 @@ contains
       ! ========================================================================
 
       enveloop: do point = 1, max_points
-         ! call progress_bar(point, max_points, advance=.false.)
+         call progress_bar(point, max_points, advance=.false.)
          call full_newton(&
             f_injection, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
          )
 
          if (iters >= max_iters) then
-            ! call progress_bar(point, max_points, advance=.true.)
+            call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -367,7 +367,7 @@ contains
       alpha = X(n + 2)
 
       break_conditions = [ &
-                         ! p > 50000, &
+                         p > 2000, &
                          all(X(:n) < 1e-10) &
                          ! abs(del_S) < 1e-3 &
                          ]
@@ -592,12 +592,12 @@ contains
       ! ======================================================================
 
       enveloop: do point = 1, max_points
-         ! call progress_bar(point, max_points, advance=.false.)
+         call progress_bar(point, max_points, advance=.false.)
          call full_newton(&
             F_injection_three_phases, iters, X, ns, S, max_iters, F, dF, solvetol=solve_tol &
          )
          if (iters >= max_iters) then
-            ! call progress_bar(point, max_points, advance=.true.)
+            call progress_bar(point, max_points, advance=.true.)
             print *, "Breaking: Above max iterations"
             exit enveloop
          end if
@@ -683,7 +683,7 @@ contains
          end block detect_critical
 
          if (x(2*n + 3) > 1 .or. (x(2*n+3) < 0)) then
-            ! call progress_bar(point, max_points, .true.)
+            call progress_bar(point, max_points, .true.)
             print *, "Breaking: positive 𝜷"
             exit enveloop
          end if
@@ -691,7 +691,7 @@ contains
          X = X + dXdS*del_S
          S = X(ns)
          if (any(break_conditions_three_phases(X, ns, S, del_S)) .and. point > 10) then
-            ! call progress_bar(point, max_points, .true.)
+            call progress_bar(point, max_points, .true.)
             print *, "Breaking: ", break_conditions_three_phases(X, ns, S, del_S)
             exit enveloop
          end if
@@ -868,8 +868,9 @@ contains
                pt_env_2%p(idx), pt_env_2%p(idx + 1), &
                t_inj)
 
-         if (abs(p - pold) < 0.001) cycle
+         if (abs(p - pold) < 0.1) cycle
          pold = p
+         print *, ts_envel(idx), p
 
          k = exp(interpol( &
                   pt_env_2%t(idx), pt_env_2%t(idx + 1), &
@@ -884,7 +885,7 @@ contains
       end do
    end function
 
-   function px_three_phase_from_pt(t_inj, pt_env_3, t_tol, del_S0) result(envel)
+   function px_three_phase_from_pt(t_inj, pt_env_3, t_tol, del_S0, alpha0) result(envel)
       !! Calculate three phase Px envelopes at a given injection temperature.
       !!
       !! Given an injection temperature `t_inj` and a base PT envelope 
@@ -900,6 +901,7 @@ contains
       type(PTEnvel3), intent(in) :: pt_env_3(:) !! Base PT envelopes
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
+      real(pr), optional, intent(in) :: alpha0 !! First point \(\alpha\)
       type(injelope) :: envel !! Output Px envelope
 
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
@@ -914,6 +916,7 @@ contains
       real(pr) :: del_S
 
       del_S = optval(del_S0, 0.05_pr)
+      alpha = optval(alpha0, 0.0_pr)
       pold = 0
       
       do i_envel = 1, size(pt_env_3)
@@ -942,7 +945,6 @@ contains
                      pt%beta(idx), pt%beta(idx + 1), &
                      t_inj)
             
-            alpha = 0
             X = [log(Kx), log(Ky), log(P), alpha, beta]
             ns = size(X) - 1
 
