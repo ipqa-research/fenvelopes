@@ -52,6 +52,7 @@ contains
          read (funit, nml=nml_px)
       close (funit)
 
+      z_0 = z_0 / sum(z_0)
       z_injection = z_injection/sum(z_injection)
    end subroutine
 
