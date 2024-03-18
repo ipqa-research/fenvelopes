@@ -1063,15 +1063,15 @@ contains
       call injection_envelope_three_phase(X, ns, del_S, envels(2))
    end function
    
-   function px_hpl_line(alpha_0, p, y0)
+   function px_hpl_line(alpha_0, p)
       !! Find a HPLL PX line at a given pressure, starting from a given alpha
       use legacy_ar_models, only: nc
       use legacy_thermo_properties, only: termo
       use linalg, only: solve_system
       use saturation_points, only: EquilibriaState
-      real(pr), intent(in out) :: alpha_0 !! Staring \(\alpha\) to search
-      real(pr), intent(in out) :: p !! Pressure of HPLL
-      real(pr), optional :: y0(:)
+      real(pr), intent(in) :: alpha_0 !! Staring \(\alpha\) to search
+      real(pr), intent(in) :: p !! Pressure of HPLL
+      
       type(injelope) :: px_hpl_line !! Resulting HPLL line
       type(injelope) :: px_hpl_line_1, px_hpl_line_2 !! intermediary HPLL lines
 
@@ -1079,8 +1079,10 @@ contains
       real(pr) :: lnfug_z(nc), lnfug_y(nc), &
                   dlnphi_dz(nc, nc), dlnphi_dy(nc, nc), &
                   dlnphi_dp_z(nc), dlnphi_dp_y(nc)
+      
       real(pr) :: z(nc), y(nc), v, k(nc)
-      real(pr) :: p_in, alpha_in
+      
+      real(pr) :: alpha_in, alpha, alphas(nc)
 
       real(pr), allocatable :: x(:)
       real(pr) :: del_S0
@@ -1090,44 +1092,45 @@ contains
 
       type(EquilibriaState) :: hpl_state
 
-      do i=0,int(p),50
-         hpl_state = hpl_alpha_pressure(z, t, p-i, alpha_0, y0)
-         call get_z(alpha_0, z)
-         ! print *, sum(z*hpl_state%y/hpl_state%x)- 1, alpha_0, hpl_state%p
-         print *, hpl_state%x(:5)
-         print *, hpl_state%y(:5)
-         if (maxval(abs(hpl_state%x - hpl_state%y)) > 0.1) exit
+      alpha_in = alpha_0
+      do i =1,nc
+         alpha = alpha_in
+         diff = -1
+         ncomp = i
+         y = 0
+         y(ncomp) = 1
+         call get_z(alpha, z)
+
+         do while(diff < 0 .and. alpha < 1)
+            alpha = alpha + 0.05
+            call set_fugs
+            print *, diff
       end do
       
-      x = hpl_state%x
-      y = hpl_state%y
-      print *, hpl_state%iters
-      print *, x(:5)
-      print *, y(:5)
+         alphas(i) = alpha
+      end do
 
-      X = [log(x/y), log(hpl_state%p), alpha_0]
+
+      ncomp = minloc(alphas, dim=1)
+      print *, ncomp, alphas
+      alpha = alphas(ncomp)
+      call set_fugs
+
+      k = exp(lnfug_z - lnfug_y)
+      k(ncomp) = k(ncomp) * 10
+      
+      X = [log(k), log(hpl_state%p), alpha_0]
       del_S0 = 0.5_pr
       ns = size(X) - 1
-      call injection_envelope(X, ns, del_S0, px_hpl_line_1)
-
-      ! if (size(px_hpl_line_1%alpha) > 1) then
-      !    ! If the first line give results, calculate the other segment
-      !    ! going to the other direction
-      !    X = [px_hpl_line_1%logk(1, :), log(px_hpl_line_1%p(1)), px_hpl_line_1%alpha(1)]
-      !    del_S0 = -0.5_pr
-      !    call injection_envelope(X, ns, del_S0, px_hpl_line_2)
-
-      !    px_hpl_line%alpha = [px_hpl_line_2%alpha, px_hpl_line_1%alpha]
-      !    px_hpl_line%t = [px_hpl_line_2%t, px_hpl_line_1%t]
-      !    px_hpl_line%p = [px_hpl_line_2%p, px_hpl_line_1%p]
-
-      !    npoints = size(px_hpl_line_1%alpha) + size(px_hpl_line_2%alpha)
-      !    allocate(px_hpl_line%logk(npoints, nc))
-      !    px_hpl_line%logk(:size(px_hpl_line_2%alpha), :) = px_hpl_line_2%logk
-      !    px_hpl_line%logk(size(px_hpl_line_2%alpha)+1:, :) = px_hpl_line_1%logk
-      ! else
-      !    px_hpl_line = px_hpl_line_1
-      ! end if
+      call injection_envelope(X, ns, del_S0, px_hpl_line)
+      
+      contains
+         subroutine set_fugs
+            call termo(nc, 4, 1, t, p, z, v, philog=lnfug_z)
+            call termo(nc, 4, 1, t, p, y, v, philog=lnfug_y)
+            ! (Fugacity in main fluid)/(Pure fugacity)
+            diff = (log(z(ncomp)) + lnfug_z(ncomp)) - (log(y(ncomp)) + lnfug_y(ncomp))
+      end subroutine
    end function
 
    type(EquilibriaState) function hpl_alpha_pressure(n, t, p0, a0, y0, max_inner_its)
