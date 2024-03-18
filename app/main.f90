@@ -32,8 +32,17 @@ program main
 
    call cli%get(alpha, switch="--alpha0", error=cli_error)
    call get_z(alpha, z)
-   print *, "ALPHA: ", alpha
-   print *, "Z: ", z
+   print "(A)", "=================================================================="
+   print "(A)", "Settings"
+   print "(A)", "------------------------------------------------------------------"
+   print "('𝛼: '(F5.3))", alpha
+   if (size(z) > 14) then
+      print "(A)", "Z:"
+      print "(*(F5.3, 1x)))", z(:14)
+      print "(*(F5.3, 1x)))", z(15:)
+   else
+   print "('Z: '(*(F5.3, 1x)))", z
+   end if
 
    call cli%get(run_3ph, switch="--three_phases", error=cli_error)
 
@@ -447,11 +456,11 @@ contains
       !! Find all the intersection points between two phase envelopes and
       !! calculate all the pairs of three phase lines (\(P \alpha\) and DSP
       !! lines)
-      use inj_envelopes, only: injelope, px_three_phase_from_inter
+      use inj_envelopes, only: injelope, px_three_phase_from_inter, PXEnvel3
       use dsp_lines, only: dsp_line_from_dsp_px
       use linalg, only: point, intersection
       type(injelope) :: px_1(:), px_2(:)
-      type(injelope) :: px_out(2)
+      type(PXEnvel3) :: px_out(2)
       type(injelope) :: dsps(2)
       type(point), allocatable :: inter_1_2(:)
       integer :: i, j, k
@@ -470,9 +479,9 @@ contains
                ! For each DSP found, calculate the two possible DSP lines
                ! and the two three-phase branchs.
                print *, "Intersection: ", inter_1_2(k)
-               dsps = dsp_line_from_dsp_px(&
-                  inter_1_2(k), px_1(i), px_2(j) &
-                  )
+               ! dsps = dsp_line_from_dsp_px(&
+               !    inter_1_2(k), px_1(i), px_2(j) &
+               !    )
                px_out = px_three_phase_from_inter(&
                   inter_1_2(k), px_1(i), px_2(j) &
                   )
@@ -502,7 +511,8 @@ contains
          inter = intersection(px(i)%alpha, px(i)%p)
          if (size(inter) > 0) then
             do j=1,size(inter)
-               dsps = dsp_line_from_dsp_px(inter(j), px(i), px(i))
+               print *, "Self-intersection: ", inter(j)
+               ! dsps = dsp_line_from_dsp_px(inter(j), px(i), px(i))
                px_out = px_three_phase_from_inter(&
                   inter(j), px(i), px(i) &
                   )
