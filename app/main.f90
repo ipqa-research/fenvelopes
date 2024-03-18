@@ -412,7 +412,8 @@ contains
       if (run_3ph) then
          three_phase: block
             use dsp_lines, only: injelope, dsp_line_from_dsp_px
-            type(injelope) :: px_bub_3, px_dew_3, px_branch_3(2)
+            use inj_envelopes, only: PXEnvel3
+            type(PXEnvel3) :: px_bub_3, px_dew_3, px_branch_3(2)
 
             ! =====================================================================
             ! Intersections between lines
@@ -486,17 +487,18 @@ contains
       !! From a single envelope find all self-crossing points an calculate
       !! the corresponding three-phase lines for each one of them. Including
       !! both Px as well as DSP lines.
-      use inj_envelopes, only: injelope, px_three_phase_from_inter
+      use inj_envelopes, only: injelope, px_three_phase_from_inter, PXEnvel3
       use dsp_lines, only: dsp_line_from_dsp_px
       use linalg, only: point, intersection
       type(injelope) :: px(:)
 
-      type(injelope) :: px_out(2)
+      type(PXEnvel3) :: px_out(2)
       type(injelope) :: dsps(2)
       type(point), allocatable :: inter(:)
       integer :: i, j
 
       do i=1,size(px)
+         print *, i
          inter = intersection(px(i)%alpha, px(i)%p)
          if (size(inter) > 0) then
             do j=1,size(inter)

@@ -12,6 +12,19 @@ module inj_envelopes
       real(pr), allocatable :: z_inj(:) !! Injected fluid composition
       real(pr), allocatable :: z_mix(:, :) !! Composition at each step
    end type
+   type, extends(AbsEnvel) :: PXEnvel3
+      !! Three-Phase PX Envelope
+      real(pr), allocatable :: z_0(:) !! Original fluid composition 
+      real(pr), allocatable :: z_inj(:) !! Injection fluid composition
+      real(pr), allocatable :: T(:) !! Temperature [K]
+      real(pr), allocatable :: P(:) !! Pressure [bar]
+      real(pr), allocatable :: alpha(:) !! \(\alpha\)
+      real(pr), allocatable :: beta(:) !! \(\beta\)
+      real(pr), allocatable :: x(:, :) !! Heavier phase composition
+      real(pr), allocatable :: y(:, :) !! Lighter phase composition
+      real(pr), allocatable :: w(:, :) !! Incipient phase composition
+      type(critical_point), allocatable :: critical_points(:) !! Critical points
+   end type
 
    ! ===========================================================================
    !  Parameters
@@ -537,7 +550,7 @@ contains
       real(pr), intent(in) :: X0(:) !! Vector of variables
       integer, intent(in) :: spec_number !! Number of specification
       real(pr), intent(in) :: del_S0 !! \(\Delta S_0\)
-      type(injelope), intent(out) :: envels !! Calculated envelopes
+      type(PXEnvel3), intent(out) :: envels !! Calculated envelopes
 
       type(critical_point), allocatable :: cps(:)
 
@@ -710,12 +723,36 @@ contains
       end if
 
       close (funit_output)
-      envels%z = z_0
+
+      setup: block
+         real(pr) :: w(point, n), x(point, n), y(point, n)
+         real(pr) :: Kx(point, n), Ky(point,  n)
+         real(pr) :: beta(point), alpha(point)
+
+         Kx = exp(XS(:point, :n))
+         Ky = exp(XS(:point, n+1:2*n))
+         beta = XS(:point, 2*n+3)
+
+         do concurrent(i=1:point)
+            w(i, :) = z/(beta(i)*Ky(i, :) + (1 - beta(i))*Kx(i, :))
+            x(i, :) = w(i, :)*Kx(i, :)
+            y(i, :) = w(i, :)*Ky(i, :)
+         end do
+
+         point = point-1
+         envels%z_0 = z_0
       envels%z_inj = z_injection
-      envels%logk = XS(:point, :n)
-      envels%alpha = XS(:point, n + 2)
-      envels%p = exp(XS(:point, n + 1))
+         envels%beta = beta
+
+         envels%x = x
+         envels%y = y
+         envels%w = w
+         
+         envels%alpha = XS(:point, 2*n + 2)
+         envels%P = exp(XS(:point, 2*n + 1))
+         envels%T = [(T, i=1,point)]
       envels%critical_points = cps
+      end block setup
    end subroutine
    
    function break_conditions_three_phases(X, ns, S, del_S)
