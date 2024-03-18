@@ -1,7 +1,7 @@
 module inj_envelopes
    !! Module to calculate Px phase envelopes
    use constants, only: pr, R
-   use dtypes, only: envelope, critical_point
+   use dtypes, only: envelope, critical_point, AbsEnvel
    use linalg, only: solve_system, interpol, full_newton
    use progress_bar_module, only: progress_bar
 
@@ -12,6 +12,19 @@ module inj_envelopes
       real(pr), allocatable :: z_inj(:) !! Injected fluid composition
       real(pr), allocatable :: z_mix(:, :) !! Composition at each step
    end type
+
+   type, extends(AbsEnvel) :: PXEnvel2
+      !! Three-Phase PX Envelope
+      real(pr), allocatable :: z_0(:) !! Original fluid composition 
+      real(pr), allocatable :: z_inj(:) !! Injection fluid composition
+      real(pr), allocatable :: T(:) !! Temperature [K]
+      real(pr), allocatable :: P(:) !! Pressure [bar]
+      real(pr), allocatable :: alpha(:) !! \(\alpha\)
+      real(pr), allocatable :: x(:, :) !! Heavier phase composition
+      real(pr), allocatable :: y(:, :) !! Lighter phase composition
+      type(critical_point), allocatable :: critical_points(:) !! Critical points
+   end type
+
    type, extends(AbsEnvel) :: PXEnvel3
       !! Three-Phase PX Envelope
       real(pr), allocatable :: z_0(:) !! Original fluid composition 
@@ -380,7 +393,7 @@ contains
       alpha = X(n + 2)
 
       break_conditions = [ &
-                         p > 2000, &
+                         p > 10000, &
                          all(X(:n) < 1e-10) &
                          ! abs(del_S) < 1e-3 &
                          ]
@@ -623,13 +636,13 @@ contains
             Kx = exp(X(:n))
             Ky = exp(X(n+1:2*n))
             beta = X(2*n+3)
-         call get_z(alpha, z)
+            call get_z(alpha, z)
 
             w = z/(beta*Ky + (1 - beta)*Kx)
             xx = w*Kx
             y = w*Ky
 
-         write (funit_output, *) "SOL", iters, ns, alpha, &
+            write (funit_output, *) "SOL", iters, ns, alpha, &
                exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z, w, xx, y
          end block fileio
          XS(point, :) = X
@@ -653,7 +666,7 @@ contains
             dalpha = Xnew(2*n + 2) - X(2*n + 2)
 
             do while (abs(dP) > max_dp .or. abs(dalpha) > max_dalpha)
-               dXdS = dXdS/2.0_pr
+               del_S = 0.5_pr * del_S
 
                Xnew = X + dXdS*del_S
                dP = exp(Xnew(2*n + 1)) - exp(X(2*n + 1))
@@ -755,7 +768,7 @@ contains
 
          point = point-1
          envels%z_0 = z_0
-      envels%z_inj = z_injection
+         envels%z_inj = z_injection
          envels%beta = beta
 
          envels%x = x
@@ -765,7 +778,7 @@ contains
          envels%alpha = XS(:point, 2*n + 2)
          envels%P = exp(XS(:point, 2*n + 1))
          envels%T = [(T, i=1,point)]
-      envels%critical_points = cps
+         envels%critical_points = cps
       end block setup
    end subroutine
    
@@ -1120,8 +1133,8 @@ contains
             alpha = alpha + 0.05
             call set_fugs
             print *, diff
-      end do
-      
+         end do
+
          alphas(i) = alpha
       end do
 
