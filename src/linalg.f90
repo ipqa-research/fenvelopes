@@ -14,6 +14,11 @@ module linalg
       module procedure :: intersect_two_lines
       module procedure :: intersect_one_line
    end interface
+
+   interface allclose
+      module procedure :: allclose_inner
+      module procedure :: allclose_outer
+   end interface
 contains
    function solve_system(a, b) result(x)
       real(pr), intent(in) :: b(:)
@@ -125,7 +130,7 @@ contains
                if (0 <= s .and. s <= 1 .and. 0 <= t .and. t <= 1) then
                   x = s*(x2 - x1) + x1
                   y = s*(y2 - y1) + y1
-                  if (abs(x - xold) > 1 .and. abs(y - yold) > 1) then
+                  if (abs(x - xold) > 1 .or. abs(y - yold) > 1) then
                      xold = x
                      yold = y
                      ! Use earliest point for the "other" line
@@ -135,6 +140,10 @@ contains
             end associate
          end do line2
       end do line1
+      if (size(intersections) > 3) then
+         deallocate(intersections)
+         allocate(intersections(0))
+      end if
    end function
 
    subroutine intersects(x1, x2, x3, x4, y1, y2, y3, y4, s, t)
@@ -188,6 +197,23 @@ contains
       real(pr), intent(in) :: x_obj !! Desired x value to interpolate
       real(pr) :: y !! y value at `x_obj`
       y = (y2 - y1)/(x2 - x1)*(x_obj - x1) + y1
+   end function
+
+   pure logical function allclose_outer(array, array_test, atol)
+      real(pr), intent(in) :: array(:)
+      real(pr), intent(in) :: array_test(:)
+      real(pr), intent(in) :: atol
+
+      allclose_outer = all(abs(array - array_test) < atol)
+   end function
+   
+   pure logical function allclose_inner(array, atol)
+      real(pr), intent(in) :: array(:)
+      real(pr), intent(in) :: atol
+
+      integer :: i, j
+      allclose_inner = .true.
+
    end function
 
    subroutine full_newton(fun, iters, X, ns, S, max_iters, F, dF, solvetol)
