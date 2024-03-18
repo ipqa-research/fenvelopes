@@ -600,9 +600,9 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
       write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
-         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n), (" z" //str(i), i=1,n)
-      write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), &
-         X(2*n + 3), X(:2*n)
+         " beta", (" lnKx"//str(i), i=1,n), (" lnKy"//str(i), i=1,n), &
+         (" z" //str(i), i=1,n), (" w" //str(i), i=1,n), (" x" //str(i), i=1,n), (" y" //str(i), i=1,n)
+      write (funit_output, *) "X0", iters, ns, X(2*n + 2), exp(X(2*n + 1)), X(2*n + 3), X(:2*n)
       ! ======================================================================
 
       enveloop: do point = 1, max_points
@@ -616,9 +616,23 @@ contains
             exit enveloop
          end if
 
+         fileio: block
+         use legacy_ar_models, only: z
+            real(pr) :: w(n), xx(n), y(n), beta
+            real(pr) :: Ky(n), Kx(n)
+
+            Kx = exp(X(:n))
+            Ky = exp(X(n+1:2*n))
+            beta = X(2*n+3)
          call get_z(alpha, z)
+
+            w = z/(beta*Ky + (1 - beta)*Kx)
+            xx = w*Kx
+            y = w*Ky
+
          write (funit_output, *) "SOL", iters, ns, alpha, &
-            exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z
+               exp(X(2*n + 1)), X(2*n + 3), X(:2*n), z, w, xx, y
+         end block fileio
          XS(point, :) = X
 
          call update_spec_three_phases(X, ns, del_S, dF, dXdS)
