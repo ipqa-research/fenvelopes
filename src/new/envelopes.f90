@@ -9,6 +9,17 @@ module envelopes
    ! use progress_bar_module, only: progress_bar
    implicit none
 
+   type, extends(AbsEnvel) :: PTEnvel2
+      integer :: n
+      real(pr), allocatable :: lnK(:, :)
+      real(pr), allocatable :: T(:)
+      real(pr), allocatable :: P(:)
+      real(pr), allocatable :: beta(:)
+      real(pr), allocatable :: z(:, :)
+      real(pr), allocatable :: y(:, :)
+      type(critical_point), allocatable :: critical_points(:)
+   end type
+
    type, extends(AbsEnvel) :: PTEnvel3
       integer :: n
       real(pr), allocatable :: lnKx(:, :)
@@ -285,8 +296,8 @@ contains
             call set_fugs
          end do
          ts(i) = t
-
       end do
+
 
       ncomp = maxloc(ts, dim=1)
       t = ts(ncomp)
@@ -614,22 +625,22 @@ contains
                ! the black hole
                S = S + delS
                X = X + dXdS*delS
-               ! passingcri = .true.
-               ! if (stepX > 0.07) then
-               !    !  half step back
-               !    S = S - delS/2
-               !    X = X - dXdS*delS/2   
-               ! else
-               !    ! one more step to jump over the critical point
-               !    S = S + delS
-               !    X = X + dXdS*delS   
-               ! end if
+               passingcri = .true.
+               if (stepX > 0.07) then
+                  !  half step back
+                  S = S - delS/2
+                  X = X - dXdS*delS/2   
+               else
+                  ! one more step to jump over the critical point
+                  S = S + 2* delS
+                  X = X + 2* dXdS*delS   
+               end if
             end do
             end block critical_region
 
             T = exp(X(n + 1))
 
-            do while (.not. passingcri .and. abs(T - Told) > 15)
+            do while (.not. passingcri .and. abs(T - Told) > 7)
                ! Delta T estimations > 7K are not allowed
                delS = delS/2
                S = S - delS
@@ -929,10 +940,18 @@ contains
             real(pr) :: dP, dT
 
             del_S = sign(1.5_pr, del_S) * minval([ &
-                                               max(abs(sqrt(X(ns))/10), 0.1_pr), &
-                                               abs(del_S)*5/iters &
+                                               max(abs(sqrt(X(ns)/10)), 0.1_pr), &
+                                               abs(del_S)*3/iters &
                                                ] &
                                                )
+
+            Xnew = X + dXdS*del_S
+            dT = abs(exp(Xnew(2*n+2)) - exp(X(2*n+2)))
+            do while(dT > 7)
+               del_S = 0.5*del_S
+               Xnew = X + dXdS*del_S
+               dT = abs(exp(Xnew(2*n+2)) - exp(X(2*n+2)))
+            end do
          end block fix_step
 
          detect_critical: block
@@ -991,6 +1010,8 @@ contains
       end if
 
       close (funit_output)
+
+      point = point - 1
       ! call progress_bar(point, max_points, .true.)
       envel%lnKx = XS(:point, :n)
       envel%lnKy = XS(:point, n+1:2*n)
@@ -1015,7 +1036,7 @@ contains
       beta = x(2*n+3)
       t = X(2*n + 2)
          
-      break_conditions_three_phases = [ .false.&
+      break_conditions_three_phases = [ P < 1 .or. .false.&
                                           ! beta < 0 &
                                           ! .or. 1 < beta &
                                       ]
