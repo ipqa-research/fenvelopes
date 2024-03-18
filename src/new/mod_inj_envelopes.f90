@@ -202,7 +202,7 @@ contains
       open (newunit=funit_output, file=fname_env)
       write (funit_output, *) "#", T
       write (funit_output, *) "STAT", " iters", " ns", " alpha", " P", &
-         (" lnK"//str(i), i=1,n), (" z"//str(i), i=1,n)
+         (" lnK"//str(i), i=1,n), (" z"//str(i), i=1,n), (" F"//str(i), i=1,n), " sum(F)"
       write (funit_output, *) "X0", iters, ns, X(n + 2), exp(X(n + 1)), X(:n), z
       ! ========================================================================
 
@@ -220,8 +220,7 @@ contains
 
          XS(point, :) = X
          call get_z(X(n+2), z)
-         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), &
-            X(:n), z
+         write (funit_output, *) "SOL", iters, ns, X(n + 2), exp(X(n + 1)), X(:n), z, F, sum(F)
 
          call update_spec(X, ns, del_S, dF, dXdS)
          call fix_step_two_phases(X, ns, S, iters, del_S, dXdS)
