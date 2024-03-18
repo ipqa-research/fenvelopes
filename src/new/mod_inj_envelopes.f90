@@ -1023,14 +1023,14 @@ contains
       p = inter%y
 
       lnKx = interpol( &
-               px_1%alpha(i), px_1%alpha(i + 1), &
-               px_1%logk(i, :), px_1%logk(i + 1, :), &
+               px_1%alpha(i - 1), px_1%alpha(i), &
+               px_1%logk(i - 1, :), px_1%logk(i, :), &
                alpha &
                )
 
       lnKy = interpol( &
-               px_2%alpha(j), px_2%alpha(j + 1), &
-               px_2%logk(j, :), px_2%logk(j + 1, :), &
+               px_2%alpha(j - 1), px_2%alpha(j), &
+               px_2%logk(j - 1, :), px_2%logk(j, :), &
                alpha &
                )
 
