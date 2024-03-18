@@ -3,6 +3,7 @@ module saturation_points
    use legacy_ar_models, only: nc
    use legacy_thermo_properties, only: termo
    use envelopes, only: k_wilson
+   use linalg, only: allclose
    implicit none
 
    type :: EquilibriaState
@@ -13,7 +14,7 @@ module saturation_points
       real(pr) :: p !! Pressure [bar]
    end type
 
-   real(pr) :: tol = 1e-5_pr
+   real(pr) :: tol = 1e-9_pr
    integer :: max_iterations = 100
    real(pr) :: step_tol = 0.1_pr
 contains
@@ -64,7 +65,7 @@ contains
          call termo(nc, 1, 4, t, p, y, vy, philog=lnfug_y, dlphip=dlnphi_dp_y)
          call termo(nc, 1, 4, t, p, z, vz, philog=lnfug_z, dlphip=dlnphi_dp_z)
          inner_its = 0
-         
+
          do while (any(isnan(lnfug_y)) .and. t > 0)
              inner_its = inner_its + 1
             p = p/2.0_pr
@@ -121,7 +122,7 @@ contains
          k = y/z
       else
          k = k_wilson(t, p)
-            y = k * z
+         y = k * z
       end if
       ! =======================================================================
 
@@ -132,9 +133,9 @@ contains
          call termo(nc, 1, 4, t, p, y, vy, philog=lnfug_y, dlphit=dlnphi_dt_y)
          call termo(nc, 1, 4, t, p, z, vz, philog=lnfug_z, dlphit=dlnphi_dt_z)
          inner_its = 0
-         
+
          do while (any(isnan(lnfug_y)) .and. t > 0)
-             inner_its = inner_its + 1
+            inner_its = inner_its + 1
             t = t - 5.0_pr
             call termo(nc, 1, 4, t, p, y, vy, philog=lnfug_y, dlphit=dlnphi_dt_y)
             call termo(nc, 1, 4, t, p, z, vz, philog=lnfug_z, dlphit=dlnphi_dt_z)
