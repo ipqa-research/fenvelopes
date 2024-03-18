@@ -710,6 +710,7 @@ contains
             exit enveloop
          end if
       end do enveloop
+      print *, "End line"
 
       write (funit_output, *) ""
       write (funit_output, *) ""
@@ -899,6 +900,7 @@ contains
       pold = 1e9
 
       ts_envel = pack(pt_env_2%t, mask=abs(pt_env_2%t - t_inj) < t_tol)
+      print *, "Ts: ", ts_envel
       do i = 1, size(ts_envel)
          idx = findloc(pt_env_2%t, value=ts_envel(i), dim=1)
          p = interpol( &
@@ -908,7 +910,6 @@ contains
 
          if (abs(p - pold) < 0.1) cycle
          pold = p
-         print *, ts_envel(idx), p
 
          k = exp(interpol( &
                   pt_env_2%t(idx), pt_env_2%t(idx + 1), &
@@ -940,7 +941,7 @@ contains
       real(pr), intent(in) :: t_tol !! Absolute temperature tolerance
       real(pr), optional, intent(in) :: del_S0 !! First point \(\Delta S\)
       real(pr), optional, intent(in) :: alpha0 !! First point \(\alpha\)
-      type(injelope) :: envel !! Output Px envelope
+      type(PXEnvel3) :: envel !! Output Px envelope
 
       real(pr), allocatable :: ts_envel(:) !! Temperatures under tolerance 
       real(pr), allocatable :: kx(:), ky(:) !! K values
@@ -953,12 +954,13 @@ contains
       integer :: i, idx, ns, i_envel
       real(pr) :: del_S
 
-      del_S = optval(del_S0, 0.05_pr)
+      del_S = optval(del_S0, 0.01_pr)
       alpha = optval(alpha0, 0.0_pr)
-      pold = 0
+      pold = 0.0_pr
       
       do i_envel = 1, size(pt_env_3)
          associate(pt => pt_env_3(i_envel))
+         if (.not. allocated(pt%t)) cycle
          ts_envel = pack(pt%t, mask=abs(pt%t - t_inj) < t_tol)
          do i = 1, size(ts_envel)
             idx = findloc(pt%t, value=ts_envel(i), dim=1)
@@ -967,7 +969,7 @@ contains
                   pt%p(idx), pt%p(idx + 1), &
                   t_inj)
 
-            if (abs(p - pold) < 5) cycle
+            if (abs(p - pold)/p < 0.5) cycle
             pold = p
 
             kx = exp(interpol( &
@@ -1001,7 +1003,7 @@ contains
       use linalg, only: point, interpol
       type(point), intent(in) :: inter
       type(injelope), intent(in) :: px_1, px_2
-      type(injelope) :: envels(2)
+      type(PXEnvel3) :: envels(2)
       real(pr), optional :: del_S0
       real(pr), optional :: beta0
 
