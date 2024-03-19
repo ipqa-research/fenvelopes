@@ -109,6 +109,7 @@ contains
         character(len=:), allocatable :: pt_case
 
         integer :: n
+        integer :: incipient_liquid_nc
         type(EquilibriaState) :: bubble, dew
 
         allocate (tv(max_points), pv(max_points), dv(max_points))
@@ -175,7 +176,7 @@ contains
         t = dew%t
         p = dew%p
 
-        call find_hpl(t, p, k)
+        call find_hpl(t, p, k, incipient_liquid_nc)
         call envelope2(&
             3, nc, z, T, P, k, &
             n_points, Tv, Pv, Dv, ncri, icri, Tcri, Pcri, Dcri, &
@@ -205,9 +206,13 @@ contains
                     allocate(pt_bub_3(1), pt_dew_3(1))
                 end if
 
+                call pt_three_phase_from_pt_two_phase(&
+                    incipient_liquid_nc, pt_bub, pt_bub_3(1)&
+                )
                 select case(pt_case)
                   case("0")
-                    call pt_three_phase_from_pt_two_phase(size(z), pt_bub, pt_bub_3(1))
+                    ! call pt_three_phase_from_pt_two_phase(size(z), pt_bub, pt_bub_3(1))
+                    call pt_three_phase_from_pt_two_phase(2, pt_bub, pt_bub_3(1))
                   case("2_DEW_BUB")
                     call pt_three_phase_from_intersection(&
                         pt_dew, pt_bub, intersections, &
@@ -465,7 +470,7 @@ contains
     end subroutine calc_all_self_dsp
 
     subroutine pt_three_phase_from_pt_two_phase(ncomp, pt_2ph, pt_3ph)
-        !! 
+        !! Calculate a three-phase PT line using data from a two-phase one 
         use legacy_ar_models, only: nc, z
         use legacy_thermo_properties, only: termo
         use envelopes, only: pt_envelope_three_phase, PTEnvel3

@@ -136,7 +136,7 @@ contains
       else
          delS = max(updel, -delmax)
       end if
-      delS = 2.2*delS
+      delS = 5.2*delS
 
       S = S + delS
    end subroutine
@@ -267,17 +267,18 @@ contains
       end if
    end subroutine
 
-   subroutine find_hpl(t, p, k)
+   subroutine find_hpl(t, p, k, ncomp)
       !! Find a HPLL initial point at a given pressure.
       use legacy_ar_models, only: nc, z
       use legacy_thermo_properties, only: termo
       real(pr), intent(in out) :: t
       real(pr), intent(in) :: p
       real(pr), intent(out) :: k(nc)
+      integer, intent(out) :: ncomp
 
       real(pr) :: t_in
 
-      integer :: i, ncomp
+      integer :: i
       real(pr) :: diff
       real(pr) :: v
       real(pr) :: x(nc), y(nc), lnfug_z(nc), lnfug_y(nc)
@@ -304,9 +305,9 @@ contains
       call set_fugs
 
       k = exp(lnfug_z - lnfug_y)
-      k(ncomp) = k(ncomp) * 10
-      ! k = 1e-1
-      ! k(ncomp) = 100
+      k(ncomp) = k(ncomp) * 100
+      k = 1e-10
+      k(ncomp) = 100
       
       contains
          subroutine set_fugs
@@ -602,7 +603,7 @@ contains
                   its = 0
                   delta = delS
                   ! Variation of lnK based on deltaS
-                  m = 2
+                  m = 5
                   lnK_extrapolated = X(:n) + m * delS * dXdS(:n)
                   if (all(X(:n)*lnK_extrapolated < 0)) then
                      delS = 1.5 * m * delS
